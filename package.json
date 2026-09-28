@@ -17,7 +17,8 @@
     "validate:pr": "biome check src/ test/ && tsc -p tsconfig.test.json --noEmit && vitest run",
     "import:upstream": "tsx scripts/import-upstream.ts",
     "import:sda": "tsx scripts/import-sda-hymnal.ts",
-    "prepare": "[ \"$NODE_ENV\" = production ] || husky"
+    "prepare": "[ \"$NODE_ENV\" = production ] || husky",
+    "test:regression": "node scripts/test-regression.mjs"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.1",
