@@ -147,11 +147,11 @@ jobs:
       - run: mkdir -p data
       - name: Baseline (staging)
         run: |
-          git stash -u || true
+          # O script ainda não existe na staging neste PR. Copia antes do checkout.
+          cp scripts/test-regression.mjs /tmp/test-regression.mjs
           git checkout staging
-          npm run test:regression -- --baseline
-          git checkout ${{ github.head_ref }}
-          git stash pop || true
+          node /tmp/test-regression.mjs --baseline
+          git checkout "${{ github.head_ref }}"
       - name: Compare (PR branch)
         run: npm run test:regression -- --compare
 
