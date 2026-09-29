@@ -72,7 +72,12 @@ albumsRoutes.openapi(listAlbumsRoute, (c) => {
         ORDER BY a.name
         LIMIT ? OFFSET ?`,
       )
-      .all(lang, perPage, offset) as any[];
+      .all(lang, perPage, offset) as Array<{
+      id_album: number;
+      name: string;
+      color: string | null;
+      url_image: string | null;
+    }>;
 
     const data = albums.map((a) => ({
       id_album: a.id_album,
@@ -158,7 +163,14 @@ albumsRoutes.openapi(getAlbumRoute, (c) => {
         LEFT JOIN files fi ON a.id_file_image = fi.id_file
         WHERE a.id_album = ? AND a.id_language = ?`,
       )
-      .get(idAlbum, lang) as any;
+      .get(idAlbum, lang) as
+      | {
+          id_album: number;
+          name: string;
+          color: string | null;
+          url_image: string | null;
+        }
+      | undefined;
 
     if (!album) {
       return c.json({ error: "Coletânea não encontrada" }, 404);
@@ -173,7 +185,7 @@ albumsRoutes.openapi(getAlbumRoute, (c) => {
          INNER JOIN categories_albums ca ON ca.id_category = ct.id_category
          WHERE ca.id_album = ?`,
       )
-      .get(idAlbum) as any;
+      .get(idAlbum) as { categories: string | null } | undefined;
 
     const categories = catRow?.categories ? catRow.categories.split("|") : [];
 
@@ -192,7 +204,13 @@ albumsRoutes.openapi(getAlbumRoute, (c) => {
         WHERE am.id_album = ?
         ORDER BY am.track ASC`,
       )
-      .all(idAlbum) as any[];
+      .all(idAlbum) as Array<{
+      id_music: number;
+      name: string;
+      has_instrumental_music: number;
+      duration: string | null;
+      track: number;
+    }>;
 
     return c.json(
       {
