@@ -11,6 +11,12 @@ import { Hono } from "hono";
 import { getDb } from "../db/connection.js";
 import { importMusicById, ON_MISS_ENABLED } from "../lib/importMusicOnMiss.js";
 import { fetchUpstream, UpstreamError } from "../lib/upstream.js";
+import {
+  escapesMediaDir,
+  mirrorablePath,
+  NegativeCache,
+  Semaphore,
+} from "../lib/mirrorGuard.js";
 
 export const compatRoutes = new Hono();
 
@@ -677,6 +683,10 @@ import { pipeline } from "node:stream/promises";
 
 const MEDIA_DIR = join(process.cwd(), "media");
 const MIRROR_ENABLED = process.env.MEDIA_MIRROR !== "off";
+// SEC-143: guardas do mirror — cache negativo (404 não remartela upstream)
+// e cap de downloads concorrentes (flood não satura egress/disco)
+const negativeCache = new NegativeCache(5 * 60_000, 10_000);
+const mirrorSlots = new Semaphore(8);
 /** Fallback de mídia: workers.dev quando o host principal falhar. */
 const MEDIA_FALLBACK_HOST = (
   process.env.UPSTREAM_FALLBACK_API ?? "https://api.louvorja.workers.dev"
@@ -684,11 +694,21 @@ const MEDIA_FALLBACK_HOST = (
 
 compatRoutes.get("/file/:path{.*}", async (c) => {
   const path = c.req.param("path");
-  // RF-06: bloqueio explícito de path traversal e paths absolutos
-  if (path.includes("..") || path.startsWith("/")) {
+  // RF-06 + SEC-143: bloqueio explícito de path traversal, paths absolutos
+  // e allowlist de extensão — mirror só de mídia conhecida do catálogo
+  if (!mirrorablePath(path)) {
     return c.json({ error: "Invalid path" }, 400);
   }
   const localPath = join(MEDIA_DIR, path);
+  // SEC-143 defesa em profundidade: caminho resolvido tem que continuar
+  // dentro de MEDIA_DIR (cobre encode duplo / normalização estranha)
+  if (escapesMediaDir(MEDIA_DIR, localPath)) {
+    return c.json({ error: "Invalid path" }, 400);
+  }
+  // SEC-143 cache negativo: 404 conhecido não re-martela o upstream
+  if (negativeCache.has(path)) {
+    return c.json({ error: "Not found" }, 404);
+  }
   const upstreamUrl = `${UPSTREAM}/file/${path}`;
 
   // 1. Serve do disco se ja existe no mirror
@@ -731,34 +751,44 @@ compatRoutes.get("/file/:path{.*}", async (c) => {
 
   // 2. Mirror on-demand: baixa, salva e serve (host principal -> fallback)
   if (MIRROR_ENABLED) {
-    const mediaUrls = [
-      upstreamUrl,
-      `${MEDIA_FALLBACK_HOST}/file/${path}`,
-    ].filter(
-      (u, i, arr) => arr.indexOf(u) === i, // dedup se host principal == fallback
-    );
-    for (const mediaUrl of mediaUrls) {
-      try {
-        const res = await fetch(mediaUrl);
-        if (res.ok && res.body) {
-          mkdirSync(dirname(localPath), { recursive: true });
-          const tmp = `${localPath}.tmp`;
-          await pipeline(
-            Readable.fromWeb(res.body as any),
-            createWriteStream(tmp),
-          );
-          renameSync(tmp, localPath);
-          const buf = await fsReadFile(localPath);
-          return c.body(buf, 200, {
-            "Content-Type":
-              res.headers.get("content-type") ?? "application/octet-stream",
-            "Content-Length": String(buf.length),
-            "Accept-Ranges": "bytes",
-          });
+    // SEC-143: cap de downloads concorrentes — flood de misses não satura
+    if (!mirrorSlots.tryAcquire()) {
+      return c.json({ error: "Mirror ocupado, tente novamente" }, 503);
+    }
+    try {
+      const mediaUrls = [
+        upstreamUrl,
+        `${MEDIA_FALLBACK_HOST}/file/${path}`,
+      ].filter(
+        (u, i, arr) => arr.indexOf(u) === i, // dedup se host principal == fallback
+      );
+      for (const mediaUrl of mediaUrls) {
+        try {
+          const res = await fetch(mediaUrl);
+          if (res.ok && res.body) {
+            mkdirSync(dirname(localPath), { recursive: true });
+            const tmp = `${localPath}.tmp`;
+            await pipeline(
+              Readable.fromWeb(res.body as any),
+              createWriteStream(tmp),
+            );
+            renameSync(tmp, localPath);
+            const buf = await fsReadFile(localPath);
+            return c.body(buf, 200, {
+              "Content-Type":
+                res.headers.get("content-type") ?? "application/octet-stream",
+              "Content-Length": String(buf.length),
+              "Accept-Ranges": "bytes",
+            });
+          }
+        } catch {
+          // tenta próximo host
         }
-      } catch {
-        // tenta próximo host
       }
+      // SEC-143: todos os hosts falharam → cacheia miss (não remartelar)
+      negativeCache.set(path);
+    } finally {
+      mirrorSlots.release();
     }
   }
 
