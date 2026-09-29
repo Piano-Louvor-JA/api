@@ -6,6 +6,7 @@ import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import { getDbStats } from "./db/connection.js";
 import { APP_VERSION } from "./lib/version.js";
+import { antiBotMiddleware } from "./middleware/antiBot.js";
 import { rateLimit } from "./middleware/rateLimit.js";
 import { compatRoutes } from "./routes/compat.js";
 import { albumsRoutes } from "./v1/albums/albums.routes.js";
@@ -29,6 +30,10 @@ import { createRoute, z } from "@hono/zod-openapi";
 
 export function createApp() {
   const app = new OpenAPIHono();
+
+  // Anti-bot/script kiddie (SEC-7): outermost — bloqueia UA de bots antes
+  // de qualquer processamento (CORS, rate-limit, rotas)
+  app.use("/api/*", antiBotMiddleware);
 
   // RF-03: CORS configurável via CORS_ORIGINS (default * para compat com apps)
   const corsOrigins = process.env.CORS_ORIGINS ?? "*";
