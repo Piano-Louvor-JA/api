@@ -12,8 +12,8 @@ import { albumsRoutes } from "./v1/albums/albums.routes.js";
 import { bibleRoutes } from "./v1/bible/bible.routes.js";
 import { categoriesRoutes } from "./v1/categories/categories.routes.js";
 import { customRoutes } from "./v1/custom/custom.routes.js";
-// Rotas OpenAPI (V1)
 import { musicsRoutes } from "./v1/musics/musics.routes.js";
+import { telemetryRoute, getTelemetryMetrics, telemetryMiddleware } from "./middleware/telemetry.js";
 import {
   getPalcoWs,
   palcoRoutes,
@@ -23,6 +23,19 @@ import {
 import { remoteRoutes } from "./v1/remote/remote.routes.js";
 
 // Rotas compativeis (nao-OpenAPI)
+
+import { Context, type Next } from "hono";
+
+interface TelemetryMetrics {
+  minute: string;
+  ip: string;
+  method: string;
+  path: string;
+  count: number;
+}
+
+const globalMetrics: TelemetryMetrics[] = [];
+const globalLock = new Map<string, boolean>();
 
 import { createRoute, z } from "@hono/zod-openapi";
 
@@ -51,12 +64,57 @@ export function createApp() {
   // Rate limiting Token Bucket (boas práticas louvorja/api)
   app.use("*", rateLimit);
 
+  // Middleware de telemetria (log-only, sem bloqueio)
+  if (process.env.NODE_ENV !== "production") {
+    const inlineTelemetry = () => {
+      return async (c: Context, next: Next) => {
+        const start = Date.now();
+        const ip = c.req.header("x-real-ip") ?? c.req.header("x-forwarded-for")?.split(",")[0] ?? (c.req.raw.headers.get("cf-connecting-ip") || "unknown");
+        const method = c.req.method;
+        const path = c.req.path;
+        const minuteKey = new Date().toISOString().slice(0, 16);
+
+        await next();
+
+        const duration = Date.now() - start;
+
+        // Simplified counter (unique key per request)
+        const lockKey = `${ip}:${minuteKey}:${path}`;
+        if (globalLock.get(lockKey)) return;
+        globalLock.set(lockKey, true);
+
+        try {
+          const existing = globalMetrics.find(m => m.minute === minuteKey && m.ip === ip && m.method === method && m.path === path);
+          if (existing) {
+            existing.count++;
+          } else {
+            globalMetrics.push({
+              minute: minuteKey,
+              ip,
+              method,
+              path,
+              count: 1,
+            });
+          }
+        } finally {
+          globalLock.delete(lockKey);
+        }
+      };
+    };
+    app.use("*", inlineTelemetry());
+  }
+
   // RF-02: error handler global — nunca vaza stack/erro cru do SQLite
   app.onError((err, c) => {
     console.error("[piano-api] unhandled error:", err.message);
     return c.json({ error: "Internal Server Error" }, 500);
   });
   app.notFound((c) => c.json({ error: "Not Found" }, 404));
+
+  // Rota de debug da telemetria (só em staging/dev) — fora do OpenAPI para acesso imediato
+  app.get("/v1/telemetry/debug", (c) => {
+    return c.json([...globalMetrics]);
+  });
 
   const healthRoute = createRoute({
     method: "get",
