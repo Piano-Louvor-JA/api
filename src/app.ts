@@ -6,6 +6,7 @@ import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import { getDbStats } from "./db/connection.js";
 import { APP_VERSION } from "./lib/version.js";
+import { antiBotMiddleware } from "./middleware/antiBot.js";
 import { rateLimit } from "./middleware/rateLimit.js";
 import { compatRoutes } from "./routes/compat.js";
 import { albumsRoutes } from "./v1/albums/albums.routes.js";
@@ -30,6 +31,10 @@ import { createRoute, z } from "@hono/zod-openapi";
 export function createApp() {
   const app = new OpenAPIHono();
 
+  // Anti-bot/script kiddie (SEC-7): outermost — bloqueia UA de bots antes
+  // de qualquer processamento (CORS, rate-limit, rotas)
+  app.use("/api/*", antiBotMiddleware);
+
   // RF-03: CORS configurável via CORS_ORIGINS (default * para compat com apps)
   const corsOrigins = process.env.CORS_ORIGINS ?? "*";
   const corsConfig =
@@ -37,11 +42,33 @@ export function createApp() {
       ? {}
       : { origin: corsOrigins.split(",").map((o) => o.trim()) };
   app.use("*", cors(corsConfig));
+  // SEC-3 (api#124): CSP por rota — a API não serve HTML (default-src 'none'),
+  // mas DUAS superfícies servem: /palco (receiver com script inline + WS) e
+  // /doc (Scalar via CDN). Override pós-secureHeaders somente nessas rotas.
+  // Registrado ANTES do secureHeaders de propósito: ambos aplicam pós-next(),
+  // este executa por último e vence.
+  const cspOverrides: Array<[RegExp, string]> = [
+    [
+      /^\/palco(\/|$)/,
+      "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' blob:; connect-src 'self' ws: wss:",
+    ],
+    [
+      /^\/doc$/,
+      "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://cdn.jsdelivr.net",
+    ],
+  ];
+  app.use("*", async (c, next) => {
+    await next();
+    const override = cspOverrides.find(([re]) => re.test(c.req.path));
+    if (override) c.res.headers.set("content-security-policy", override[1]);
+  });
   // RF-01: secure headers globais
   app.use(
     "*",
     secureHeaders({
       referrerPolicy: "strict-origin-when-cross-origin",
+      // SEC-3 (api#124): CSP default-src 'none' — API não serve HTML
+      contentSecurityPolicy: { defaultSrc: ["'none'"] },
       // CORP: bloqueia subrecursos (img/audio) de origem cruzada. Em dev
       // (CORS_ORIGINS=*) liberamos cross-origin p/ o web na 5173 e o
       // Electron carregarem mídia da API; em prod mantém same-origin.
