@@ -7,7 +7,6 @@ import type { MiddlewareHandler } from "hono";
 
 const SUSPICIOUS_UA = /curl|wget|python|postman|insomnia|bot|spider|crawler/i;
 const PROBING_PATHS = ["/openapi.json", "/doc", "/api", "/v1/", "/v2/", "/health", "/metrics"];
-const MAX_REQUESTS_PER_MIN = 100;
 
 export const antiBotMiddleware: MiddlewareHandler = async (c, next) => {
   const start = Date.now();
