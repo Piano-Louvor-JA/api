@@ -6,7 +6,15 @@
 import type { MiddlewareHandler } from "hono";
 
 const SUSPICIOUS_UA = /curl|wget|python|postman|insomnia|bot|spider|crawler/i;
-const PROBING_PATHS = ["/openapi.json", "/doc", "/api", "/v1/", "/v2/", "/health", "/metrics"];
+const PROBING_PATHS = [
+  "/openapi.json",
+  "/doc",
+  "/api",
+  "/v1/",
+  "/v2/",
+  "/health",
+  "/metrics",
+];
 
 export const antiBotMiddleware: MiddlewareHandler = async (c, next) => {
   const start = Date.now();
@@ -19,12 +27,12 @@ export const antiBotMiddleware: MiddlewareHandler = async (c, next) => {
     console.log(`⚠️ Bot UA bloqueado: ${ip} | ${ua} | ${path}`);
     return c.json(
       { error: "User-Agent não suportado. Utilize um cliente HTTP padrão." },
-      403
+      403,
     );
   }
 
   // 2. Probing de endpoints de documentação/paths → throttle (opcional, sem KV)
-  if (PROBING_PATHS.some(p => path.startsWith(p))) {
+  if (PROBING_PATHS.some((p) => path.startsWith(p))) {
     // Versão simples: log e throttle básico
     console.log(`🔍 Probing detectado: ${ip} | ${path}`);
     // Em produção real, usaríamos Redis/D1/Cloudflare KV, aqui só log mesmo

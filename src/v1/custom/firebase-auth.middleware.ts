@@ -1,4 +1,4 @@
-import type { Env, MiddlewareHandler } from "hono";
+import type { MiddlewareHandler } from "hono";
 import { createMiddleware } from "hono/factory";
 import { getDb } from "../../db/connection.js";
 import type { CustomAuthEnv } from "./auth.middleware.js";
@@ -39,7 +39,7 @@ export const firebaseAuth: MiddlewareHandler<CustomAuthEnv> =
     const raw = c.req.header("authorization") ?? "";
     const token = raw.startsWith("Bearer ") ? raw.slice(7) : "";
     // Firebase ID tokens são JWTs (3 segmentos). Token opaco legacy tem 1.
-    if (!token || token.split(".").length !== 3) return next();
+    if (token?.split(".").length !== 3) return next();
 
     try {
       const app = await getFirebaseApp();
