@@ -103,6 +103,7 @@ jobs:
             -e PORT=3100 \
             -e DB_PATH=/app/data/catalog.db \
             -e MEDIA_DIR=/app/media \
+            -e PALCO_RELAY_KEY=smoke-test-key \
             piano-api:smoke
           for i in $(seq 1 20); do
             if curl -fsS http://localhost:3100/v1/health > /dev/null 2>&1; then
