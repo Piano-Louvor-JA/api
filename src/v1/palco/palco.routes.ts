@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import type { NodeWebSocket } from "@hono/node-ws";
 import { OpenAPIHono } from "@hono/zod-openapi";
+import { zodErrorHook } from "../../lib/zodErrorHook.js";
 import {
   createRoom,
   getRoom,
@@ -14,7 +15,7 @@ import {
   routeMessage,
 } from "./relay.js";
 
-export const palcoRoutes = new OpenAPIHono();
+export const palcoRoutes = new OpenAPIHono({ defaultHook: zodErrorHook });
 
 let palcoWsRef: NodeWebSocket | null = null;
 

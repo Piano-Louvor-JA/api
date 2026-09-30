@@ -1,8 +1,9 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getDb } from "../../db/connection.js";
+import { zodErrorHook } from "../../lib/zodErrorHook.js";
 import { BibleBookSchema, BibleChapterSchema } from "./bible.schemas.js";
 
-const app = new OpenAPIHono();
+const app = new OpenAPIHono({ defaultHook: zodErrorHook });
 const ErrorResponseSchema = z.object({ error: z.string() });
 
 // GET /v1/bible
@@ -45,7 +46,11 @@ app.openapi(listRoute, (c) => {
       .prepare(
         `SELECT *, id_book AS id_bible_book FROM bible_books WHERE id_language = ?`,
       )
-      .all(lang) as any[];
+      .all(lang) as Array<{
+      id_bible_book: number;
+      name: string;
+      chapters: number;
+    }>;
 
     const response = {
       data: books.map((b) => ({
@@ -114,7 +119,9 @@ app.openapi(chapterRoute, (c) => {
       .prepare(
         `SELECT * FROM bible_chapters WHERE id_bible_book = ? AND id_language = ? AND chapter = ?`,
       )
-      .get(parsedBookId, lang, parsedChapter) as any;
+      .get(parsedBookId, lang, parsedChapter) as
+      | { id_bible_chapter: number; id_bible_book: number; chapter: number }
+      | undefined;
 
     if (!bibleChapter) return c.json({ error: "Capitulo nao encontrado" }, 404);
 
@@ -122,7 +129,10 @@ app.openapi(chapterRoute, (c) => {
       .prepare(
         `SELECT verse, text FROM bible_verses WHERE id_bible_chapter = ? ORDER BY verse ASC`,
       )
-      .all(bibleChapter.id_bible_chapter) as any[];
+      .all(bibleChapter.id_bible_chapter) as Array<{
+      verse: number;
+      text: string;
+    }>;
 
     return c.json(
       {

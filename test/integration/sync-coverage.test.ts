@@ -19,7 +19,7 @@ import { requireSyncAuth, runSync } from "../../src/v1/custom/sync.service.js";
 let userIdA = 0;
 let userIdB = 0;
 let tokenA = "";
-let tokenB = "";
+let _tokenB = "";
 
 function seedUser(email: string): { id: number; token: string } {
   const db = getDb();
@@ -82,7 +82,7 @@ beforeAll(() => {
   userIdA = a.id;
   userIdB = b.id;
   tokenA = a.token;
-  tokenB = b.token;
+  _tokenB = b.token;
 });
 
 afterAll(() => {
