@@ -588,14 +588,55 @@ import { pipeline } from "node:stream/promises";
 
 const MEDIA_DIR = join(process.cwd(), "media");
 const MIRROR_ENABLED = process.env.MEDIA_MIRROR !== "off";
+/**
+ * Timeout por host no mirror on-demand (RED TEAM 2026-09-30): fetch sem
+ * timeout pendurava a request pra sempre quando o host upstream estava
+ * fora — cada tentativa tem prazo curto; falhou, pula pro próximo.
+ */
+const MIRROR_FETCH_TIMEOUT_MS = Number(
+  process.env.MIRROR_FETCH_TIMEOUT_MS ?? "10000",
+);
 // SEC-143: guardas do mirror — cache negativo (404 não remartela upstream)
 // e cap de downloads concorrentes (flood não satura egress/disco)
 const negativeCache = new NegativeCache(5 * 60_000, 10_000);
 const mirrorSlots = new Semaphore(8);
-/** Segundo host de mídia, depois do Workers. */
-const MEDIA_FALLBACK_HOST = (
-  process.env.UPSTREAM_FALLBACK_API ?? "https://api.louvorja.com.br"
-).replace(/\/$/, "");
+const CLASSIC_MEDIA_HOST = "https://api.louvorja.com.br";
+
+function parseMediaHosts(raw: string): string[] {
+  return raw
+    .split(",")
+    .map((h) => h.trim().replace(/\/$/, ""))
+    .filter(Boolean);
+}
+
+/**
+ * Ordem de tentativa do mirror /file (diretriz do Rafael 2026-09-30):
+ * hosts estáveis primeiro, api.louvorja.com.br por último. Sem duplicados.
+ * Exportado só para testes.
+ */
+export function mediaHostsForTest(
+  upstream: string,
+  fallbackEnv?: string,
+): string[] {
+  const fallbacks = parseMediaHosts(
+    fallbackEnv ?? "https://api.louvorja.workers.dev",
+  );
+  return [...new Set([...fallbacks, upstream.replace(/\/$/, "")])];
+}
+export const MIRROR_FETCH_TIMEOUT_MS_FOR_TEST = MIRROR_FETCH_TIMEOUT_MS;
+
+/**
+ * Fila real do /file. UPSTREAM da staging já é o Workers; o fallback
+ * (default: host clássico, lista separada por vírgula) vem depois.
+ * Assim o Workers continua na frente e o clássico no fim.
+ */
+function mirrorMediaHosts(): string[] {
+  const primary = UPSTREAM.replace(/\/$/, "");
+  const rest = parseMediaHosts(
+    process.env.UPSTREAM_FALLBACK_API ?? CLASSIC_MEDIA_HOST,
+  );
+  return [...new Set([primary, ...rest])];
+}
 
 compatRoutes.get("/file/:path{.*}", async (c) => {
   const path = c.req.param("path");
@@ -654,22 +695,20 @@ compatRoutes.get("/file/:path{.*}", async (c) => {
     });
   }
 
-  // 2. Mirror on-demand: baixa, salva e serve (host principal -> fallback)
+  // 2. Mirror on-demand: baixa, salva e serve.
+  // Workers (UPSTREAM) primeiro; fallbacks depois, clássico no fim da fila.
   if (MIRROR_ENABLED) {
     // SEC-143: cap de downloads concorrentes — flood de misses não satura
     if (!mirrorSlots.tryAcquire()) {
       return c.json({ error: "Mirror ocupado, tente novamente" }, 503);
     }
     try {
-      const mediaUrls = [
-        upstreamUrl,
-        `${MEDIA_FALLBACK_HOST}/file/${path}`,
-      ].filter(
-        (u, i, arr) => arr.indexOf(u) === i, // dedup se host principal == fallback
-      );
+      const mediaUrls = mirrorMediaHosts().map((h) => `${h}/file/${path}`);
       for (const mediaUrl of mediaUrls) {
         try {
-          const res = await fetch(mediaUrl);
+          const res = await fetch(mediaUrl, {
+            signal: AbortSignal.timeout(MIRROR_FETCH_TIMEOUT_MS),
+          });
           if (res.ok && res.body) {
             mkdirSync(dirname(localPath), { recursive: true });
             const tmp = `${localPath}.tmp`;
@@ -687,7 +726,7 @@ compatRoutes.get("/file/:path{.*}", async (c) => {
             });
           }
         } catch {
-          // tenta próximo host
+          // tenta próximo host (timeout, rede ou host fora)
         }
       }
       // SEC-143: todos os hosts falharam → cacheia miss (não remartelar)
