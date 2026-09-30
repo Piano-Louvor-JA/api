@@ -70,3 +70,33 @@ console.log(db.prepare(\"SELECT COUNT(*) c FROM custom_collections WHERE name IN
 3. `CUSTOM_QUOTA_MB` definido explicitamente (mesmo que = default)
 4. Após start: `GET /v1/health` 200 e logs sem erro de migration
 5. Se B8 pendente: runbook acima
+
+## Telemetria de requests por IP/min (SEC-6 Fase 0 — api#127)
+
+Middleware **log-only**: conta requests por IP/minuto e emite 1 linha de log
+estruturada por IP/minuto. NÃO bloqueia, NÃO limita, NÃO altera resposta —
+é pré-requisito para decidir thresholds de rate limit com dados reais
+(mín. 2–4 semanas, incluindo sábados) antes de qualquer Fase 1.
+
+| Env | Default | Descrição |
+|-----|---------|-----------|
+| `TELEMETRY_DISABLED` | `false` | `true` desliga a coleta (kill switch sem deploy). Log-only, zero risco a tráfego. |
+
+Formato do log (stdout, 1 linha por IP/minuto):
+
+```
+[telemetry] {"minute":"2026-10-03T19:04","ip":"203.0.113.5","total":7,"routes":{"GET /v1/musics":5,"GET /v1/albums":2}}
+```
+
+Gerar o relatório p95/p99 (requests por IP/min) a partir dos logs:
+
+```bash
+docker logs piano-api 2>&1 | npx tsx scripts/analyze-telemetry.ts
+# ou de um arquivo salvo:
+npx tsx scripts/analyze-telemetry.ts saturdays-logs.txt --json
+# validação do parser/percentis com distribuição conhecida:
+npx tsx scripts/analyze-telemetry.ts --self-test
+```
+
+Saída: p95/p99/max por minuto + agregado da janela, top IPs e top rotas —
+insumo para o threshold da Fase 1 (mínimo 5x o p99 de sábado, issue #127).

@@ -14,7 +14,7 @@ import { fetchUpstream, UpstreamError } from "../lib/upstream.js";
 
 export const compatRoutes = new Hono();
 
-const UPSTREAM = process.env.UPSTREAM_API ?? "https://api.louvorja.com.br";
+const UPSTREAM = process.env.UPSTREAM_API ?? "https://api.louvorja.workers.dev";
 const BIBLE_CACHE_DIR = join(process.cwd(), "data", "bible_cache");
 
 // Versões ES do ecossistema LouvorJA (mesmos ids da prod). Usadas como
@@ -582,9 +582,9 @@ import { pipeline } from "node:stream/promises";
 
 const MEDIA_DIR = join(process.cwd(), "media");
 const MIRROR_ENABLED = process.env.MEDIA_MIRROR !== "off";
-/** Fallback de mídia: workers.dev quando o host principal falhar. */
+/** Segundo host de mídia, depois do Workers. */
 const MEDIA_FALLBACK_HOST = (
-  process.env.UPSTREAM_FALLBACK_API ?? "https://api.louvorja.workers.dev"
+  process.env.UPSTREAM_FALLBACK_API ?? "https://api.louvorja.com.br"
 ).replace(/\/$/, "");
 
 compatRoutes.get("/file/:path{.*}", async (c) => {
@@ -667,6 +667,6 @@ compatRoutes.get("/file/:path{.*}", async (c) => {
     }
   }
 
-  // 3. Fallback final: redirect pro upstream (principal, depois Cloudflare)
+  // 3. Fallback final: redirect pro host primário (Workers)
   return c.redirect(upstreamUrl, 302);
 });
