@@ -7,6 +7,8 @@ import { secureHeaders } from "hono/secure-headers";
 import { getDbStats } from "./db/connection.js";
 import { APP_VERSION } from "./lib/version.js";
 import { rateLimit } from "./middleware/rateLimit.js";
+// SEC-6 Fase 0: telemetria log-only por IP/min (api#127) — nunca bloqueia
+import { telemetryMiddleware } from "./middleware/telemetry.js";
 import { compatRoutes } from "./routes/compat.js";
 import { albumsRoutes } from "./v1/albums/albums.routes.js";
 import { bibleRoutes } from "./v1/bible/bible.routes.js";
@@ -56,6 +58,10 @@ export function createApp() {
   );
   // Rate limiting Token Bucket (boas práticas louvorja/api)
   app.use("*", rateLimit);
+
+  // SEC-6 Fase 0 (api#127): contagem por IP/min — LOG-ONLY, nunca bloqueia.
+  // Desligável sem deploy: TELEMETRY_DISABLED=true
+  app.use("*", telemetryMiddleware);
 
   // RF-02: error handler global — nunca vaza stack/erro cru do SQLite
   app.onError((err, c) => {
