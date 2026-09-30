@@ -10,13 +10,13 @@ import { dirname, join } from "node:path";
 import { Hono } from "hono";
 import { getDb } from "../db/connection.js";
 import { importMusicById, ON_MISS_ENABLED } from "../lib/importMusicOnMiss.js";
-import { fetchUpstream, UpstreamError } from "../lib/upstream.js";
 import {
   escapesMediaDir,
   mirrorablePath,
   NegativeCache,
   Semaphore,
 } from "../lib/mirrorGuard.js";
+import { fetchUpstream, UpstreamError } from "../lib/upstream.js";
 
 export const compatRoutes = new Hono();
 

@@ -4,7 +4,7 @@
 // cap de downloads concorrentes e sem cache negativo — flood barato derruba
 // o servidor (egress + disco). Este módulo centraliza os guardas puros;
 // a rota (src/routes/compat.ts) consome.
-import { relative, isAbsolute } from "node:path";
+import { isAbsolute, relative } from "node:path";
 
 /** Extensões que a API tem motivo para espelhar (mídia do catálogo). */
 const MIRRORABLE_EXT = new Set(["mp3", "bmp", "jpg", "jpeg", "png"]);

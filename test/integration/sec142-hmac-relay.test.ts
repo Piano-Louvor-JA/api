@@ -1,5 +1,5 @@
 // SEC-142 (api#142): chave do relay — fail-fast no boot em produção
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { validateEnv } from "../../src/config/env.js";
 
 describe("SEC-142: PALCO_RELAY_KEY obrigatória em produção", () => {
@@ -10,9 +10,9 @@ describe("SEC-142: PALCO_RELAY_KEY obrigatória em produção", () => {
   };
 
   it("produção SEM PALCO_RELAY_KEY → boot falha", () => {
-    expect(() =>
-      validateEnv({ ...base, PALCO_RELAY_KEY: undefined }),
-    ).toThrow("PALCO_RELAY_KEY é obrigatória em produção");
+    expect(() => validateEnv({ ...base, PALCO_RELAY_KEY: undefined })).toThrow(
+      "PALCO_RELAY_KEY é obrigatória em produção",
+    );
   });
 
   it("produção com PALCO_RELAY_KEY vazia/espaços → boot falha", () => {

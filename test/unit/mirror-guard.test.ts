@@ -1,12 +1,13 @@
 // SEC-143 (api#143): guardas do mirror on-demand — unidade pura
-import { describe, it, expect, beforeEach, vi } from "vitest";
+
+import { join } from "node:path";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  mirrorablePath,
   escapesMediaDir,
+  mirrorablePath,
   NegativeCache,
   Semaphore,
 } from "../../src/lib/mirrorGuard.js";
-import { join } from "node:path";
 
 describe("SEC-143: mirrorablePath (allowlist de extensão)", () => {
   it("permite extensões de mídia conhecidas", () => {
