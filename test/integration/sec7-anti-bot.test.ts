@@ -1,16 +1,25 @@
-// Teste do anti-bot/script kiddie middleware
+// Teste SEC-7 do anti-bot contra o APP REAL (createApp) — review da PR #141:
+// o middleware precisa interceptar /v1/* (a API real), e /v1/health precisa
+// continuar acessível para healthchecks (docker + monitores Hostinger usam curl).
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { createApp } from "../../src/app.js";
+import { closeDb, initDb } from "../../src/db/connection.js";
 
-import { Hono } from "hono";
-import { describe, expect, it } from "vitest";
-import { antiBotMiddleware } from "./src/middleware/antiBot.js";
+let app: ReturnType<typeof createApp>;
 
-describe("antiBotMiddleware", () => {
-  const app = new Hono();
-  app.use("/api/*", antiBotMiddleware);
-  app.get("/api/teste", (c) => c.json({ ok: true }));
+beforeAll(() => {
+  process.env.DB_PATH = ":memory:";
+  initDb();
+  app = createApp();
+});
 
-  it("bloqueia user-agent suspeito", async () => {
-    const res = await app.request("http://localhost/api/teste", {
+afterAll(() => {
+  closeDb();
+});
+
+describe("SEC-7: anti-bot intercepta a API real (/v1/*)", () => {
+  it("bloqueia user-agent de bot em endpoint /v1", async () => {
+    const res = await app.request("http://localhost/v1/albums", {
       headers: { "user-agent": "curl/7.88.1" },
     });
     expect(res.status).toBe(403);
@@ -19,9 +28,16 @@ describe("antiBotMiddleware", () => {
     });
   });
 
-  it("aceita user-agent normal", async () => {
-    const res = await app.request("http://localhost/api/teste", {
+  it("aceita user-agent normal em endpoint /v1", async () => {
+    const res = await app.request("http://localhost/v1/albums?lang=pt", {
       headers: { "user-agent": "Mozilla/5.0" },
+    });
+    expect(res.status).toBe(200);
+  });
+
+  it("/v1/health permanece acessível mesmo com UA de bot (healthcheck)", async () => {
+    const res = await app.request("http://localhost/v1/health", {
+      headers: { "user-agent": "curl/7.88.1" },
     });
     expect(res.status).toBe(200);
   });

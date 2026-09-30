@@ -33,7 +33,12 @@ export function createApp() {
 
   // Anti-bot/script kiddie (SEC-7): outermost — bloqueia UA de bots antes
   // de qualquer processamento (CORS, rate-limit, rotas)
-  app.use("/api/*", antiBotMiddleware);
+  // SEC-7 review: escopo real da API é /v1/*. /v1/health excluído do UA-block
+  // (healthcheck do container e monitores da Hostinger usam curl e precisam passar).
+  app.use("/v1/*", async (c, next) => {
+    if (c.req.path === "/v1/health") return next();
+    return antiBotMiddleware(c, next);
+  });
 
   // RF-03: CORS configurável via CORS_ORIGINS (default * para compat com apps)
   const corsOrigins = process.env.CORS_ORIGINS ?? "*";
