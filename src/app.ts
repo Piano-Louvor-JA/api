@@ -6,6 +6,7 @@ import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import { getDbStats } from "./db/connection.js";
 import { APP_VERSION } from "./lib/version.js";
+import { antiBotMiddleware } from "./middleware/antiBot.js";
 import { rateLimit } from "./middleware/rateLimit.js";
 // SEC-6 Fase 0: telemetria log-only por IP/min (api#127) — nunca bloqueia
 import { telemetryMiddleware } from "./middleware/telemetry.js";
@@ -32,6 +33,15 @@ import { zodErrorHook } from "./lib/zodErrorHook.js";
 
 export function createApp() {
   const app = new OpenAPIHono({ defaultHook: zodErrorHook });
+
+  // Anti-bot/script kiddie (SEC-7): outermost — bloqueia UA de bots antes
+  // de qualquer processamento (CORS, rate-limit, rotas)
+  // SEC-7 review: escopo real da API é /v1/*. /v1/health excluído do UA-block
+  // (healthcheck do container e monitores da Hostinger usam curl e precisam passar).
+  app.use("/v1/*", async (c, next) => {
+    if (c.req.path === "/v1/health") return next();
+    return antiBotMiddleware(c, next);
+  });
 
   // RF-03: CORS configurável via CORS_ORIGINS (default * para compat com apps)
   const corsOrigins = process.env.CORS_ORIGINS ?? "*";
