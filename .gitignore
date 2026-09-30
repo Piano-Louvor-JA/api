@@ -1,7 +1,8 @@
 node_modules/
 dist/
-data/
-media/
+/data
+/media
+/media_community
 coverage/
 .env
 .env.*
