@@ -1,11 +1,12 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getDb } from "../../db/connection.js";
+import { zodErrorHook } from "../../lib/zodErrorHook.js";
 import {
   MusicDetailSchema,
   MusicsListResponseSchema,
 } from "./musics.schemas.js";
 
-const musicsRoutes = new OpenAPIHono();
+const musicsRoutes = new OpenAPIHono({ defaultHook: zodErrorHook });
 
 // ============================================
 // GET /v1/musics — paridade com /json_db/pt_musics

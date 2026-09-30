@@ -1,11 +1,12 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getDb } from "../../db/connection.js";
+import { zodErrorHook } from "../../lib/zodErrorHook.js";
 import {
   CategoriesListResponseSchema,
   CategorySchema,
 } from "./categories.schemas.js";
 
-const categoriesRoutes = new OpenAPIHono();
+const categoriesRoutes = new OpenAPIHono({ defaultHook: zodErrorHook });
 
 // ============================================
 // GET /v1/categories — paridade com /json_db/pt_categories
