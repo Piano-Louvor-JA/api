@@ -677,10 +677,39 @@ import { pipeline } from "node:stream/promises";
 
 const MEDIA_DIR = join(process.cwd(), "media");
 const MIRROR_ENABLED = process.env.MEDIA_MIRROR !== "off";
-/** Fallback de mídia: workers.dev quando o host principal falhar. */
-const MEDIA_FALLBACK_HOST = (
+/**
+ * Timeout por host no mirror on-demand (RED TEAM 2026-09-30): fetch sem
+ * timeout pendurava a request pra sempre quando o host upstream estava
+ * fora — cada tentativa tem prazo curto; falhou, pula pro próximo.
+ */
+const MIRROR_FETCH_TIMEOUT_MS = Number(
+  process.env.MIRROR_FETCH_TIMEOUT_MS ?? "10000",
+);
+/** Fallbacks de mídia: lista separada por vírgula (workers.dev, etc). */
+const MEDIA_FALLBACK_HOSTS = (
   process.env.UPSTREAM_FALLBACK_API ?? "https://api.louvorja.workers.dev"
-).replace(/\/$/, "");
+)
+  .split(",")
+  .map((h) => h.trim().replace(/\/$/, ""))
+  .filter(Boolean);
+
+/**
+ * Ordem de tentativa do mirror /file (diretriz do Rafael 2026-09-30):
+ * fallbacks estáveis PRIMEIRO (Cloudflare Workers), host principal
+ * (api.louvorja.com.br, instável) por ÚLTIMO. Sem duplicados.
+ * Exportado só para testes — comportamento real usa as consts acima.
+ */
+export function mediaHostsForTest(
+  upstream: string,
+  fallbackEnv?: string,
+): string[] {
+  const fallbacks = (fallbackEnv ?? "https://api.louvorja.workers.dev")
+    .split(",")
+    .map((h) => h.trim().replace(/\/$/, ""))
+    .filter(Boolean);
+  return [...new Set([...fallbacks, upstream.replace(/\/$/, "")])];
+}
+export const MIRROR_FETCH_TIMEOUT_MS_FOR_TEST = MIRROR_FETCH_TIMEOUT_MS;
 
 compatRoutes.get("/file/:path{.*}", async (c) => {
   const path = c.req.param("path");
@@ -729,17 +758,21 @@ compatRoutes.get("/file/:path{.*}", async (c) => {
     });
   }
 
-  // 2. Mirror on-demand: baixa, salva e serve (host principal -> fallback)
+  // 2. Mirror on-demand: baixa, salva e serve.
+  // Ordem (diretriz Rafael 2026-09-30): fallbacks estáveis primeiro
+  // (workers.dev/Cloudflare), host principal (classic) no FIM da fila.
   if (MIRROR_ENABLED) {
     const mediaUrls = [
+      ...MEDIA_FALLBACK_HOSTS.map((h) => `${h}/file/${path}`),
       upstreamUrl,
-      `${MEDIA_FALLBACK_HOST}/file/${path}`,
     ].filter(
-      (u, i, arr) => arr.indexOf(u) === i, // dedup se host principal == fallback
+      (u, i, arr) => arr.indexOf(u) === i, // dedup se principal == algum fallback
     );
     for (const mediaUrl of mediaUrls) {
       try {
-        const res = await fetch(mediaUrl);
+        const res = await fetch(mediaUrl, {
+          signal: AbortSignal.timeout(MIRROR_FETCH_TIMEOUT_MS),
+        });
         if (res.ok && res.body) {
           mkdirSync(dirname(localPath), { recursive: true });
           const tmp = `${localPath}.tmp`;
