@@ -1,5 +1,4 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
-import type { Context } from "hono";
 import { getDb } from "../../db/connection.js";
 import {
   type CustomAuthEnv,
@@ -29,7 +28,6 @@ import {
 } from "./custom.schemas.js";
 import { firebaseAuth } from "./firebase-auth.middleware.js";
 import {
-  getActiveSeasonalMultiplier,
   listUnreadNotifications,
   markAllRead,
   promoteMusicToF,
@@ -47,9 +45,68 @@ import {
   getWeeklyTasksForUser,
   isoWeekKey,
 } from "./weekly-tasks.service.js";
-import { zodErrorHook } from "../../lib/zodErrorHook.js";
 
-const customRoutes = new OpenAPIHono<CustomAuthEnv>({ defaultHook: zodErrorHook });
+// lint: row types das tabelas custom (evitam 'as any' nas queries)
+type CollectionRow = {
+  id_collection: number;
+  name: string;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+  cover_url: string | null;
+  owner_id: number | null;
+  author_name: string | null;
+  visibility: "public" | "private";
+  client_uuid: string | null;
+  deleted_at: number | null;
+  updated_at_ms: number | null;
+  musics_count?: number;
+  is_owner?: number;
+};
+type MusicRow = {
+  id_music: number;
+  id_collection: number;
+  name: string | null;
+  lyric: string | null;
+  auxiliary_lyric: string | null;
+  id_file_audio: number | null;
+  id_file_instrumental: number | null;
+  id_file_image: number | null;
+  duration: number | null;
+  official_music_id: number | null;
+  owner_id: number | null;
+  created_at: string;
+  updated_at: string;
+  client_uuid: string | null;
+  deleted_at: number | null;
+  updated_at_ms: number | null;
+};
+type LyricRow = {
+  id_lyric: number;
+  id_music: number;
+  lyric: string | null;
+  aux_lyric: string | null;
+  id_file_image: number | null;
+  time: string | null;
+  instrumental_time: string | null;
+  show_slide: number;
+  order: number;
+  created_at: string | null;
+  updated_at: string | null;
+};
+type UserRow = {
+  id_user: number;
+  email: string;
+  password_hash: string;
+  display_name: string | null;
+};
+type SessionRow = {
+  id_user: number;
+  email: string;
+  display_name: string | null;
+};
+
+const customRoutes = new OpenAPIHono<CustomAuthEnv>();
 
 // Rotas públicas (sem auth): health/register/login. Todo o resto valida sessão
 // via optionalAuth (leitura aceita anônimo) ou exige owner check na rota.
@@ -90,7 +147,7 @@ customRoutes.openapi(listCollectionsRoute, (c) => {
 
     // api#82: privada só o dono vê. Deslogado vê apenas públicas.
     // Ordem dos placeholders: 1º o do is_owner (SELECT), 2º o do WHERE.
-    const params: any[] = [];
+    const params: unknown[] = [];
     const query = `
       SELECT cc.*, COUNT(cm.id_music) as musics_count,
              ${user ? "?" : "0"} as is_owner
@@ -108,7 +165,9 @@ customRoutes.openapi(listCollectionsRoute, (c) => {
       params.push(user.id_user); // filtro de visibilidade
     }
 
-    const collections = db.prepare(query).all(...params) as any[];
+    const collections = db
+      .prepare(query)
+      .all(...(params as string[])) as CollectionRow[];
 
     // Paginação (query da Comunidade): page/per_page via query string.
     const page = Math.max(1, Number(c.req.query("page") ?? 1) || 1);
@@ -196,7 +255,10 @@ customRoutes.openapi(createCollectionRoute, async (c) => {
 
     const collection = db
       .prepare(`SELECT * FROM custom_collections WHERE id_collection = ?`)
-      .get(result.lastInsertRowid) as any;
+      .get(result.lastInsertRowid) as CollectionRow | undefined;
+    if (!collection) {
+      return c.json({ error: "Erro ao criar coletânea" }, 500);
+    }
 
     // F2: publicar coletânea pública credita +10 (SPEC §2). Privada não pontua.
     if ((body.visibility ?? "public") === "public") {
@@ -257,7 +319,7 @@ customRoutes.openapi(getCollectionRoute, (c) => {
          WHERE cc.id_collection = ?
          GROUP BY cc.id_collection`,
       )
-      .get(parseInt(id, 10)) as any;
+      .get(parseInt(id, 10)) as CollectionRow | undefined;
 
     if (!collection) {
       return c.json({ error: "Coletânea não encontrada" }, 404);
@@ -333,7 +395,7 @@ customRoutes.openapi(updateCollectionRoute, (c) => {
 
     const collection = db
       .prepare(`SELECT * FROM custom_collections WHERE id_collection = ?`)
-      .get(parseInt(id, 10)) as any;
+      .get(parseInt(id, 10)) as CollectionRow | undefined;
 
     if (!collection) {
       return c.json({ error: "Coletânea não encontrada" }, 404);
@@ -364,7 +426,7 @@ customRoutes.openapi(updateCollectionRoute, (c) => {
          WHERE cc.id_collection = ?
          GROUP BY cc.id_collection`,
       )
-      .get(parseInt(id, 10)) as any;
+      .get(parseInt(id, 10)) as CollectionRow | undefined;
 
     return c.json(updated, 200);
   } catch (error) {
@@ -426,7 +488,7 @@ customRoutes.openapi(deleteCollectionRoute, (c) => {
 
     const collection = db
       .prepare(`SELECT * FROM custom_collections WHERE id_collection = ?`)
-      .get(parseInt(id, 10)) as any;
+      .get(parseInt(id, 10)) as CollectionRow | undefined;
 
     if (!collection) {
       return c.json({ error: "Coletânea não encontrada" }, 404);
@@ -497,7 +559,13 @@ customRoutes.openapi(listAllMusicsRoute, (c) => {
          LEFT JOIN files f_img ON cm.id_file_image = f_img.id_file
          ORDER BY cm.name`,
       )
-      .all() as any[];
+      .all() as (MusicRow & {
+      collection_name: string;
+      audio_url: string | null;
+      instrumental_url: string | null;
+      image_url: string | null;
+      image_position: number | null;
+    })[];
 
     return c.json(
       {
@@ -562,7 +630,7 @@ customRoutes.openapi(listMusicsRoute, (c) => {
          WHERE cm.id_collection = ?
          ORDER BY cm.name`,
       )
-      .all(parseInt(id, 10)) as any[];
+      .all(parseInt(id, 10)) as MusicRow[];
 
     return c.json(
       {
@@ -626,14 +694,14 @@ customRoutes.openapi(copyMusicRoute, (c) => {
 
     const src = db
       .prepare("SELECT * FROM custom_musics WHERE id_music = ?")
-      .get(parseInt(musicId, 10)) as any;
+      .get(parseInt(musicId, 10)) as MusicRow | undefined;
     if (!src) return c.json({ error: "Música de origem não encontrada" }, 404);
 
     const dest = db
       .prepare(
         "SELECT id_collection FROM custom_collections WHERE id_collection = ?",
       )
-      .get(parseInt(id, 10)) as any;
+      .get(parseInt(id, 10)) as CollectionRow | undefined;
     if (!dest)
       return c.json({ error: "Coletânea destino não encontrada" }, 404);
 
@@ -642,7 +710,7 @@ customRoutes.openapi(copyMusicRoute, (c) => {
       .prepare(
         "SELECT * FROM custom_musics WHERE id_collection = ? AND name = ?",
       )
-      .get(parseInt(id, 10), src.name) as any;
+      .get(parseInt(id, 10), src.name) as MusicRow | undefined;
     if (dup) return c.json(dup, 200);
 
     const result = db
@@ -669,7 +737,7 @@ customRoutes.openapi(copyMusicRoute, (c) => {
       .prepare(
         'SELECT * FROM custom_lyrics WHERE id_music = ? ORDER BY "order", id_lyric',
       )
-      .all(src.id_music) as any[];
+      .all(src.id_music) as LyricRow[];
     const insertLyric = db.prepare(
       `INSERT INTO custom_lyrics (id_music, lyric, aux_lyric, id_file_image, time, instrumental_time, show_slide, "order")
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -689,7 +757,7 @@ customRoutes.openapi(copyMusicRoute, (c) => {
 
     const music = db
       .prepare("SELECT * FROM custom_musics WHERE id_music = ?")
-      .get(newId) as any;
+      .get(newId) as MusicRow | undefined;
     return c.json(music, 201);
   } catch (error) {
     console.error(error);
@@ -738,7 +806,7 @@ customRoutes.openapi(createMusicRoute, (c) => {
 
     const collection = db
       .prepare(`SELECT * FROM custom_collections WHERE id_collection = ?`)
-      .get(parseInt(id, 10)) as any;
+      .get(parseInt(id, 10)) as CollectionRow | undefined;
 
     if (!collection) {
       return c.json({ error: "Coletânea não encontrada" }, 404);
@@ -778,7 +846,7 @@ customRoutes.openapi(createMusicRoute, (c) => {
 
     const music = db
       .prepare(`SELECT * FROM custom_musics WHERE id_music = ?`)
-      .get(result.lastInsertRowid) as any;
+      .get(result.lastInsertRowid) as MusicRow | undefined;
 
     return c.json(music, 201);
   } catch (error) {
@@ -835,7 +903,14 @@ customRoutes.openapi(getMusicRoute, (c) => {
          LEFT JOIN files f_img ON cm.id_file_image = f_img.id_file
          WHERE cm.id_music = ?`,
       )
-      .get(parseInt(id, 10)) as any;
+      .get(parseInt(id, 10)) as
+      | (MusicRow & {
+          audio_url: string | null;
+          instrumental_url: string | null;
+          image_url: string | null;
+          image_position: number | null;
+        })
+      | undefined;
 
     if (!music) {
       return c.json({ error: "Música não encontrada" }, 404);
@@ -852,7 +927,10 @@ customRoutes.openapi(getMusicRoute, (c) => {
          WHERE cl.id_music = ?
          ORDER BY cl."order" ASC`,
       )
-      .all(parseInt(id, 10)) as any[];
+      .all(parseInt(id, 10)) as (LyricRow & {
+      image_url: string | null;
+      image_position: number | null;
+    })[];
 
     return c.json({ ...music, lyrics }, 200);
   } catch (error) {
@@ -915,7 +993,7 @@ customRoutes.openapi(updateMusicRoute, (c) => {
 
     const music = db
       .prepare(`SELECT * FROM custom_musics WHERE id_music = ?`)
-      .get(parseInt(id, 10)) as any;
+      .get(parseInt(id, 10)) as MusicRow | undefined;
 
     if (!music) {
       return c.json({ error: "Música não encontrada" }, 404);
@@ -955,7 +1033,14 @@ customRoutes.openapi(updateMusicRoute, (c) => {
          LEFT JOIN files f_img ON cm.id_file_image = f_img.id_file
          WHERE cm.id_music = ?`,
       )
-      .get(parseInt(id, 10)) as any;
+      .get(parseInt(id, 10)) as
+      | (MusicRow & {
+          audio_url: string | null;
+          instrumental_url: string | null;
+          image_url: string | null;
+          image_position: number | null;
+        })
+      | undefined;
 
     return c.json(updated, 200);
   } catch (error) {
@@ -1017,7 +1102,7 @@ customRoutes.openapi(deleteMusicRoute, (c) => {
 
     const music = db
       .prepare(`SELECT * FROM custom_musics WHERE id_music = ?`)
-      .get(parseInt(id, 10)) as any;
+      .get(parseInt(id, 10)) as MusicRow | undefined;
 
     if (!music) {
       return c.json({ error: "Música não encontrada" }, 404);
@@ -1083,7 +1168,10 @@ customRoutes.openapi(listLyricsRoute, (c) => {
          WHERE cl.id_music = ?
          ORDER BY cl."order" ASC`,
       )
-      .all(parseInt(id, 10)) as any[];
+      .all(parseInt(id, 10)) as (LyricRow & {
+      image_url: string | null;
+      image_position: number | null;
+    })[];
 
     return c.json({ data: lyrics }, 200);
   } catch (error) {
@@ -1133,7 +1221,7 @@ customRoutes.openapi(createLyricRoute, (c) => {
 
     const music = db
       .prepare(`SELECT * FROM custom_musics WHERE id_music = ?`)
-      .get(parseInt(id, 10)) as any;
+      .get(parseInt(id, 10)) as MusicRow | undefined;
 
     if (!music) {
       return c.json({ error: "Música não encontrada" }, 404);
@@ -1146,8 +1234,8 @@ customRoutes.openapi(createLyricRoute, (c) => {
         .prepare(
           `SELECT MAX("order") as max_order FROM custom_lyrics WHERE id_music = ?`,
         )
-        .get(parseInt(id, 10)) as any;
-      order = (last.max_order || 0) + 1;
+        .get(parseInt(id, 10)) as { max_order: number | null } | undefined;
+      order = (last?.max_order || 0) + 1;
     }
 
     const result = db
@@ -1168,7 +1256,7 @@ customRoutes.openapi(createLyricRoute, (c) => {
 
     const lyric = db
       .prepare(`SELECT * FROM custom_lyrics WHERE id_lyric = ?`)
-      .get(result.lastInsertRowid) as any;
+      .get(result.lastInsertRowid) as LyricRow | undefined;
 
     return c.json(lyric, 201);
   } catch (error) {
@@ -1218,7 +1306,7 @@ customRoutes.openapi(updateLyricRoute, (c) => {
 
     const lyric = db
       .prepare(`SELECT * FROM custom_lyrics WHERE id_lyric = ?`)
-      .get(parseInt(id, 10)) as any;
+      .get(parseInt(id, 10)) as LyricRow | undefined;
 
     if (!lyric) {
       return c.json({ error: "Estrofe não encontrada" }, 404);
@@ -1241,7 +1329,7 @@ customRoutes.openapi(updateLyricRoute, (c) => {
 
     const updated = db
       .prepare(`SELECT * FROM custom_lyrics WHERE id_lyric = ?`)
-      .get(parseInt(id, 10)) as any;
+      .get(parseInt(id, 10)) as LyricRow | undefined;
 
     return c.json(updated, 200);
   } catch (error) {
@@ -1289,7 +1377,7 @@ customRoutes.openapi(deleteLyricRoute, (c) => {
 
     const lyric = db
       .prepare(`SELECT * FROM custom_lyrics WHERE id_lyric = ?`)
-      .get(parseInt(id, 10)) as any;
+      .get(parseInt(id, 10)) as LyricRow | undefined;
 
     if (!lyric) {
       return c.json({ error: "Estrofe não encontrada" }, 404);
@@ -1499,8 +1587,13 @@ customRoutes.openapi(registerRoute, (c) => {
           `INSERT INTO custom_users (email, password_hash, display_name) VALUES (?, ?, ?)`,
         )
         .run(body.email, passwordHash, body.displayName);
-    } catch (e: any) {
-      if (e.code === "SQLITE_CONSTRAINT_UNIQUE") {
+    } catch (e) {
+      if (
+        typeof e === "object" &&
+        e !== null &&
+        "code" in e &&
+        e.code === "SQLITE_CONSTRAINT_UNIQUE"
+      ) {
         return c.json({ error: "E-mail já cadastrado" }, 409);
       }
       throw e;
@@ -1569,7 +1662,7 @@ customRoutes.openapi(loginRoute, (c) => {
       .prepare(
         `SELECT id_user, email, display_name, password_hash FROM custom_users WHERE email = ?`,
       )
-      .get(body.email) as any;
+      .get(body.email) as UserRow | undefined;
 
     if (!user || !verifyPassword(body.password, user.password_hash)) {
       return c.json({ error: "Credenciais inválidas" }, 401);
@@ -1708,7 +1801,7 @@ customRoutes.openapi(meRoute, (c) => {
        INNER JOIN custom_users cu ON cu.id_user = cs.id_user
        WHERE cs.token_hash = ?`,
     )
-    .get(hashToken(token)) as any;
+    .get(hashToken(token)) as SessionRow | undefined;
 
   if (!session) return c.json({ error: "Não autenticado" }, 401);
 
@@ -1846,8 +1939,7 @@ customRoutes.openapi(resetPasswordRoute, (c) => {
       | undefined;
 
     if (
-      !user ||
-      !user.reset_token_expires ||
+      !user?.reset_token_expires ||
       new Date(user.reset_token_expires).getTime() < Date.now()
     ) {
       return c.json({ error: "Token inválido ou expirado" }, 400);
@@ -2259,7 +2351,7 @@ customRoutes.openapi(promoteRoute, (c) => {
     custom_music_id,
     official_music_id,
     user.id_user,
-    (to, subject, body) => {
+    (to, subject, _body) => {
       // Injeção do mail real fica no compose da rota (mail.service já existe).
       console.log(`[f6-mail] to=${to} subject=${subject}`);
     },

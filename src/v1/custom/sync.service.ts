@@ -131,7 +131,19 @@ function loadServerCollections(
        WHERE cc.deleted_at IS NULL AND (cc.owner_id = ? OR cc.owner_id IS NULL)
        ORDER BY cc.id_collection`,
     )
-    .all(userId) as any[];
+    .all(userId) as Array<{
+    id_collection: number;
+    client_uuid: string;
+    name: string;
+    description: string | null;
+    author_name: string | null;
+    owner_id: number | null;
+    created_at: number;
+    updated_at: number;
+    updated_at_ms: number | null;
+    deleted_at: number | null;
+    visibility: string;
+  }>;
 
   return cols.map((col) => {
     const musics = db
@@ -139,7 +151,22 @@ function loadServerCollections(
         `SELECT * FROM custom_musics
          WHERE id_collection = ? AND deleted_at IS NULL ORDER BY id_music`,
       )
-      .all(col.id_collection) as any[];
+      .all(col.id_collection) as Array<{
+      id_music: number;
+      id_collection: number;
+      client_uuid: string;
+      name: string;
+      official_music_id: number | null;
+      duration: number | null;
+      lyric: string | null;
+      auxiliary_lyric: string | null;
+      id_file_audio: number | null;
+      id_file_instrumental: number | null;
+      id_file_image: number | null;
+      owner_id: number | null;
+      updated_at_ms: number | null;
+      deleted_at: number | null;
+    }>;
 
     return {
       client_uuid: col.client_uuid ?? null,
@@ -189,7 +216,18 @@ function applyCollection(
        LEFT JOIN custom_users u ON u.id_user = cc.owner_id
        WHERE cc.client_uuid = ?`,
     )
-    .get(incoming.client_uuid) as any;
+    .get(incoming.client_uuid) as
+    | {
+        id_collection: number;
+        client_uuid: string;
+        name: string;
+        description: string | null;
+        author_name: string | null;
+        owner_id: number | null;
+        updated_at_ms: number | null;
+        deleted_at: number | null;
+      }
+    | undefined;
 
   if (!existing) {
     // criação — mas se algum tombstone existia com esse uuid (purgado?) não há
@@ -283,7 +321,17 @@ function applyMusic(
 ): void {
   const existing = db
     .prepare(`SELECT * FROM custom_musics WHERE client_uuid = ?`)
-    .get(incoming.client_uuid) as any;
+    .get(incoming.client_uuid) as
+    | {
+        id_music: number;
+        id_collection: number;
+        client_uuid: string;
+        name: string | null;
+        owner_id: number | null;
+        updated_at_ms: number | null;
+        deleted_at: number | null;
+      }
+    | undefined;
 
   if (!existing) {
     const t = incoming.deleted_at ?? incoming.updated_at;
