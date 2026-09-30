@@ -9,15 +9,10 @@ services:
       - proxy
     volumes:
       - ./data:/app/data
-      - /opt/services/api-piano-louvorja/media:/app/media:ro
+      - ./media:/app/media:ro
       - ./media_community:/app/media_community:ro
     env_file:
       - .env
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3101/v1/health"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
 
 networks:
   proxy:

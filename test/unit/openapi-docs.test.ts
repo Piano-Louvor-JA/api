@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createApp } from "../../src/app.js";
 
 describe("OpenAPI Docs", () => {
@@ -34,5 +34,45 @@ describe("OpenAPI Docs", () => {
     expect(responseSchema.properties.uptime).toBeDefined();
     expect(responseSchema.properties.db_size).toBeDefined();
     expect(responseSchema.properties.tables).toBeDefined();
+  });
+});
+
+describe("SEC-5: docs bloqueados em producao", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("GET /openapi.json responde 404 com NODE_ENV=production", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const prodApp = createApp();
+
+    const res = await prodApp.request("/openapi.json");
+    expect(res.status).toBe(404);
+    const body = (await res.json()) as { error?: string };
+    expect(body.error).toBeTruthy();
+  });
+
+  it("GET /doc responde 404 com NODE_ENV=production", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const prodApp = createApp();
+
+    const res = await prodApp.request("/doc");
+    expect(res.status).toBe(404);
+    const body = (await res.json()) as { error?: string };
+    expect(body.error).toBeTruthy();
+  });
+
+  it("GET /doc e /openapi.json continuam 200 sem NODE_ENV=production", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const devApp = createApp();
+
+    const spec = await devApp.request("/openapi.json");
+    expect(spec.status).toBe(200);
+    const specBody = (await spec.json()) as { paths?: Record<string, unknown> };
+    expect(specBody.paths?.["/v1/health"]).toBeDefined();
+
+    const doc = await devApp.request("/doc");
+    expect(doc.status).toBe(200);
+    expect(doc.headers.get("content-type")).toContain("text/html");
   });
 });
