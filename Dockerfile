@@ -17,6 +17,7 @@ ENV NODE_ENV=production
 COPY --from=builder /app/node_modules ./node_modules
 COPY package*.json ./
 COPY --from=builder /app/dist ./dist
+COPY src/db/migrations ./db/migrations
 # WT-5: receiver browser em /palco (serveStatic)
 COPY static/ ./static/
 RUN mkdir -p data media

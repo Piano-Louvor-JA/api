@@ -11,10 +11,10 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 const tmpDir = mkdtempSync(join(tmpdir(), "plj-sync-cov-"));
 process.env.DB_PATH = join(tmpDir, "sync.db");
 
-import { closeDb, getDb, initDb } from "../../src/db/connection.js";
-import { requireSyncAuth, runSync } from "../../src/v1/custom/sync.service.js";
-import { hashPassword, hashToken } from "../../src/v1/custom/auth.service.js";
 import type { Context, Next } from "hono";
+import { closeDb, getDb, initDb } from "../../src/db/connection.js";
+import { hashPassword, hashToken } from "../../src/v1/custom/auth.service.js";
+import { requireSyncAuth, runSync } from "../../src/v1/custom/sync.service.js";
 
 let userIdA = 0;
 let userIdB = 0;

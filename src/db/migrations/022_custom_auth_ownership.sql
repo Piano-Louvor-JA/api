@@ -3,14 +3,10 @@
 -- owner_id NULL = coletânea legado (pública, sem dono).
 --
 -- IMPORTANTE (lição api#88 / B15): o runner roda o arquivo via db.exec() que
--- PARA no primeiro erro. Melhor-sqlite3 não suporta múltiplos statements com
--- tolerância por-statement, então cada ALTER vive num arquivo logicamente
--- separado via guard: usamos ALTER direto, mas a 021 já cria owner_id em
+-- PARA no primeiro erro. Melhor-sqlite3 não suportava múltiplos statements com
+-- tolerância por-statement (corrigido depois), então a 021 já cria owner_id em
 -- custom_collections — duplicado abortaria o restante deste script.
--- Solução: idempotência por subprocesso do runner NÃO basta; garantimos aqui
--- reordenando: os ALTERs de custom_musics vêm ANTES de qualquer operação que
--- possa falhar em custom_collections. O ALTER duplicado de custom_collections
--- foi REMOVIDO (021 já cobre) e mantido apenas o author_name guard.
+-- Solução: o ALTER duplicado de custom_collections foi REMOVIDO (021 já cobre).
 --
 -- Em DBs que já aplicaram a 021: owner_id/author_name existem → nada a fazer.
 -- Em DBs que NÃO aplicaram (ordem antiga): 021 roda antes (sort) e cria.

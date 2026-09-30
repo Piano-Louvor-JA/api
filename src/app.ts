@@ -43,6 +43,11 @@ export function createApp() {
     "*",
     secureHeaders({
       referrerPolicy: "strict-origin-when-cross-origin",
+      // CORP: bloqueia subrecursos (img/audio) de origem cruzada. Em dev
+      // (CORS_ORIGINS=*) liberamos cross-origin p/ o web na 5173 e o
+      // Electron carregarem mídia da API; em prod mantém same-origin.
+      crossOriginResourcePolicy:
+        corsOrigins === "*" ? "cross-origin" : "same-origin",
       // HSTS só quando HTTPS real estiver ativo (domínio próprio + Tunnel)
       strictTransportSecurity:
         process.env.NODE_ENV === "production"

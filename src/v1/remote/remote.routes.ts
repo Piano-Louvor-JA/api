@@ -44,6 +44,7 @@ function unseal(value: string) {
     "aes-256-gcm",
     secretKey(),
     Buffer.from(ivText, "base64url"),
+    { authTagLength: 16 },
   );
   decipher.setAuthTag(Buffer.from(tagText, "base64url"));
   const plain = Buffer.concat([

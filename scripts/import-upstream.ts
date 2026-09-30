@@ -621,8 +621,8 @@ async function importBible() {
   if (Array.isArray(versions)) {
     for (const v of versions) {
       db.prepare(
-        "INSERT OR IGNORE INTO bible_versions (id_version, name, language) VALUES (?, ?, ?)",
-      ).run(v.id_bible_version ?? v.id, v.name, "pt");
+        "INSERT OR IGNORE INTO bible_versions (id_version, name, language, abbreviation) VALUES (?, ?, ?, ?)",
+      ).run(v.id_bible_version ?? v.id, v.name, "pt", v.abbreviation ?? null);
     }
     console.log(`  ${versions.length} versoes`);
   }
@@ -648,6 +648,44 @@ async function importBible() {
   console.log("  (versiculos importados sob demanda via lazy proxy)");
 }
 
+async function importBibleEs() {
+  console.log("\n=== IMPORTANDO BIBLIA (ES) ===");
+
+  // Versoes (ids ES: 10, 11, 12 — sem colisao com PT "1.0".."13.0")
+  const versions = await fetchJson("/json_db/es_bible_version");
+  if (Array.isArray(versions)) {
+    for (const v of versions) {
+      db.prepare(
+        "INSERT OR IGNORE INTO bible_versions (id_version, name, language, abbreviation) VALUES (?, ?, 'es', ?)",
+      ).run(String(v.id_bible_version ?? v.id), v.name, v.abbreviation ?? null);
+    }
+    console.log(`  ${versions.length} versoes`);
+  }
+
+  // Livros (ids ES: 67..132 — sem colisao com PT 1..66)
+  const books = await fetchJson("/json_db/es_bible_book");
+  if (Array.isArray(books)) {
+    for (const b of books) {
+      db.prepare(
+        "INSERT OR IGNORE INTO bible_books (id_book, name, abbreviation, chapters, book_number, id_language, testament, keywords, color) VALUES (?, ?, ?, ?, ?, 'es', ?, ?, ?)",
+      ).run(
+        b.id_bible_book ?? b.id_book,
+        b.name,
+        b.abbreviation ?? null,
+        b.chapters ?? 0,
+        b.book_number ?? 0,
+        b.testament ?? null,
+        b.keywords ?? null,
+        b.color ?? null,
+      );
+    }
+    console.log(`  ${books.length} livros`);
+  }
+
+  // Capitulos ES NAO existem no upstream (bible_10_1_1 -> 404):
+  // o lazy proxy espelha o 404, paridade mantida.
+}
+
 // ==============================================
 // MAIN
 // ==============================================
@@ -665,23 +703,28 @@ async function main() {
   // 0. Config
   await importConfig();
 
+  const lang = process.env.IMPORT_LANG ?? "pt";
+
   // 1. Categorias + Albums (com slug, type, order, subtitle, url_image)
-  await importCategoriesWithAlbums("pt");
+  await importCategoriesWithAlbums(lang);
 
   // 2. Musicas (com letra texto, albums com track do pivot)
-  await importMusics("pt");
+  await importMusics(lang);
 
   // 3. Hinarios
-  await importHymnals("pt");
+  await importHymnals(lang);
 
   // 4. Detalhes de cada album (atualizar track das musicas)
-  await importAlbumDetails("pt");
+  await importAlbumDetails(lang);
 
   // 5. Detalhes de cada musica (audio, imagem, estrofes com timing)
-  await importMusicDetails("pt");
+  await importMusicDetails(lang);
 
-  // 6. Biblia
-  await importBible();
+  // 6. Biblia (somente uma vez, pt)
+  if (lang === "pt") {
+    await importBible();
+    await importBibleEs();
+  }
 
   // Stats finais
   const tables = [

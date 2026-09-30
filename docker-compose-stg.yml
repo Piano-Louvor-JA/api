@@ -1,0 +1,24 @@
+services:
+  api:
+    build: /opt/services/api-piano-louvorja
+    container_name: piano-api-stg
+    restart: unless-stopped
+    expose:
+      - "3101"
+    networks:
+      - proxy
+    volumes:
+      - ./data:/app/data
+      - /opt/services/api-piano-louvorja/media:/app/media:ro
+      - ./media_community:/app/media_community:ro
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3101/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  proxy:
+    external: true

@@ -32,9 +32,12 @@ try {
   console.error("[purge] falhou (não-fatal):", e);
 }
 
-const server = serve({ fetch: app.fetch, port }, (info) => {
-  console.log(`piano-api rodando na porta ${info.port}`);
-});
+const server = serve(
+  { fetch: app.fetch, port, hostname: "0.0.0.0" },
+  (info) => {
+    console.log(`piano-api rodando na porta ${info.port}`);
+  },
+);
 
 // WT-5a: injeta suporte a WebSocket no servidor HTTP (relay do Palco)
 getPalcoWs().injectWebSocket(server);

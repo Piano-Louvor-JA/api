@@ -14,14 +14,14 @@ const tmpDir = mkdtempSync(join(tmpdir(), "plj-cov-fine-"));
 process.env.DB_PATH = join(tmpDir, "fine.db");
 
 import { closeDb, getDb, initDb } from "../../src/db/connection.js";
-import { runSync } from "../../src/v1/custom/sync.service.js";
+import { hashPassword } from "../../src/v1/custom/auth.service.js";
 import {
   getQuotaBytes,
   purgeTombstones,
   quotaCheck,
   usedBytes,
 } from "../../src/v1/custom/quota.service.js";
-import { hashPassword } from "../../src/v1/custom/auth.service.js";
+import { runSync } from "../../src/v1/custom/sync.service.js";
 
 let uid = 0;
 let uidOther = 0;

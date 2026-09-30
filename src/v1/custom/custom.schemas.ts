@@ -17,8 +17,8 @@ export const CustomCollectionsListResponseSchema = z.object({
   data: z.array(CustomCollectionSchema),
   meta: z.object({
     total: z.number(),
+    page: z.number(),
     per_page: z.number(),
-    current_page: z.number(),
     last_page: z.number(),
   }),
 });
@@ -27,12 +27,14 @@ export const CreateCustomCollectionSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().max(500).optional(),
   author_name: z.string().max(80).nullable().optional(),
+  visibility: z.enum(["public", "private"]).optional(),
 });
 
 export const UpdateCustomCollectionSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   description: z.string().max(500).optional(),
   cover_url: z.string().nullable().optional(),
+  visibility: z.enum(["public", "private"]).optional(),
 });
 
 // Custom Musics
@@ -162,6 +164,18 @@ export const RegisterSchema = z.object({
 export const LoginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
+});
+
+/** Pedido de reset: só o e-mail. Resposta SEMPRE 200 (não revela se o
+ * e-mail existe — evita enumeração de contas). */
+export const ForgotPasswordSchema = z.object({
+  email: z.string().email(),
+});
+
+/** Efetiva o reset: token (válido, não expirado, 1h) + senha nova. */
+export const ResetPasswordSchema = z.object({
+  token: z.string().min(16),
+  password: z.string().min(8),
 });
 
 export const AuthResponseSchema = z.object({

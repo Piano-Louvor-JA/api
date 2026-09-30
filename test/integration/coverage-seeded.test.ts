@@ -80,6 +80,14 @@ beforeAll(async () => {
 
     INSERT INTO bible_verses (id_bible_chapter, verse, text) VALUES
       (1,1,'Paulo, apostolo');
+
+    INSERT INTO bible_versions (id_version, name, language, abbreviation) VALUES
+      ('10','Reina-Valera','es','RV'),
+      ('12','Las Sagradas Escrituras','es','SEV');
+
+    INSERT INTO bible_books (id_book, name, abbreviation, chapters, book_number, id_language, testament, keywords, color) VALUES
+      (67,'Génesis','Gn',50,1,'es',1,'genesis','#01a2d9'),
+      (68,'Éxodo','Ex',40,2,'es',1,'exodo','#01a2d9');
   `);
 
   const { createApp } = await import("../../src/app.js");
@@ -190,6 +198,33 @@ describe("coverage gaps — seeded temp DB", () => {
       ).json();
       expect(versions[0].id_bible_version).toBe("acf");
       expect(versions[0].abbreviation).toBe("ACF");
+    });
+
+    it("es_bible_book retorna só livros em espanhol", async () => {
+      const books = await (
+        await router.request("/json_db/es_bible_book")
+      ).json();
+      expect(books).toHaveLength(2);
+      expect(books[0].id_bible_book).toBe(67);
+      expect(books[0].name).toBe("Génesis");
+      expect(books[0].book_number).toBe(1);
+      expect(books[0].testament).toBe(1);
+      // nao vaza livro PT (id 50)
+      expect(books.some((b: any) => b.id_bible_book === 50)).toBe(false);
+    });
+
+    it("es_bible_version retorna só versões em espanhol", async () => {
+      const versions = await (
+        await router.request("/json_db/es_bible_version")
+      ).json();
+      expect(versions).toHaveLength(2);
+      const rv = versions.find((v: any) => v.id_bible_version === "10");
+      expect(rv.name).toBe("Reina-Valera");
+      expect(rv.abbreviation).toBe("RV");
+      // nao vaza versão PT
+      expect(versions.some((v: any) => v.id_bible_version === "acf")).toBe(
+        false,
+      );
     });
 
     it("GET /json_db/config retorna metadata", async () => {

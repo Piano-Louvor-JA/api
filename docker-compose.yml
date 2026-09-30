@@ -3,20 +3,16 @@ services:
     build: .
     container_name: piano-api
     restart: unless-stopped
-    ports:
-      - "3100:3100"
+    expose:
+      - "3100"
+    networks:
+      - proxy
     volumes:
       - ./data:/app/data
       - ./media:/app/media
-    environment:
-      - NODE_ENV=production
-      - PORT=3100
-      - DB_PATH=/app/data/catalog.db
-      - MEDIA_DIR=/app/media
-      - FIREBASE_PROJECT_ID=pianolouvorja
-      - UPSTREAM_API=https://api.louvorja.com.br
-      - UPSTREAM_FALLBACK_API=https://api.louvorja.workers.dev
-      - CACHE_TTL_HYMN=86400
-      - CACHE_TTL_AUDIO=3600
-      - CACHE_TTL_BIBLE=604800
-      - RATE_LIMIT_PER_MIN=100
+    env_file:
+      - .env
+
+networks:
+  proxy:
+    external: true

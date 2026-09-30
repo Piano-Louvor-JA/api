@@ -54,16 +54,49 @@ export function initDb(): void {
 
   for (const file of files) {
     const sql = readFileSync(join(migrationsDir, file), "utf-8");
-    try {
-      db!.exec(sql);
-    } catch (e) {
-      // Ignorar erros de coluna duplicada ou tabela inexistente em migrations idempotentes
-      const msg = e instanceof Error ? e.message : String(e);
-      if (
-        !msg.includes("duplicate column name") &&
-        !msg.includes("no such table")
-      ) {
-        throw e;
+    // Executar instrução por instrução: db.exec() aborta TODO o arquivo no
+    // primeiro erro (ex.: "duplicate column name" ignorado abaixo), pulando
+    // ALTERs subsequentes do mesmo arquivo — bug real que deixou a 022
+    // parcialmente aplicada (owner_id em collections mas não em musics).
+    // Parser simples que respeita comentários "--" (um ";" dentro de um
+    // comentário não divide statements).
+    const statements: string[] = [];
+    let current = "";
+    for (const rawLine of sql.split(/\r?\n/)) {
+      const line = rawLine.trim();
+      if (line.startsWith("--")) continue; // comentário inteiro fora
+      // remove comentário de fim de linha (fora de aspas simples)
+      let clean = "";
+      let inQuote = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === "'") inQuote = !inQuote;
+        if (ch === "-" && !inQuote && line[i + 1] === "-") break;
+        clean += ch;
+      }
+      current += (current ? "\n" : "") + clean;
+      if (clean.trimEnd().endsWith(";")) {
+        const stmt = current.trim().replace(/;\s*$/, "").trim();
+        if (stmt.length > 0) statements.push(stmt);
+        current = "";
+      }
+    }
+    const tail = current.trim();
+    if (tail.length > 0) statements.push(tail);
+    for (const stmt of statements) {
+      try {
+        db!.exec(stmt);
+      } catch (e) {
+        // Ignorar erros de coluna duplicada ou tabela inexistente em migrations idempotentes
+        const msg = e instanceof Error ? e.message : String(e);
+        if (
+          !msg.includes("duplicate column name") &&
+          !msg.includes("no such table") &&
+          !msg.includes("no such column") &&
+          !msg.includes("has no column named")
+        ) {
+          throw e;
+        }
       }
     }
   }
