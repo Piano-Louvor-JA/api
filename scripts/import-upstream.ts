@@ -4,7 +4,7 @@
  * Salva no SQLite com paridade completa de dados.
  *
  * Uso: npx tsx scripts/import-upstream.ts
- * Env: UPSTREAM_API (default: https://api.louvorja.com.br)
+ * Env: UPSTREAM_API (default: https://api.louvorja.workers.dev)
  *      DB_PATH (default: ./data/catalog.db)
  */
 
@@ -12,7 +12,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import Database from "better-sqlite3";
 
-const UPSTREAM = process.env.UPSTREAM_API ?? "https://api.louvorja.com.br";
+const UPSTREAM = process.env.UPSTREAM_API ?? "https://api.louvorja.workers.dev";
 const DB_PATH = process.env.DB_PATH ?? "./data/catalog.db";
 
 mkdirSync(dirname(DB_PATH), { recursive: true });
