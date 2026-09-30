@@ -30,7 +30,9 @@ export const optionalAuth: MiddlewareHandler<CustomAuthEnv> =
        INNER JOIN custom_users cu ON cu.id_user = cs.id_user
        WHERE cs.token_hash = ?`,
       )
-      .get(hashToken(token)) as any;
+      .get(hashToken(token)) as
+      | { id_user: number; email: string; display_name: string }
+      | undefined;
 
     if (session) {
       c.set("user", {
@@ -60,7 +62,9 @@ export const requireAuth: MiddlewareHandler<CustomAuthEnv> =
        INNER JOIN custom_users cu ON cu.id_user = cs.id_user
        WHERE cs.token_hash = ?`,
       )
-      .get(hashToken(token)) as any;
+      .get(hashToken(token)) as
+      | { id_user: number; email: string; display_name: string }
+      | undefined;
 
     if (!session) return c.json({ error: "Não autenticado" }, 401);
 

@@ -28,9 +28,10 @@ import { remoteRoutes } from "./v1/remote/remote.routes.js";
 // Rotas compativeis (nao-OpenAPI)
 
 import { createRoute, z } from "@hono/zod-openapi";
+import { zodErrorHook } from "./lib/zodErrorHook.js";
 
 export function createApp() {
-  const app = new OpenAPIHono();
+  const app = new OpenAPIHono({ defaultHook: zodErrorHook });
 
   // RF-03: CORS configurável via CORS_ORIGINS (default * para compat com apps)
   const corsOrigins = process.env.CORS_ORIGINS ?? "*";
