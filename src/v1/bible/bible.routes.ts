@@ -1,8 +1,9 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getDb } from "../../db/connection.js";
+import { zodErrorHook } from "../../lib/zodErrorHook.js";
 import { BibleBookSchema, BibleChapterSchema } from "./bible.schemas.js";
 
-const app = new OpenAPIHono();
+const app = new OpenAPIHono({ defaultHook: zodErrorHook });
 const ErrorResponseSchema = z.object({ error: z.string() });
 
 // GET /v1/bible

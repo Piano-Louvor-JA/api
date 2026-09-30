@@ -8,6 +8,8 @@ import { getDbStats } from "./db/connection.js";
 import { APP_VERSION } from "./lib/version.js";
 import { antiBotMiddleware } from "./middleware/antiBot.js";
 import { rateLimit } from "./middleware/rateLimit.js";
+// SEC-6 Fase 0: telemetria log-only por IP/min (api#127) — nunca bloqueia
+import { telemetryMiddleware } from "./middleware/telemetry.js";
 import { compatRoutes } from "./routes/compat.js";
 import { albumsRoutes } from "./v1/albums/albums.routes.js";
 import { bibleRoutes } from "./v1/bible/bible.routes.js";
@@ -27,13 +29,19 @@ import { remoteRoutes } from "./v1/remote/remote.routes.js";
 // Rotas compativeis (nao-OpenAPI)
 
 import { createRoute, z } from "@hono/zod-openapi";
+import { zodErrorHook } from "./lib/zodErrorHook.js";
 
 export function createApp() {
-  const app = new OpenAPIHono();
+  const app = new OpenAPIHono({ defaultHook: zodErrorHook });
 
   // Anti-bot/script kiddie (SEC-7): outermost — bloqueia UA de bots antes
   // de qualquer processamento (CORS, rate-limit, rotas)
-  app.use("/api/*", antiBotMiddleware);
+  // SEC-7 review: escopo real da API é /v1/*. /v1/health excluído do UA-block
+  // (healthcheck do container e monitores da Hostinger usam curl e precisam passar).
+  app.use("/v1/*", async (c, next) => {
+    if (c.req.path === "/v1/health") return next();
+    return antiBotMiddleware(c, next);
+  });
 
   // RF-03: CORS configurável via CORS_ORIGINS (default * para compat com apps)
   const corsOrigins = process.env.CORS_ORIGINS ?? "*";
@@ -83,6 +91,10 @@ export function createApp() {
   );
   // Rate limiting Token Bucket (boas práticas louvorja/api)
   app.use("*", rateLimit);
+
+  // SEC-6 Fase 0 (api#127): contagem por IP/min — LOG-ONLY, nunca bloqueia.
+  // Desligável sem deploy: TELEMETRY_DISABLED=true
+  app.use("*", telemetryMiddleware);
 
   // RF-02: error handler global — nunca vaza stack/erro cru do SQLite
   app.onError((err, c) => {
@@ -149,31 +161,36 @@ export function createApp() {
   setPalcoWs(createNodeWebSocket({ app }));
   registerPalcoWs(app, getPalcoWs());
 
-  // Registrar especificacao OpenAPI
-  app.doc("/openapi.json", {
-    openapi: "3.0.0",
-    info: {
-      version: APP_VERSION,
-      title: "Piano Louvor JA API",
-      description:
-        "API propria drop-in replacement para api.louvorja.com.br.\n\nFornece catalogo de musicas, hinos, albuns, categorias e biblia.\n\n**Endpoints de compatibilidade** (`/json_db/*`, `/file/*`, `/db/*`) nao aparecem nesta documentacao pois usam path matching dinamico.",
-    },
-  });
-
-  // Interface Scalar API Reference (https://scalar.com)
-  app.get(
-    "/doc",
-    apiReference({
-      url: "/openapi.json",
-      pageTitle: "Piano Louvor JA API",
-      theme: "purple",
-      layout: "modern",
-      defaultHttpClient: {
-        targetKey: "js",
-        clientKey: "fetch",
+  // SEC-5 (api#126): docs e spec OpenAPI so existem fora de producao.
+  // Em producao as rotas nao sao registradas e o notFound global responde 404,
+  // sem entregar o mapa das rotas de negocio para enumeracao/IDOR.
+  if (process.env.NODE_ENV !== "production") {
+    // Registrar especificacao OpenAPI
+    app.doc("/openapi.json", {
+      openapi: "3.0.0",
+      info: {
+        version: APP_VERSION,
+        title: "Piano Louvor JA API",
+        description:
+          "API propria drop-in replacement para api.louvorja.com.br.\n\nFornece catalogo de musicas, hinos, albuns, categorias e biblia.\n\n**Endpoints de compatibilidade** (`/json_db/*`, `/file/*`, `/db/*`) nao aparecem nesta documentacao pois usam path matching dinamico.",
       },
-    }),
-  );
+    });
+
+    // Interface Scalar API Reference (https://scalar.com)
+    app.get(
+      "/doc",
+      apiReference({
+        url: "/openapi.json",
+        pageTitle: "Piano Louvor JA API",
+        theme: "purple",
+        layout: "modern",
+        defaultHttpClient: {
+          targetKey: "js",
+          clientKey: "fetch",
+        },
+      }),
+    );
+  }
 
   // Montar rotas compat ao final
   // Bypass temporario de tipagem pro Hono classico
