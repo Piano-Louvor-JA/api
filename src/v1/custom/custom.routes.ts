@@ -1,6 +1,7 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import type { Context } from "hono";
 import { getDb } from "../../db/connection.js";
+import { zodErrorHook } from "../../lib/zodErrorHook.js";
 import { optionalAuth, requireAuth } from "./auth.middleware.js";
 import {
   AuthResponseSchema,
@@ -22,7 +23,7 @@ import {
   UpdateCustomMusicSchema,
 } from "./custom.schemas.js";
 
-const customRoutes = new OpenAPIHono();
+const customRoutes = new OpenAPIHono({ defaultHook: zodErrorHook });
 
 // Rotas públicas (sem auth): health/register/login. Todo o resto valida sessão
 // via optionalAuth (leitura aceita anônimo) ou exige owner check na rota.

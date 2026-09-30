@@ -1,11 +1,12 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getDb } from "../../db/connection.js";
+import { zodErrorHook } from "../../lib/zodErrorHook.js";
 import {
   AlbumDetailSchema,
   AlbumsListResponseSchema,
 } from "./albums.schemas.js";
 
-const albumsRoutes = new OpenAPIHono();
+const albumsRoutes = new OpenAPIHono({ defaultHook: zodErrorHook });
 
 // ============================================
 // GET /v1/albums — lista paginada
