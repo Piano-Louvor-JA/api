@@ -1,11 +1,12 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getDb } from "../../db/connection.js";
+import { zodErrorHook } from "../../lib/zodErrorHook.js";
 import {
   MusicDetailSchema,
   MusicsListResponseSchema,
 } from "./musics.schemas.js";
 
-const musicsRoutes = new OpenAPIHono();
+const musicsRoutes = new OpenAPIHono({ defaultHook: zodErrorHook });
 
 // ============================================
 // GET /v1/musics — paridade com /json_db/pt_musics
@@ -82,11 +83,27 @@ musicsRoutes.openapi(listMusicsRoute, (c) => {
         WHERE m.id_language = ?
         LIMIT ? OFFSET ?`,
       )
-      .all(lang, perPage, offset) as any[];
+      .all(lang, perPage, offset) as Array<{
+      id_music: number;
+      name: string;
+      has_instrumental_music: number;
+      duration: string | null;
+      lyric: string | null;
+      albums_names: string | null;
+    }>;
 
     // Para cada música, buscar os albums com pivot (relacionamento N:N)
     const musicIds = musics.map((m) => m.id_music);
-    const albumsByMusic: Record<number, any[]> = {};
+    const albumsByMusic: Record<
+      number,
+      Array<{
+        id_album: number;
+        name: string;
+        order: number | null;
+        type: string;
+        pivot: { id_music: number; id_album: number; track: number };
+      }>
+    > = {};
 
     if (musicIds.length > 0) {
       const placeholders = musicIds.map(() => "?").join(",");
@@ -108,7 +125,14 @@ musicsRoutes.openapi(listMusicsRoute, (c) => {
           GROUP BY al.id_album, al.name, am.id_music, am.id_album, am.track, ct.type
           ORDER BY "order"`,
         )
-        .all(...musicIds) as any[];
+        .all(...musicIds) as Array<{
+        id_music: number;
+        id_album: number;
+        name: string;
+        order: number | null;
+        type: string;
+        track: number;
+      }>;
 
       for (const row of albumRows) {
         if (!albumsByMusic[row.id_music]) albumsByMusic[row.id_music] = [];
@@ -220,7 +244,18 @@ musicsRoutes.openapi(getMusicRoute, (c) => {
         LEFT JOIN files fi ON m.id_file_instrumental_music = fi.id_file
         WHERE m.id_music = ? AND m.id_language = ?`,
       )
-      .get(idMusic, lang) as any;
+      .get(idMusic, lang) as
+      | {
+          id_music: number;
+          name: string;
+          duration: string | null;
+          instrumental_duration: string | null;
+          url_image: string | null;
+          image_position: string | null;
+          url_music: string | null;
+          url_instrumental_music: string | null;
+        }
+      | undefined;
 
     if (!music) {
       return c.json({ error: "Música não encontrada" }, 404);
@@ -246,7 +281,18 @@ musicsRoutes.openapi(getMusicRoute, (c) => {
         WHERE l.id_music = ?
         ORDER BY l."order" ASC`,
       )
-      .all(idMusic) as any[];
+      .all(idMusic) as Array<{
+      id_lyric: number;
+      id_music: number;
+      lyric: string;
+      aux_lyric: string | null;
+      url_image: string | null;
+      image_position: string | null;
+      time: string;
+      instrumental_time: string | null;
+      show_slide: number;
+      order: number;
+    }>;
 
     // Buscar albums da musica (paridade com music_{id} do upstream)
     const albums = db
@@ -267,7 +313,13 @@ musicsRoutes.openapi(getMusicRoute, (c) => {
         GROUP BY al.id_album, al.name, am.id_music, am.id_album, am.track
         ORDER BY "order"`,
       )
-      .all(idMusic) as any[];
+      .all(idMusic) as Array<{
+      id_album: number;
+      name: string;
+      track: number;
+      url_image: string | null;
+      order: number | null;
+    }>;
 
     return c.json(
       {

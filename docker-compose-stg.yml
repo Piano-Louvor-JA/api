@@ -1,15 +1,15 @@
 services:
   api:
-    build: .
-    container_name: piano-api
+    build: /opt/services/api-piano-louvorja
+    container_name: piano-api-stg
     restart: unless-stopped
     expose:
-      - "3100"
+      - "3101"
     networks:
       - proxy
     volumes:
       - ./data:/app/data
-      - ./media:/app/media
+      - ./media:/app/media:ro
       - ./media_community:/app/media_community:ro
     env_file:
       - .env

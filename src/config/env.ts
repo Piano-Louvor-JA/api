@@ -8,11 +8,11 @@ const envSchema = z.object({
     .default("development"),
   DB_PATH: z.string().default("./data/catalog.db"),
   MEDIA_DIR: z.string().default("./media"),
-  UPSTREAM_API: z.string().url().default("https://api.louvorja.com.br"),
+  UPSTREAM_API: z.string().url().default("https://api.louvorja.workers.dev"),
   UPSTREAM_FALLBACK_API: z
     .string()
     .url()
-    .default("https://api.louvorja.workers.dev"),
+    .default("https://api.louvorja.com.br"),
   CORS_ORIGINS: z.string().default("*"),
   TRUSTED_PROXY: z
     .enum(["true", "false"])
@@ -33,6 +33,14 @@ export function validateEnv(raw: Record<string, string | undefined>): Env {
     const path = issue?.path.join(".");
     throw new Error(
       `Env inválida: ${path} — ${issue?.message}. Corrija o .env e reinicie.`,
+    );
+  }
+  // SEC-142 (api#142): relay do palco com HMAC de chave vazia = qualquer um
+  // forja token de sala. Em produção, chave é OBRIGATÓRIA — API não sobe sem.
+  // Em dev/test, permite ausente (relay falha seguro: getRoom → null).
+  if (parsed.data.NODE_ENV === "production" && !raw.PALCO_RELAY_KEY?.trim()) {
+    throw new Error(
+      "Env inválida: PALCO_RELAY_KEY é obrigatória em produção (SEC-142). Defina uma chave forte no .env e reinicie.",
     );
   }
   return parsed.data;

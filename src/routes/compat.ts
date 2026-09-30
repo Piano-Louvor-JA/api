@@ -10,11 +10,17 @@ import { dirname, join } from "node:path";
 import { Hono } from "hono";
 import { getDb } from "../db/connection.js";
 import { importMusicById, ON_MISS_ENABLED } from "../lib/importMusicOnMiss.js";
+import {
+  escapesMediaDir,
+  mirrorablePath,
+  NegativeCache,
+  Semaphore,
+} from "../lib/mirrorGuard.js";
 import { fetchUpstream, UpstreamError } from "../lib/upstream.js";
 
 export const compatRoutes = new Hono();
 
-const UPSTREAM = process.env.UPSTREAM_API ?? "https://api.louvorja.com.br";
+const UPSTREAM = process.env.UPSTREAM_API ?? "https://api.louvorja.workers.dev";
 const BIBLE_CACHE_DIR = join(process.cwd(), "data", "bible_cache");
 
 // Versões ES do ecossistema LouvorJA (mesmos ids da prod). Usadas como
@@ -147,6 +153,18 @@ compatRoutes.get("/json_db", (c) => {
       file: "pt_bible_version.json",
       table: "pt_bible_version",
       path: "/db/pt_bible_version",
+      hash: "static",
+    },
+    {
+      file: "es_bible_book.json",
+      table: "es_bible_book",
+      path: "/db/es_bible_book",
+      hash: "static",
+    },
+    {
+      file: "es_bible_version.json",
+      table: "es_bible_version",
+      path: "/db/es_bible_version",
       hash: "static",
     },
   ]);
@@ -346,138 +364,31 @@ compatRoutes.get("/json_db/:file", async (c) => {
   // pt_bible_book / es_bible_book
   const bookLangMatch = file.match(/^(pt|es)_bible_book$/);
   if (bookLangMatch) {
+    const lang = bookLangMatch[1];
     const books = db
       .prepare(
         `SELECT id_book AS id_bible_book, book_number, name, chapters, abbreviation, testament, keywords, color
          FROM bible_books WHERE id_language = ? ORDER BY book_number`,
       )
-      .all(bookLangMatch[1]);
-    return c.json(books);
+      .all(lang);
+    // PT: resposta direta do DB (mesmo vazia — contrato do espelho).
+    // ES: se o catálogo ainda não estiver populado (migration 027), usa o
+    // fallback do ecossistema em vez de devolver [] (issue api#76).
+    if (books.length > 0 || lang === "pt") return c.json(books);
+    return await serveEsBibleBookFallback(c);
   }
 
   // pt_bible_version / es_bible_version
   const versionLangMatch = file.match(/^(pt|es)_bible_version$/);
   if (versionLangMatch) {
+    const lang = versionLangMatch[1];
     const versions = db
       .prepare(
         `SELECT id_version AS id_bible_version, name, abbreviation FROM bible_versions WHERE language = ? ORDER BY name`,
       )
-      .all(versionLangMatch[1])
+      .all(lang)
       .map((row) => withVersionAbbreviation(row as Record<string, unknown>));
-    return c.json(versions);
-  }
-
-  // es_bible_book — espelha o formato da prod (ids 67-132, offset +66).
-  // Fonte: dados ES do upstream, servidos do DB quando populados; fallback
-  // deriva do cache de capítulos bible_{v}_{book}_{chapter} (books 67-132).
-  if (file === "es_bible_book") {
-    const books = db
-      .prepare(
-        `SELECT id_book AS id_bible_book, book_number, name, chapters, abbreviation, testament, keywords, color
-         FROM bible_books WHERE id_book BETWEEN 67 AND 132 ORDER BY book_number`,
-      )
-      .all();
-    if (books.length > 0) return c.json(books);
-
-    // Fallback: busca um capítulo ES no upstream e extrai os nomes não é viável
-    // — em vez disso, serve o manifest estático equivalente ao da prod.
-    return serveEsBibleBookFallback(c);
-  }
-
-  // es_bible_version — versões ES do ecossistema (SEV=10, RV=11, RVA=12).
-  if (file === "es_bible_version") {
-    const versions = db
-      .prepare(
-        `SELECT id_version AS id_bible_version, name, abbreviation FROM bible_versions WHERE language = 'es' ORDER BY name`,
-      )
-      .all()
-      .map((row) => withVersionAbbreviation(row as Record<string, unknown>));
-    if (versions.length > 0) return c.json(versions);
-    return c.json(ES_BIBLE_VERSIONS_FALLBACK);
-  }
-
-  // es_bible_book — espelha o formato da prod (ids 67-132, offset +66).
-  // Fonte: dados ES do upstream, servidos do DB quando populados; fallback
-  // deriva do cache de capítulos bible_{v}_{book}_{chapter} (books 67-132).
-  if (file === "es_bible_book") {
-    const books = db
-      .prepare(
-        `SELECT id_book AS id_bible_book, book_number, name, chapters, abbreviation, testament, keywords, color
-         FROM bible_books WHERE id_book BETWEEN 67 AND 132 ORDER BY book_number`,
-      )
-      .all();
-    if (books.length > 0) return c.json(books);
-
-    // Fallback: busca um capítulo ES no upstream e extrai os nomes não é viável
-    // — em vez disso, serve o manifest estático equivalente ao da prod.
-    return serveEsBibleBookFallback(c);
-  }
-
-  // es_bible_version — versões ES do ecossistema (SEV=10, RV=11, RVA=12).
-  if (file === "es_bible_version") {
-    const versions = db
-      .prepare(
-        `SELECT id_version AS id_bible_version, name, abbreviation FROM bible_versions WHERE language = 'es' ORDER BY name`,
-      )
-      .all()
-      .map((row) => withVersionAbbreviation(row as Record<string, unknown>));
-    if (versions.length > 0) return c.json(versions);
-    return c.json(ES_BIBLE_VERSIONS_FALLBACK);
-  }
-
-  // es_bible_book — espelha o formato da prod (ids 67-132, offset +66).
-  // Fonte: dados ES do upstream, servidos do DB quando populados; fallback
-  // deriva do cache de capítulos bible_{v}_{book}_{chapter} (books 67-132).
-  if (file === "es_bible_book") {
-    const books = db
-      .prepare(
-        `SELECT id_book AS id_bible_book, book_number, name, chapters, abbreviation, testament, keywords, color
-         FROM bible_books WHERE id_book BETWEEN 67 AND 132 ORDER BY book_number`,
-      )
-      .all();
-    if (books.length > 0) return c.json(books);
-
-    // Fallback: busca um capítulo ES no upstream e extrai os nomes não é viável
-    // — em vez disso, serve o manifest estático equivalente ao da prod.
-    return serveEsBibleBookFallback(c);
-  }
-
-  // es_bible_version — versões ES do ecossistema (SEV=10, RV=11, RVA=12).
-  if (file === "es_bible_version") {
-    const versions = db
-      .prepare(
-        `SELECT id_version AS id_bible_version, name, abbreviation FROM bible_versions WHERE language = 'es' ORDER BY name`,
-      )
-      .all();
-    if (versions.length > 0) return c.json(versions);
-    return c.json(ES_BIBLE_VERSIONS_FALLBACK);
-  }
-
-  // es_bible_book — espelha o formato da prod (ids 67-132, offset +66).
-  // Fonte: dados ES do upstream, servidos do DB quando populados; fallback
-  // deriva do cache de capítulos bible_{v}_{book}_{chapter} (books 67-132).
-  if (file === "es_bible_book") {
-    const books = db
-      .prepare(
-        `SELECT id_book AS id_bible_book, book_number, name, chapters, abbreviation, testament, keywords, color
-         FROM bible_books WHERE id_book BETWEEN 67 AND 132 ORDER BY book_number`,
-      )
-      .all();
-    if (books.length > 0) return c.json(books);
-
-    // Fallback: busca um capítulo ES no upstream e extrai os nomes não é viável
-    // — em vez disso, serve o manifest estático equivalente ao da prod.
-    return serveEsBibleBookFallback(c);
-  }
-
-  // es_bible_version — versões ES do ecossistema (SEV=10, RV=11, RVA=12).
-  if (file === "es_bible_version") {
-    const versions = db
-      .prepare(
-        `SELECT id_version AS id_bible_version, name, abbreviation FROM bible_versions WHERE language = 'es' ORDER BY name`,
-      )
-      .all();
-    if (versions.length > 0) return c.json(versions);
+    if (versions.length > 0 || lang === "pt") return c.json(versions);
     return c.json(ES_BIBLE_VERSIONS_FALLBACK);
   }
 
@@ -685,39 +596,65 @@ const MIRROR_ENABLED = process.env.MEDIA_MIRROR !== "off";
 const MIRROR_FETCH_TIMEOUT_MS = Number(
   process.env.MIRROR_FETCH_TIMEOUT_MS ?? "10000",
 );
-/** Fallbacks de mídia: lista separada por vírgula (workers.dev, etc). */
-const MEDIA_FALLBACK_HOSTS = (
-  process.env.UPSTREAM_FALLBACK_API ?? "https://api.louvorja.workers.dev"
-)
-  .split(",")
-  .map((h) => h.trim().replace(/\/$/, ""))
-  .filter(Boolean);
+// SEC-143: guardas do mirror — cache negativo (404 não remartela upstream)
+// e cap de downloads concorrentes (flood não satura egress/disco)
+const negativeCache = new NegativeCache(5 * 60_000, 10_000);
+const mirrorSlots = new Semaphore(8);
+const CLASSIC_MEDIA_HOST = "https://api.louvorja.com.br";
+
+function parseMediaHosts(raw: string): string[] {
+  return raw
+    .split(",")
+    .map((h) => h.trim().replace(/\/$/, ""))
+    .filter(Boolean);
+}
 
 /**
  * Ordem de tentativa do mirror /file (diretriz do Rafael 2026-09-30):
- * fallbacks estáveis PRIMEIRO (Cloudflare Workers), host principal
- * (api.louvorja.com.br, instável) por ÚLTIMO. Sem duplicados.
- * Exportado só para testes — comportamento real usa as consts acima.
+ * hosts estáveis primeiro, api.louvorja.com.br por último. Sem duplicados.
+ * Exportado só para testes.
  */
 export function mediaHostsForTest(
   upstream: string,
   fallbackEnv?: string,
 ): string[] {
-  const fallbacks = (fallbackEnv ?? "https://api.louvorja.workers.dev")
-    .split(",")
-    .map((h) => h.trim().replace(/\/$/, ""))
-    .filter(Boolean);
+  const fallbacks = parseMediaHosts(
+    fallbackEnv ?? "https://api.louvorja.workers.dev",
+  );
   return [...new Set([...fallbacks, upstream.replace(/\/$/, "")])];
 }
 export const MIRROR_FETCH_TIMEOUT_MS_FOR_TEST = MIRROR_FETCH_TIMEOUT_MS;
 
+/**
+ * Fila real do /file. UPSTREAM da staging já é o Workers; o fallback
+ * (default: host clássico, lista separada por vírgula) vem depois.
+ * Assim o Workers continua na frente e o clássico no fim.
+ */
+function mirrorMediaHosts(): string[] {
+  const primary = UPSTREAM.replace(/\/$/, "");
+  const rest = parseMediaHosts(
+    process.env.UPSTREAM_FALLBACK_API ?? CLASSIC_MEDIA_HOST,
+  );
+  return [...new Set([primary, ...rest])];
+}
+
 compatRoutes.get("/file/:path{.*}", async (c) => {
   const path = c.req.param("path");
-  // RF-06: bloqueio explícito de path traversal e paths absolutos
-  if (path.includes("..") || path.startsWith("/")) {
+  // RF-06 + SEC-143: bloqueio explícito de path traversal, paths absolutos
+  // e allowlist de extensão — mirror só de mídia conhecida do catálogo
+  if (!mirrorablePath(path)) {
     return c.json({ error: "Invalid path" }, 400);
   }
   const localPath = join(MEDIA_DIR, path);
+  // SEC-143 defesa em profundidade: caminho resolvido tem que continuar
+  // dentro de MEDIA_DIR (cobre encode duplo / normalização estranha)
+  if (escapesMediaDir(MEDIA_DIR, localPath)) {
+    return c.json({ error: "Invalid path" }, 400);
+  }
+  // SEC-143 cache negativo: 404 conhecido não re-martela o upstream
+  if (negativeCache.has(path)) {
+    return c.json({ error: "Not found" }, 404);
+  }
   const upstreamUrl = `${UPSTREAM}/file/${path}`;
 
   // 1. Serve do disco se ja existe no mirror
@@ -759,42 +696,46 @@ compatRoutes.get("/file/:path{.*}", async (c) => {
   }
 
   // 2. Mirror on-demand: baixa, salva e serve.
-  // Ordem (diretriz Rafael 2026-09-30): fallbacks estáveis primeiro
-  // (workers.dev/Cloudflare), host principal (classic) no FIM da fila.
+  // Workers (UPSTREAM) primeiro; fallbacks depois, clássico no fim da fila.
   if (MIRROR_ENABLED) {
-    const mediaUrls = [
-      ...MEDIA_FALLBACK_HOSTS.map((h) => `${h}/file/${path}`),
-      upstreamUrl,
-    ].filter(
-      (u, i, arr) => arr.indexOf(u) === i, // dedup se principal == algum fallback
-    );
-    for (const mediaUrl of mediaUrls) {
-      try {
-        const res = await fetch(mediaUrl, {
-          signal: AbortSignal.timeout(MIRROR_FETCH_TIMEOUT_MS),
-        });
-        if (res.ok && res.body) {
-          mkdirSync(dirname(localPath), { recursive: true });
-          const tmp = `${localPath}.tmp`;
-          await pipeline(
-            Readable.fromWeb(res.body as any),
-            createWriteStream(tmp),
-          );
-          renameSync(tmp, localPath);
-          const buf = await fsReadFile(localPath);
-          return c.body(buf, 200, {
-            "Content-Type":
-              res.headers.get("content-type") ?? "application/octet-stream",
-            "Content-Length": String(buf.length),
-            "Accept-Ranges": "bytes",
+    // SEC-143: cap de downloads concorrentes — flood de misses não satura
+    if (!mirrorSlots.tryAcquire()) {
+      return c.json({ error: "Mirror ocupado, tente novamente" }, 503);
+    }
+    try {
+      const mediaUrls = mirrorMediaHosts().map((h) => `${h}/file/${path}`);
+      for (const mediaUrl of mediaUrls) {
+        try {
+          const res = await fetch(mediaUrl, {
+            signal: AbortSignal.timeout(MIRROR_FETCH_TIMEOUT_MS),
           });
+          if (res.ok && res.body) {
+            mkdirSync(dirname(localPath), { recursive: true });
+            const tmp = `${localPath}.tmp`;
+            await pipeline(
+              Readable.fromWeb(res.body as any),
+              createWriteStream(tmp),
+            );
+            renameSync(tmp, localPath);
+            const buf = await fsReadFile(localPath);
+            return c.body(buf, 200, {
+              "Content-Type":
+                res.headers.get("content-type") ?? "application/octet-stream",
+              "Content-Length": String(buf.length),
+              "Accept-Ranges": "bytes",
+            });
+          }
+        } catch {
+          // tenta próximo host (timeout, rede ou host fora)
         }
-      } catch {
-        // tenta próximo host
       }
+      // SEC-143: todos os hosts falharam → cacheia miss (não remartelar)
+      negativeCache.set(path);
+    } finally {
+      mirrorSlots.release();
     }
   }
 
-  // 3. Fallback final: redirect pro upstream (principal, depois Cloudflare)
+  // 3. Fallback final: redirect pro host primário (Workers)
   return c.redirect(upstreamUrl, 302);
 });

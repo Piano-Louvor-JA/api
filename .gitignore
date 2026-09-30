@@ -1,7 +1,15 @@
 node_modules/
 dist/
-data/
-media/
+/data/*
+# Exceção: snapshots versionados do espelho bíblico ES (issue api#76) —
+# auditoria de paridade com o mirror oficial, com checksums sha256.
+!/data/json_db/
+/data/json_db/*
+!/data/json_db/es_bible_book.json
+!/data/json_db/es_bible_version.json
+!/data/json_db/es_bible_catalog.sha256
+/media
+/media_community
 coverage/
 .env
 .env.*

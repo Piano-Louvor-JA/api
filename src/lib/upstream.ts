@@ -1,4 +1,4 @@
-// Cliente HTTP para o upstream api.louvorja.com.br
+// Cliente HTTP para o upstream (Workers primeiro, api.louvorja.com.br depois).
 // Rate limit: max ~4500 req/h (0.8s entre chamadas) + respeito a 429/Retry-After.
 // Ver .planning / references/upstream-sync-rate-limit-audit.md
 
@@ -7,12 +7,12 @@ const MAX_RETRIES = 3;
 
 /**
  * Fallback em cascata: hosts na ordem de tentativa.
- * Derivado da URL chamada: se a URL aponta pro host primário e falhar
- * (rede/5xx), tenta o mesmo path no fallback (Cloudflare Workers).
+ * A URL chamada é o primário (Workers). Se falhar (rede/5xx), tenta o
+ * mesmo path em api.louvorja.com.br.
  * 404 NÃO troca de host — recurso não existe, fallback teria o mesmo.
  */
 const FALLBACK_HOST = (
-  process.env.UPSTREAM_FALLBACK_API ?? "https://api.louvorja.workers.dev"
+  process.env.UPSTREAM_FALLBACK_API ?? "https://api.louvorja.com.br"
 ).replace(/\/$/, "");
 
 /** Hosts candidatos para uma URL: própria URL primeiro, depois fallback. */
@@ -60,7 +60,7 @@ export class UpstreamError extends Error {
 /**
  * fetch com rate limit global e retry em 429/5xx.
  * Fallback: em falha de rede/5xx no host primário, refaz a mesma requisição
- * no host fallback (Cloudflare) antes de lançar. 404 é imediato (não troca host).
+ * no segundo host antes de lançar. 404 é imediato (não troca host).
  * Lança UpstreamError após esgotar tentativas — NUNCA busca sem throttle.
  */
 export async function fetchUpstream(url: string): Promise<Response> {
