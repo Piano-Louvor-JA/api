@@ -12,7 +12,7 @@
 import type Database from "better-sqlite3";
 import { fetchUpstream, UpstreamError } from "./upstream.js";
 
-const UPSTREAM = process.env.UPSTREAM_API ?? "https://api.louvorja.com.br";
+const UPSTREAM = process.env.UPSTREAM_API ?? "https://api.louvorja.workers.dev";
 
 /** Flag de controle: desativa o fetch on-miss (default: ligado). */
 export const ON_MISS_ENABLED = (process.env.ON_MISS_FETCH ?? "on") !== "off";
