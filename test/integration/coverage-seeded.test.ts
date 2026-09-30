@@ -81,13 +81,8 @@ beforeAll(async () => {
     INSERT INTO bible_verses (id_bible_chapter, verse, text) VALUES
       (1,1,'Paulo, apostolo');
 
-    INSERT INTO bible_versions (id_version, name, language, abbreviation) VALUES
-      ('10','Reina-Valera','es','RV'),
-      ('12','Las Sagradas Escrituras','es','SEV');
-
-    INSERT INTO bible_books (id_book, name, abbreviation, chapters, book_number, id_language, testament, keywords, color) VALUES
-      (67,'Génesis','Gn',50,1,'es',1,'genesis','#01a2d9'),
-      (68,'Éxodo','Ex',40,2,'es',1,'exodo','#01a2d9');
+    -- Catálogo ES vem da migration 027_bible_es_catalog.sql (mirror oficial):
+    -- 66 livros (ids 67..132) + 3 versões (RV 10, RVA 11, SEV 12).
   `);
 
   const { createApp } = await import("../../src/app.js");
@@ -204,11 +199,14 @@ describe("coverage gaps — seeded temp DB", () => {
       const books = await (
         await router.request("/json_db/es_bible_book")
       ).json();
-      expect(books).toHaveLength(2);
+      // Catálogo completo do mirror (migration 027): 66 livros, ids 67..132
+      expect(books).toHaveLength(66);
       expect(books[0].id_bible_book).toBe(67);
       expect(books[0].name).toBe("Génesis");
       expect(books[0].book_number).toBe(1);
       expect(books[0].testament).toBe(1);
+      expect(books[65].id_bible_book).toBe(132);
+      expect(books[65].name).toBe("Apocalipsis");
       // nao vaza livro PT (id 50)
       expect(books.some((b: any) => b.id_bible_book === 50)).toBe(false);
     });
@@ -217,10 +215,13 @@ describe("coverage gaps — seeded temp DB", () => {
       const versions = await (
         await router.request("/json_db/es_bible_version")
       ).json();
-      expect(versions).toHaveLength(2);
+      expect(versions).toHaveLength(3);
       const rv = versions.find((v: any) => v.id_bible_version === "10");
       expect(rv.name).toBe("Reina-Valera");
       expect(rv.abbreviation).toBe("RV");
+      const sev = versions.find((v: any) => v.id_bible_version === "12");
+      expect(sev.name).toBe("Las Sagradas Escrituras");
+      expect(sev.abbreviation).toBe("SEV");
       // nao vaza versão PT
       expect(versions.some((v: any) => v.id_bible_version === "acf")).toBe(
         false,

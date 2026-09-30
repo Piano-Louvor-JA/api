@@ -6,15 +6,24 @@
 import type { MiddlewareHandler } from "hono";
 
 const SUSPICIOUS_UA = /curl|wget|python|postman|insomnia|bot|spider|crawler/i;
+// O middleware já está montado só em /v1/*. O prefixo /v1/ não é probing:
+// marcá-lo aqui logaria toda request legítima da API.
 const PROBING_PATHS = [
   "/openapi.json",
   "/doc",
   "/api",
-  "/v1/",
   "/v2/",
   "/health",
   "/metrics",
 ];
+
+function logLine(message: string): void {
+  try {
+    console.log(message);
+  } catch {
+    // Log nunca pode derrubar a request.
+  }
+}
 
 export const antiBotMiddleware: MiddlewareHandler = async (c, next) => {
   const start = Date.now();
@@ -24,7 +33,7 @@ export const antiBotMiddleware: MiddlewareHandler = async (c, next) => {
 
   // 1. User-agent suspeito → block rápido
   if (ua && SUSPICIOUS_UA.test(ua)) {
-    console.log(`⚠️ Bot UA bloqueado: ${ip} | ${ua} | ${path}`);
+    logLine(`⚠️ Bot UA bloqueado: ${ip} | ${ua} | ${path}`);
     return c.json(
       { error: "User-Agent não suportado. Utilize um cliente HTTP padrão." },
       403,
@@ -34,7 +43,7 @@ export const antiBotMiddleware: MiddlewareHandler = async (c, next) => {
   // 2. Probing de endpoints de documentação/paths → throttle (opcional, sem KV)
   if (PROBING_PATHS.some((p) => path.startsWith(p))) {
     // Versão simples: log e throttle básico
-    console.log(`🔍 Probing detectado: ${ip} | ${path}`);
+    logLine(`🔍 Probing detectado: ${ip} | ${path}`);
     // Em produção real, usaríamos Redis/D1/Cloudflare KV, aqui só log mesmo
     // para não bloquear tráfego legítimo
   }
@@ -44,7 +53,7 @@ export const antiBotMiddleware: MiddlewareHandler = async (c, next) => {
   // 3. Log de requests lentas (> 2s)
   const duration = Date.now() - start;
   if (duration > 2000) {
-    console.log(`🐢 Request lenta: ${duration}ms | ${ip} | ${path}`);
+    logLine(`🐢 Request lenta: ${duration}ms | ${ip} | ${path}`);
   }
 
   return;
