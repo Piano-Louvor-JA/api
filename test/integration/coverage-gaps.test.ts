@@ -167,7 +167,9 @@ describe("coverage gaps - functional HTTP paths", () => {
   it("covers compat.ts: file redirect", async () => {
     const res = await router.request("/file/some/path.mp3");
     expect(res.status).toBe(302);
-    expect(res.headers.get("location")).toContain("api.louvorja.com.br/file/");
+    expect(res.headers.get("location")).toContain(
+      "api.louvorja.workers.dev/file/",
+    );
   });
 
   it("covers /v1/musics 404 for non-existent", async () => {
