@@ -128,31 +128,36 @@ export function createApp() {
   setPalcoWs(createNodeWebSocket({ app }));
   registerPalcoWs(app, getPalcoWs());
 
-  // Registrar especificacao OpenAPI
-  app.doc("/openapi.json", {
-    openapi: "3.0.0",
-    info: {
-      version: APP_VERSION,
-      title: "Piano Louvor JA API",
-      description:
-        "API propria drop-in replacement para api.louvorja.com.br.\n\nFornece catalogo de musicas, hinos, albuns, categorias e biblia.\n\n**Endpoints de compatibilidade** (`/json_db/*`, `/file/*`, `/db/*`) nao aparecem nesta documentacao pois usam path matching dinamico.",
-    },
-  });
-
-  // Interface Scalar API Reference (https://scalar.com)
-  app.get(
-    "/doc",
-    apiReference({
-      url: "/openapi.json",
-      pageTitle: "Piano Louvor JA API",
-      theme: "purple",
-      layout: "modern",
-      defaultHttpClient: {
-        targetKey: "js",
-        clientKey: "fetch",
+  // SEC-5 (api#126): docs e spec OpenAPI so existem fora de producao.
+  // Em producao as rotas nao sao registradas e o notFound global responde 404,
+  // sem entregar o mapa das rotas de negocio para enumeracao/IDOR.
+  if (process.env.NODE_ENV !== "production") {
+    // Registrar especificacao OpenAPI
+    app.doc("/openapi.json", {
+      openapi: "3.0.0",
+      info: {
+        version: APP_VERSION,
+        title: "Piano Louvor JA API",
+        description:
+          "API propria drop-in replacement para api.louvorja.com.br.\n\nFornece catalogo de musicas, hinos, albuns, categorias e biblia.\n\n**Endpoints de compatibilidade** (`/json_db/*`, `/file/*`, `/db/*`) nao aparecem nesta documentacao pois usam path matching dinamico.",
       },
-    }),
-  );
+    });
+
+    // Interface Scalar API Reference (https://scalar.com)
+    app.get(
+      "/doc",
+      apiReference({
+        url: "/openapi.json",
+        pageTitle: "Piano Louvor JA API",
+        theme: "purple",
+        layout: "modern",
+        defaultHttpClient: {
+          targetKey: "js",
+          clientKey: "fetch",
+        },
+      }),
+    );
+  }
 
   // Montar rotas compat ao final
   // Bypass temporario de tipagem pro Hono classico
