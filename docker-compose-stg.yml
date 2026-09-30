@@ -1,7 +1,7 @@
 services:
   api:
     build: /opt/services/api-piano-louvorja
-    container_name: piano-api-test
+    container_name: piano-api-stg
     restart: unless-stopped
     expose:
       - "3101"
