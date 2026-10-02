@@ -7,6 +7,10 @@ import { secureHeaders } from "hono/secure-headers";
 import { getDbStats } from "./db/connection.js";
 import { APP_VERSION } from "./lib/version.js";
 import { antiBotMiddleware } from "./middleware/antiBot.js";
+import {
+  metricsHandler,
+  metricsMiddleware,
+} from "./middleware/metrics.js";
 import { rateLimit } from "./middleware/rateLimit.js";
 // SEC-6 Fase 0: telemetria log-only por IP/min (api#127) — nunca bloqueia
 import { telemetryMiddleware } from "./middleware/telemetry.js";
