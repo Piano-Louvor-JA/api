@@ -4,6 +4,7 @@
 // — Path protection contra probing automatizado
 
 import type { MiddlewareHandler } from "hono";
+import { incAntiBotBlocked } from "./metrics.js";
 
 const SUSPICIOUS_UA = /curl|wget|python|postman|insomnia|bot|spider|crawler/i;
 // O middleware já está montado só em /v1/*. O prefixo /v1/ não é probing:
@@ -34,6 +35,7 @@ export const antiBotMiddleware: MiddlewareHandler = async (c, next) => {
   // 1. User-agent suspeito → block rápido
   if (ua && SUSPICIOUS_UA.test(ua)) {
     logLine(`⚠️ Bot UA bloqueado: ${ip} | ${ua} | ${path}`);
+    incAntiBotBlocked("suspicious_ua");
     return c.json(
       { error: "User-Agent não suportado. Utilize um cliente HTTP padrão." },
       403,
