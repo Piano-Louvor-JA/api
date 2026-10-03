@@ -1443,7 +1443,9 @@ const uploadCustomFileRoute = createRoute({
       content: {
         "multipart/form-data": {
           schema: z.object({
-            file: z.any().describe("Arquivo (mp3, png, jpg, bmp...)"),
+            file: z
+              .custom<Blob>()
+              .describe("Arquivo (mp3, png, jpg, bmp...)"),
             kind: z
               .enum(["audio", "imagens"])
               .optional()
