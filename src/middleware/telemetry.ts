@@ -34,6 +34,8 @@ interface Bucket {
   /** minute em UTC ISO: YYYY-MM-DDTHH:MM */
   minute: string;
   ip: string;
+  /** plataforma do cliente (X-Client-Platform), ex: desktop-windows, web, apk-android */
+  platform: string;
   total: number;
   routes: Map<RouteKey, number>;
 }
@@ -84,6 +86,31 @@ function clientIp(c: Context): string {
   return c.req.raw.headers.get("cf-connecting-ip")?.trim() || "unknown";
 }
 
+const VALID_PLATFORMS = new Set([
+  "desktop-windows", "desktop-mac", "desktop-linux",
+  "web", "apk-android", "apk-ios",
+  "palco-webos", "palco-tizen", "palco-androidtv",
+]);
+
+/**
+ * Plataforma do cliente: header X-Client-Platform (padrão da org, definido
+ * nos 4 clientes) com fallback heurístico por User-Agent quando o header
+ * ainda não existe (transição até todos os apps atualizarem).
+ */
+function clientPlatform(c: Context): string {
+  const declared = c.req.header("x-client-platform")?.trim().toLowerCase();
+  if (declared && VALID_PLATFORMS.has(declared)) return declared;
+  const ua = c.req.header("user-agent") || "";
+  if (/Android/i.test(ua)) return "apk-android";
+  if (/iPhone|iPad|iOS/i.test(ua)) return "apk-ios";
+  if (/Electron/i.test(ua)) {
+    if (/Windows/i.test(ua)) return "desktop-windows";
+    if (/Mac/i.test(ua)) return "desktop-mac";
+    return "desktop-linux";
+  }
+  return "unknown";
+}
+
 /**
  * Middleware log-only. SEMPRE chama next(); depois apenas conta.
  * Qualquer erro interno é engolido — telemetria nunca derruba request.
@@ -99,16 +126,17 @@ export async function telemetryMiddleware(
 
     const minute = currentMinuteKey();
     const ip = clientIp(c);
+    const platform = clientPlatform(c);
     // routePath = pattern registrado (ex: "/v1/musics/:id") → cardinalidade
     // fixa por rota. Fora de handler registrado (compat paths) cai no path cru.
     const route = c.req.routePath || c.req.path;
     const routeKey = `${c.req.method} ${route}`;
 
-    const key = `${minute}|${ip}`;
+    const key = `${minute}|${ip}|${platform}`;
     let bucket = buckets.get(key);
     if (!bucket) {
       if (buckets.size >= MAX_BUCKETS) expireOldMinutes(minute);
-      bucket = { minute, ip, total: 0, routes: new Map() };
+      bucket = { minute, ip, platform, total: 0, routes: new Map() };
       buckets.set(key, bucket);
     }
     bucket.total++;
@@ -119,6 +147,7 @@ export async function telemetryMiddleware(
       `[telemetry] ${JSON.stringify({
         minute,
         ip,
+        platform: bucket.platform,
         total: bucket.total,
         routes: Object.fromEntries(bucket.routes),
       })}`,
