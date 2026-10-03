@@ -64,11 +64,33 @@ export const CustomSyncCollectionSchema = z.object({
   deleted_at: z.number().int().nonnegative().nullable().optional(),
 });
 
+// ── Sync v2 (app#336): estado do operador ──────────────────────────────
+// Namespaces: liturgy | scheduled | stage | timer | prefs — payload é
+// JSON opaco pro servidor (o servidor só aplica LWW, nunca interpreta).
+export const OPERATOR_NAMESPACES = [
+  "liturgy",
+  "scheduled",
+  "stage",
+  "timer",
+  "prefs",
+] as const;
+
+export const OperatorStateSchema = z.object({
+  client_uuid: z.string().min(8).max(64),
+  namespace: z.enum(OPERATOR_NAMESPACES),
+  key: z.string().min(1).max(200),
+  value_json: z.string().max(1_000_000),
+  updated_at: z.number().int().nonnegative(),
+  deleted_at: z.number().int().nonnegative().nullable().optional(),
+});
+
 export const SyncRequestSchema = z.object({
   collections: z.array(CustomSyncCollectionSchema).max(500),
+  operator_state: z.array(OperatorStateSchema).max(500).optional(),
 });
 
 export type SyncRequest = z.infer<typeof SyncRequestSchema>;
+export type OperatorStateItem = z.infer<typeof OperatorStateSchema>;
 export type SyncCollection = z.infer<typeof CustomSyncCollectionSchema>;
 export type SyncMusic = z.infer<typeof CustomSyncMusicSchema>;
 
@@ -433,10 +455,106 @@ export function runSync(userId: number, body: SyncRequest) {
     applyCollection(db, userId, col, applied, conflicts);
   }
 
+  const operatorApplied = body.operator_state?.length
+    ? applyOperatorState(db, userId, body.operator_state, applied, conflicts)
+    : null;
+
   return {
     server_time: nowMs(),
     applied,
     conflicts,
     collections: loadServerCollections(db, userId),
+    ...(operatorApplied
+      ? { operator_state: loadServerOperatorState(db, userId) }
+      : {}),
   };
+}
+
+/**
+ * LWW do estado do operador (sync v2). Mesma semântica das coletâneas:
+ * client vence por updated_at_ms; tombstone nunca ressuscita.
+ */
+function applyOperatorState(
+  db: ReturnType<typeof getDb>,
+  userId: number,
+  items: OperatorStateItem[],
+  applied: { created: number; updated: number },
+  conflicts: Array<{ client_uuid: string; resolution: string }>,
+): boolean {
+  const insert = db.prepare(`
+    INSERT INTO operator_state
+      (id_user, namespace, key, value_json, client_uuid, updated_at_ms, deleted_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `);
+  const update = db.prepare(`
+    UPDATE operator_state
+       SET namespace = ?, key = ?, value_json = ?, updated_at_ms = ?, deleted_at = ?
+     WHERE client_uuid = ?
+  `);
+
+  for (const item of items) {
+    const existing = db
+      .prepare(`SELECT * FROM operator_state WHERE client_uuid = ?`)
+      .get(item.client_uuid) as
+      | { updated_at_ms: number; deleted_at: number | null }
+      | undefined;
+
+    if (!existing) {
+      insert.run(
+        userId,
+        item.namespace,
+        item.key,
+        item.value_json,
+        item.client_uuid,
+        item.updated_at,
+        item.deleted_at ?? null,
+      );
+      applied.created += 1;
+      continue;
+    }
+
+    if (item.updated_at > existing.updated_at_ms) {
+      update.run(
+        item.namespace,
+        item.key,
+        item.value_json,
+        item.updated_at,
+        item.deleted_at ?? null,
+        item.client_uuid,
+      );
+      applied.updated += 1;
+    } else {
+      conflicts.push({ client_uuid: item.client_uuid, resolution: "server_wins" });
+    }
+  }
+  return true;
+}
+
+function loadServerOperatorState(
+  db: ReturnType<typeof getDb>,
+  userId: number,
+): Array<{
+  client_uuid: string;
+  namespace: string;
+  key: string;
+  value_json: string;
+  updated_at_ms: number;
+  deleted_at: number | null;
+}> {
+  return (
+    db
+      .prepare(
+        `SELECT client_uuid, namespace, key, value_json, updated_at_ms, deleted_at
+         FROM operator_state
+         WHERE id_user = ? AND deleted_at IS NULL`,
+      )
+      .all(userId) as Array<{
+      client_uuid: string;
+      namespace: string;
+      key: string;
+      value_json: string;
+      updated_at_ms: number;
+      deleted_at: number | null;
+    }>
+  ).map((row) => ({ ...row }));
 }
