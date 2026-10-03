@@ -524,7 +524,10 @@ function applyOperatorState(
       );
       applied.updated += 1;
     } else {
-      conflicts.push({ client_uuid: item.client_uuid, resolution: "server_wins" });
+      conflicts.push({
+        client_uuid: item.client_uuid,
+        resolution: "server_wins",
+      });
     }
   }
   return true;

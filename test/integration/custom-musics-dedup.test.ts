@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { setupSeededDb, type SeededDb } from "../helpers/seeded-db";
+import { type SeededDb, setupSeededDb } from "../helpers/seeded-db";
 
 /**
  * app#336 fase 3 — dedup de imports na API (migration 028):
