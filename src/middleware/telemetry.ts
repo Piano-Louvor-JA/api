@@ -87,9 +87,15 @@ function clientIp(c: Context): string {
 }
 
 const VALID_PLATFORMS = new Set([
-  "desktop-windows", "desktop-mac", "desktop-linux",
-  "web", "apk-android", "apk-ios",
-  "palco-webos", "palco-tizen", "palco-androidtv",
+  "desktop-windows",
+  "desktop-mac",
+  "desktop-linux",
+  "web",
+  "apk-android",
+  "apk-ios",
+  "palco-webos",
+  "palco-tizen",
+  "palco-androidtv",
 ]);
 
 /**
