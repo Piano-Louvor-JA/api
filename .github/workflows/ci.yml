@@ -146,14 +146,16 @@ jobs:
           cache: npm
       - run: npm ci
       - run: mkdir -p data
-      - name: Baseline (staging)
+      - name: Baseline (base da PR)
         run: |
-          # O script ainda não existe na staging neste PR. Copia antes do checkout.
+          # O script pode ainda não existir na base. Copia antes do checkout e
+          # guarda o merge calculado pelo GitHub para comparar base vs base+PR.
+          MERGE_SHA="$(git rev-parse HEAD)"
           cp scripts/test-regression.mjs /tmp/test-regression.mjs
-          git checkout staging
+          git checkout "${{ github.base_ref }}"
           node /tmp/test-regression.mjs --baseline
-          git checkout "${{ github.head_ref }}"
-      - name: Compare (PR branch)
+          git checkout "$MERGE_SHA"
+      - name: Compare (merge da PR)
         run: npm run test:regression -- --compare
 
   # Quality Gate: so passa se TODAS as camadas passaram
