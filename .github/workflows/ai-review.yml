@@ -6,7 +6,7 @@ name: AI Review
 
 on:
   pull_request:
-    types: [opened, reopened, ready_for_review]
+    types: [opened, reopened, ready_for_review, synchronize]
   issue_comment:
     types: [created]
 
@@ -33,10 +33,13 @@ jobs:
           OPENAI_KEY: ${{ secrets.AI_REVIEW_API_KEY }}
           OPENAI_API_BASE: ${{ secrets.AI_REVIEW_BASE_URL || 'https://api.z.ai/api/coding/paas/v4' }}
           CONFIG.GIT_PROVIDER: github
+          GITHUB_ACTION_CONFIG.HANDLE_PUSH_TRIGGER: 'true'
+          GITHUB_ACTION_CONFIG.PUSH_COMMANDS: '["/review"]'
           # CONFIG.MODEL é a chave que o pr-agent lê. LLM_MODEL era ignorada
           # e a action caía no default gpt-5.6, que a API da z.ai rejeita.
-          CONFIG.MODEL: glm-4.6
-          CONFIG.FALLBACK_MODELS: glm-4.6
+          # Prefixo openai/ identifica o protocolo compatível da API z.ai no LiteLLM.
+          CONFIG.MODEL: openai/glm-4.6
+          CONFIG.FALLBACK_MODELS: openai/glm-4.6
           CONFIG.CUSTOM_MODEL_MAX_TOKENS: "128000"
           CONFIG.REVIEW_MAX_FILES: '40'
           PR_REVIEWER.EXTRA_INSTRUCTIONS: >-
