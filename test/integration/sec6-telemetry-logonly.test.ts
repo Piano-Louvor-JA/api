@@ -165,26 +165,43 @@ describe("SEC-6 Fase 0: relatório p95/p99 (scripts/analyze-telemetry.ts)", () =
   });
 });
 
+function telemetryPayload(logSpy: { mock: { calls: unknown[][] } }) {
+  const line = logSpy.mock.calls
+    .map((c) => String(c[0]))
+    .find((l) => l.startsWith("[telemetry]"));
+  expect(line).toBeDefined();
+  return JSON.parse(line!.slice("[telemetry] ".length)) as { platform: string };
+}
+
 describe("X-Client-Platform", () => {
   it("header válido vira plataforma no log", async () => {
     resetTelemetryState();
-    const res = await request(app)
-      .get("/v1/health")
-      .set("X-Client-Platform", "desktop-windows");
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const res = await app.request("http://localhost/v1/health", {
+      headers: { "x-client-platform": "desktop-windows" },
+    });
     expect(res.status).toBeLessThan(500);
-    // bucket loga platform:
-    // (o log emite post-next; o assert direto é via formato da linha)
+    expect(telemetryPayload(logSpy).platform).toBe("desktop-windows");
   });
 
-  it("header inválido cai em heurística de UA", () => {
-    // validação unitária do conjunto:
-    // (o middleware não exporta clientPlatform; validamos indireto abaixo)
-    expect(true).toBe(true);
+  it("header inválido cai em heurística de UA", async () => {
+    resetTelemetryState();
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const res = await app.request("http://localhost/v1/health", {
+      headers: {
+        "x-client-platform": "nao-existe",
+        "user-agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit",
+      },
+    });
+    expect(res.status).toBeLessThan(500);
+    expect(telemetryPayload(logSpy).platform).toBe("apk-android");
   });
 
   it("sem header = unknown (fallback)", async () => {
     resetTelemetryState();
-    const res = await request(app).get("/v1/health");
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const res = await app.request("http://localhost/v1/health");
     expect(res.status).toBeLessThan(500);
+    expect(telemetryPayload(logSpy).platform).toBe("unknown");
   });
 });
