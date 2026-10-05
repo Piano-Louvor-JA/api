@@ -546,6 +546,26 @@ function handleAlbumDetail(c: any, db: any, idAlbum: number) {
 // ==============================================
 // Handler: bible chapter (lazy proxy com cache)
 // ==============================================
+// SEC/316-317: sanitizeNtlh — a fonte (upstream LouvorJA) vem com ruído que
+// quebra a exibição no app: tags <J>...</J> (letra vermelha de Jesus), prefixos
+// de fala "  -  " e VERSOS VAZIOS (793 versos em 186 capítulos da NTLH —
+// auditoria 04/10). Limpa tudo antes de cachear/servir.
+export function sanitizeBibleChapter(data: Record<string, string>) {
+  const out: Record<string, string> = {};
+  for (const [verse, raw] of Object.entries(data)) {
+    if (typeof raw !== "string") continue;
+    const text = raw
+      // tags <J> ... </J> (mantém o texto interno)
+      .replace(/<\/?J>/gi, "")
+      // marcador de fala no início/quebra de linha: "\n  -  " -> "\n"
+      .replace(/\n?\s*-\s+(?=[A-ZÀ-Ú“"'])/g, "\n")
+      .trim();
+    if (text.length === 0) continue; // verso vazio na fonte: omitido
+    out[verse] = text;
+  }
+  return out;
+}
+
 async function handleBibleChapter(c: any, cacheKey: string) {
   mkdirSync(BIBLE_CACHE_DIR, { recursive: true });
   const cacheFile = join(BIBLE_CACHE_DIR, `${cacheKey}.json`);
@@ -564,9 +584,10 @@ async function handleBibleChapter(c: any, cacheKey: string) {
       // Versão/capítulo não existe no upstream — espelha o 404 em vez de 502
       return c.json({ error: "Arquivo nao encontrado!" }, 404);
     }
-    const data = await res.text();
-    writeFileSync(cacheFile, data, "utf-8");
-    return c.json(JSON.parse(data));
+    const parsed = JSON.parse(await res.text()) as Record<string, string>;
+    const sanitized = sanitizeBibleChapter(parsed);
+    writeFileSync(cacheFile, JSON.stringify(sanitized), "utf-8");
+    return c.json(sanitized);
   } catch (e: unknown) {
     if (e instanceof UpstreamError && e.status === 404) {
       // Versão/capítulo não existe no upstream — espelha o 404 em vez de 502
