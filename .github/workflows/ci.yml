@@ -128,6 +128,9 @@ jobs:
   audit:
     name: Security Audit
     runs-on: ubuntu-24.04
+    # Depois do lint: no mesmo instante, o GitHub abandonava este job
+    # sem entregar runner, enquanto o restante da fila seguia.
+    needs: lint
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
