@@ -543,29 +543,38 @@ function handleAlbumDetail(c: any, db: any, idAlbum: number) {
   });
 }
 
-// ==============================================
-// Handler: bible chapter (lazy proxy com cache)
-// ==============================================
-// SEC/316-317: sanitizeNtlh — a fonte (upstream LouvorJA) vem com ruído que
-// quebra a exibição no app: tags <J>...</J> (letra vermelha de Jesus), prefixos
-// de fala "  -  " e VERSOS VAZIOS (793 versos em 186 capítulos da NTLH —
-// auditoria 04/10). Limpa tudo antes de cachear/servir.
-export function sanitizeBibleChapter(data: Record<string, string>) {
+/**
+ * Limpa ruído da fonte NTLH antes de cachear/servir o capítulo:
+ * tags `<J>` (letra vermelha), marcador de fala `  -  ` após quebra de
+ * linha e versos vazios. Valores que não são string são omitidos.
+ */
+export function sanitizeBibleChapter(
+  chapter: Record<string, string>,
+): Record<string, string> {
   const out: Record<string, string> = {};
-  for (const [verse, raw] of Object.entries(data)) {
+  for (const [verse, raw] of Object.entries(chapter)) {
     if (typeof raw !== "string") continue;
     const text = raw
-      // tags <J> ... </J> (mantém o texto interno)
-      .replace(/<\/?J>/gi, "")
-      // marcador de fala no início/quebra de linha: "\n  -  " -> "\n"
-      .replace(/\n?\s*-\s+(?=[A-ZÀ-Ú“"'])/g, "\n")
+      .replace(/<\/?J>/g, "")
+      .replace(/\n {2}- {2}/g, "\n")
       .trim();
-    if (text.length === 0) continue; // verso vazio na fonte: omitido
+    if (!text) continue;
     out[verse] = text;
   }
   return out;
 }
 
+function chapterForCache(data: string): unknown {
+  const parsed: unknown = JSON.parse(data);
+  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return parsed;
+  }
+  return sanitizeBibleChapter(parsed as Record<string, string>);
+}
+
+// ==============================================
+// Handler: bible chapter (lazy proxy com cache)
+// ==============================================
 async function handleBibleChapter(c: any, cacheKey: string) {
   mkdirSync(BIBLE_CACHE_DIR, { recursive: true });
   const cacheFile = join(BIBLE_CACHE_DIR, `${cacheKey}.json`);
@@ -584,10 +593,10 @@ async function handleBibleChapter(c: any, cacheKey: string) {
       // Versão/capítulo não existe no upstream — espelha o 404 em vez de 502
       return c.json({ error: "Arquivo nao encontrado!" }, 404);
     }
-    const parsed = JSON.parse(await res.text()) as Record<string, string>;
-    const sanitized = sanitizeBibleChapter(parsed);
-    writeFileSync(cacheFile, JSON.stringify(sanitized), "utf-8");
-    return c.json(sanitized);
+    const data = await res.text();
+    const body = chapterForCache(data);
+    writeFileSync(cacheFile, JSON.stringify(body), "utf-8");
+    return c.json(body);
   } catch (e: unknown) {
     if (e instanceof UpstreamError && e.status === 404) {
       // Versão/capítulo não existe no upstream — espelha o 404 em vez de 502

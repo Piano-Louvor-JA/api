@@ -779,6 +779,11 @@ const createMusicRoute = createRoute({
     },
   },
   responses: {
+    200: {
+      content: { "application/json": { schema: CustomMusicSchema } },
+      description:
+        "Música já existia (dedup por client_uuid) — retorna a existente",
+    },
     201: {
       content: { "application/json": { schema: CustomMusicSchema } },
       description: "Música criada",
@@ -812,10 +817,30 @@ customRoutes.openapi(createMusicRoute, (c) => {
       return c.json({ error: "Coletânea não encontrada" }, 404);
     }
 
+    // Dedup de imports (app#336 fase 3): mesmo owner + mesmo client_uuid
+    // (hash determinístico do conteúdo) → retorna o registro existente
+    // sem duplicar (200 em vez de 201).
+    if (body.client_uuid) {
+      const existing = db
+        .prepare(
+          `SELECT id_music FROM custom_musics
+           WHERE owner_id = ? AND client_uuid = ?`,
+        )
+        .get(collection.owner_id, body.client_uuid) as
+        | { id_music: number }
+        | undefined;
+      if (existing) {
+        const full = db
+          .prepare(`SELECT * FROM custom_musics WHERE id_music = ?`)
+          .get(existing.id_music) as Record<string, unknown>;
+        return c.json(full as never, 200);
+      }
+    }
+
     const result = db
       .prepare(
-        `INSERT INTO custom_musics (id_collection, name, lyric, auxiliary_lyric, id_file_audio, id_file_instrumental, id_file_image, duration, official_music_id, owner_id)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO custom_musics (id_collection, name, lyric, auxiliary_lyric, id_file_audio, id_file_instrumental, id_file_image, duration, official_music_id, owner_id, client_uuid)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         parseInt(id, 10),
@@ -828,6 +853,7 @@ customRoutes.openapi(createMusicRoute, (c) => {
         body.duration ?? null,
         body.official_music_id ?? null,
         collection.owner_id,
+        body.client_uuid ?? null,
       );
 
     // Link p/ hino oficial: herda nome/duração da tabela oficial p/ a lista.

@@ -29,6 +29,7 @@
  */
 
 import type { Context, Next } from "hono";
+import { incRateLimitBlocked } from "./metrics.js";
 
 const FILE_ROUTES = ["/file/", "/player"];
 const METADATA_ROUTES = ["/version", "/version_log", "/metadata"];
@@ -158,6 +159,7 @@ export async function rateLimit(
     c.header("X-RateLimit-Reset", String(resetAt));
     c.header("X-RateLimit-Bucket", bucket);
     c.header("Retry-After", String(retryAfter));
+    incRateLimitBlocked(c.req.path);
     return c.json(
       {
         error: "Too Many Requests",
