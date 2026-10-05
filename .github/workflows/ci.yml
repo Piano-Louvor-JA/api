@@ -20,9 +20,11 @@ concurrency:
 
 jobs:
   # Camada 1: Lint + Format (< 15s) — fast feedback
+  # ubuntu-24.04 fixo: ubuntu-latest não recebia runner hospedado
+  # (run 37365233813). O label migra para Ubuntu 26 em 19/10/2026.
   lint:
     name: Lint & Format
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -35,7 +37,7 @@ jobs:
   # Camada 2: Type Check (< 30s) — depende de lint
   typecheck:
     name: Type Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: lint
     steps:
       - uses: actions/checkout@v4
@@ -49,7 +51,7 @@ jobs:
   # Camada 3: Tests + Coverage (< 1min) — depende de typecheck
   test:
     name: Tests + Coverage
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: typecheck
     steps:
       - uses: actions/checkout@v4
@@ -68,7 +70,7 @@ jobs:
   # Camada 4: Docker Build (< 2min) — depende de test
   build:
     name: Docker Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: test
     steps:
       - uses: actions/checkout@v4
@@ -85,7 +87,7 @@ jobs:
 
   smoke:
     name: Docker Smoke Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
     steps:
       - uses: actions/checkout@v4
@@ -125,7 +127,7 @@ jobs:
 
   audit:
     name: Security Audit
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -138,7 +140,7 @@ jobs:
   # Camada 4.5: Regression Gate (anti-regressão) — baseline staging vs PR
   regression-gate:
     name: Regression Gate (anti-regressão)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [lint, typecheck, test]
     if: github.event_name == 'pull_request'
     steps:
@@ -164,9 +166,19 @@ jobs:
   # Quality Gate: so passa se TODAS as camadas passaram
   quality-gate:
     name: Quality Gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [lint, typecheck, test, build, smoke, audit, regression-gate]
-    if: always()
+    # Não pede runner de novo quando um job anterior foi cancelado
+    # (runner hospedado não atribuído). Sem isso o gate espera mais 15 min.
+    if: >-
+      always() &&
+      needs.lint.result != 'cancelled' &&
+      needs.typecheck.result != 'cancelled' &&
+      needs.test.result != 'cancelled' &&
+      needs.build.result != 'cancelled' &&
+      needs.smoke.result != 'cancelled' &&
+      needs.audit.result != 'cancelled' &&
+      needs.regression-gate.result != 'cancelled'
     steps:
       - name: Verifica se todos os gates passaram
         run: |
