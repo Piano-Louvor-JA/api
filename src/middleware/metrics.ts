@@ -18,8 +18,14 @@
  *   antibot_blocked_total{reason}                — bloqueios do antiBot
  *   process_* / nodejs_*                         — default do prom-client
  */
-import { register, Counter, Histogram, collectDefaultMetrics } from "prom-client";
+
 import type { Context, Next } from "hono";
+import {
+  Counter,
+  collectDefaultMetrics,
+  Histogram,
+  register,
+} from "prom-client";
 
 // evita duplo registro em hot-reload/testes
 if (!register.getSingleMetric("http_requests_total")) {
@@ -64,9 +70,11 @@ function routeTemplate(path: string): string {
   return path
     .split("/")
     .map((seg) =>
-      /^\d+$/.test(seg) || /^[0-9a-f]{8,}$/i.test(seg) || /^[A-Za-z0-9_-]{20,}$/.test(seg)
+      /^\d+$/.test(seg) ||
+      /^[0-9a-f]{8,}$/i.test(seg) ||
+      /^[A-Za-z0-9_-]{20,}$/.test(seg)
         ? ":id"
-        : seg
+        : seg,
     )
     .join("/");
 }
