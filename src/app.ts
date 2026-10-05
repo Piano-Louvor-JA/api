@@ -18,6 +18,7 @@ import { categoriesRoutes } from "./v1/categories/categories.routes.js";
 import { customRoutes } from "./v1/custom/custom.routes.js";
 import { syncRoutes } from "./v1/custom/sync.routes.js";
 // Rotas OpenAPI (V1)
+import { liturgyRoutes } from "./v1/liturgy/liturgy.routes.js";
 import { musicsRoutes } from "./v1/musics/musics.routes.js";
 import {
   getPalcoWs,
@@ -158,6 +159,7 @@ export function createApp() {
   app.route("/", compatRoutes);
 
   app.route("/v1/bible", bibleRoutes);
+  app.route("/v1/liturgy", liturgyRoutes);
   app.route("/v1/remote", remoteRoutes);
   app.route("/v1/custom", customRoutes);
   app.route("/v1/custom", syncRoutes);
