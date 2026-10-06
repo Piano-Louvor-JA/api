@@ -9,7 +9,7 @@ on:
   check_suite:
     types: [completed]
   workflow_run:
-    workflows: ["CI", "AI Review"]
+    workflows: ["CI"]
     types: [completed]
 
 permissions:
