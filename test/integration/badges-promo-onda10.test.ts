@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -43,7 +43,9 @@ describe("ranking badges (unit com DB)", () => {
       "INSERT INTO custom_collections (name, owner_id, visibility) VALUES ('usecoll', ?, 'public')",
     ).run(uid);
     const col = db
-      .prepare("SELECT id_collection FROM custom_collections WHERE owner_id = ? LIMIT 1")
+      .prepare(
+        "SELECT id_collection FROM custom_collections WHERE owner_id = ? LIMIT 1",
+      )
       .get(uid) as { id_collection: number };
     for (let i = 0; i < 100; i++) {
       db.prepare(
@@ -57,7 +59,9 @@ describe("ranking badges (unit com DB)", () => {
 
   it("níveis: 0 pontos → nível neutro base", () => {
     const lvl = (ranking as any).levelForPoints?.(0) ?? null;
-    expect(lvl === null || typeof lvl === "string" || typeof lvl === "number").toBe(true);
+    expect(
+      lvl === null || typeof lvl === "string" || typeof lvl === "number",
+    ).toBe(true);
   });
 });
 
@@ -89,12 +93,24 @@ describe("promotion promoteMusicToF", () => {
       .prepare("SELECT id_music FROM custom_musics WHERE name = 'Promo Feliz'")
       .get() as { id_music: number };
 
-    const r1 = promotion.promoteMusicToF(db, music.id_music, 5555, uid, sendEmail);
+    const r1 = promotion.promoteMusicToF(
+      db,
+      music.id_music,
+      5555,
+      uid,
+      sendEmail,
+    );
     expect(r1.ok).toBe(true);
     expect(r1.points).toBeGreaterThan(0);
 
     // mesma música de novo: já tem official_music_id → branch "já promovida"
-    const r2 = promotion.promoteMusicToF(db, music.id_music, 5556, uid, sendEmail);
+    const r2 = promotion.promoteMusicToF(
+      db,
+      music.id_music,
+      5556,
+      uid,
+      sendEmail,
+    );
     expect(r2.ok).toBe(false);
     expect(r2.error).toContain("já promovida");
   });
@@ -107,7 +123,13 @@ describe("promotion promoteMusicToF", () => {
     const music = db
       .prepare("SELECT id_music FROM custom_musics WHERE name = 'Promo Dup2'")
       .get() as { id_music: number };
-    const r = promotion.promoteMusicToF(db, music.id_music, 5555, uid, sendEmail);
+    const r = promotion.promoteMusicToF(
+      db,
+      music.id_music,
+      5555,
+      uid,
+      sendEmail,
+    );
     expect(r.ok).toBe(false);
     expect(r.error).toContain("já tem promoção");
   });
@@ -117,9 +139,17 @@ describe("promotion promoteMusicToF", () => {
       "INSERT INTO custom_musics (id_collection, name, owner_id, official_music_id) VALUES (1, 'Herdada', ?, 1)",
     ).run(uid);
     const herded = db
-      .prepare("SELECT id_music FROM custom_musics WHERE owner_id = ? AND official_music_id = 1")
+      .prepare(
+        "SELECT id_music FROM custom_musics WHERE owner_id = ? AND official_music_id = 1",
+      )
       .get(uid) as { id_music: number };
-    const r = promotion.promoteMusicToF(db, herded.id_music, 9999, uid, sendEmail);
+    const r = promotion.promoteMusicToF(
+      db,
+      herded.id_music,
+      9999,
+      uid,
+      sendEmail,
+    );
     expect(r.ok).toBe(false);
     expect(r.error).toContain("já promovida");
   });

@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 /**
  * Onda 10a: rateLimit handler direto — buckets files/metadata/general,
@@ -12,8 +12,7 @@ describe("rateLimit handler", () => {
     return {
       req: {
         path,
-        header: (h: string) =>
-          h === "x-forwarded-for" ? ip : undefined,
+        header: (h: string) => (h === "x-forwarded-for" ? ip : undefined),
       },
       header: (k: string, v: string) => {
         headers[k] = v;

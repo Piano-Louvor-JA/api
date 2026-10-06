@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 /**
  * Onda 10c: relay direto (unit) — createRoom, getRoom (token inválido,

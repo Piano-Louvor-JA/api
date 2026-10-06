@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -46,10 +46,16 @@ describe("custom.routes ramos de dedup/official/copy", () => {
       headers: { ...auth(token), "content-type": "application/json" },
       body: JSON.stringify({ name: "Dedup Music", client_uuid: UUID }),
     };
-    const r1 = await router.request(`/v1/custom/collections/${cid}/musics`, body);
+    const r1 = await router.request(
+      `/v1/custom/collections/${cid}/musics`,
+      body,
+    );
     expect(r1.status).toBe(201);
 
-    const r2 = await router.request(`/v1/custom/collections/${cid}/musics`, body);
+    const r2 = await router.request(
+      `/v1/custom/collections/${cid}/musics`,
+      body,
+    );
     expect(r2.status).toBe(200);
   });
 
@@ -72,11 +78,14 @@ describe("custom.routes ramos de dedup/official/copy", () => {
   it("copy clona lyrics: nova música tem estrofes da origem", async () => {
     const cid = await newCollection(token, "Copy Lyrics");
     // origem com lyrics
-    const created = await router.request(`/v1/custom/collections/${cid}/musics`, {
-      method: "POST",
-      headers: { ...auth(token), "content-type": "application/json" },
-      body: JSON.stringify({ name: "Com Letra", lyric: "V1\nV2" }),
-    });
+    const created = await router.request(
+      `/v1/custom/collections/${cid}/musics`,
+      {
+        method: "POST",
+        headers: { ...auth(token), "content-type": "application/json" },
+        body: JSON.stringify({ name: "Com Letra", lyric: "V1\nV2" }),
+      },
+    );
     const cb = await created.json();
     const srcId = cb.id_music ?? cb.id;
 
@@ -102,16 +111,21 @@ describe("custom.routes ramos de dedup/official/copy", () => {
     });
     const lb = await lyrics.json();
     const items = lb.data ?? lb;
-    expect((Array.isArray(items) ? items : items.items ?? []).length).toBeGreaterThan(0);
+    expect(
+      (Array.isArray(items) ? items : (items.items ?? [])).length,
+    ).toBeGreaterThan(0);
   });
 
   it("GET music detail inclui lyrics no corpo", async () => {
     const cid = await newCollection(token, "Detail Coll");
-    const created = await router.request(`/v1/custom/collections/${cid}/musics`, {
-      method: "POST",
-      headers: { ...auth(token), "content-type": "application/json" },
-      body: JSON.stringify({ name: "Com Detalhe", lyric: "S1" }),
-    });
+    const created = await router.request(
+      `/v1/custom/collections/${cid}/musics`,
+      {
+        method: "POST",
+        headers: { ...auth(token), "content-type": "application/json" },
+        body: JSON.stringify({ name: "Com Detalhe", lyric: "S1" }),
+      },
+    );
     const cb = await created.json();
     const mid = cb.id_music ?? cb.id;
 
@@ -125,11 +139,14 @@ describe("custom.routes ramos de dedup/official/copy", () => {
 
   it("update music por não-dono mas dono da coletânea é bloqueado se não for dono de ambos", async () => {
     const cid = await newCollection(token, "Perms");
-    const created = await router.request(`/v1/custom/collections/${cid}/musics`, {
-      method: "POST",
-      headers: { ...auth(token), "content-type": "application/json" },
-      body: JSON.stringify({ name: "P" }),
-    });
+    const created = await router.request(
+      `/v1/custom/collections/${cid}/musics`,
+      {
+        method: "POST",
+        headers: { ...auth(token), "content-type": "application/json" },
+        body: JSON.stringify({ name: "P" }),
+      },
+    );
     const cb = await created.json();
     const mid = cb.id_music ?? cb.id;
 

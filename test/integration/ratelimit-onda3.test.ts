@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -49,7 +49,9 @@ describe("Rate limit (token bucket)", () => {
     let lastHeaders: Record<string, string> = {};
     for (let i = 0; i < 12; i++) {
       const res = await router.request("/v1/version");
-      lastHeaders = res.headers ? Object.fromEntries(res.headers.entries()) : {};
+      lastHeaders = res.headers
+        ? Object.fromEntries(res.headers.entries())
+        : {};
       if (res.status === 429) {
         saw429 = true;
         break;

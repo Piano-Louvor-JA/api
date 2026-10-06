@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -30,7 +30,7 @@ describe("Compat bible + on-miss", () => {
     const res = await router.request("/json_db/es_bible_version");
     expect(res.status).toBe(200);
     const body = await res.json();
-    const items = Array.isArray(body) ? body : body.data ?? [];
+    const items = Array.isArray(body) ? body : (body.data ?? []);
     if (Array.isArray(items) && items.length > 0) {
       expect(items[0].id_bible_version ?? items[0].id).toBeDefined();
     }

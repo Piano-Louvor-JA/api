@@ -32,11 +32,16 @@ describe("compat on-miss + bible proxy + mirror (fetch mockado)", () => {
     globalThis.fetch = origFetch;
   });
 
-  function upstreamReply(status: number, body: unknown, contentType = "application/json") {
+  function upstreamReply(
+    status: number,
+    body: unknown,
+    contentType = "application/json",
+  ) {
     fetchMock.mockResolvedValue({
       ok: status >= 200 && status < 300,
       status,
-      text: async () => (typeof body === "string" ? body : JSON.stringify(body)),
+      text: async () =>
+        typeof body === "string" ? body : JSON.stringify(body),
       headers: new Headers({ "content-type": contentType }),
     } as any);
   }

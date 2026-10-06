@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -68,7 +68,10 @@ describe("rateLimit sweep (state >= MAX_KEYS)", () => {
       const c: any = {
         req: {
           path: "/v1/x",
-          header: (h: string) => (h === "x-forwarded-for" ? `10.0.${(i >> 8) & 255}.${i & 255}` : undefined),
+          header: (h: string) =>
+            h === "x-forwarded-for"
+              ? `10.0.${(i >> 8) & 255}.${i & 255}`
+              : undefined,
         },
         header: () => {},
         json: (_b: unknown, status: number) => ({ __status: status }),

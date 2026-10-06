@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 /**
  * Onda 6b: rateLimit internals — normalizePath, resolveBucket,
@@ -32,7 +32,9 @@ describe("rateLimit internals", () => {
 
   it("getClientIpSafe com proxy confiável e X-Real-IP", () => {
     const c = {
-      req: { header: (h: string) => (h === "x-real-ip" ? "9.9.9.9" : undefined) },
+      req: {
+        header: (h: string) => (h === "x-real-ip" ? "9.9.9.9" : undefined),
+      },
     } as any;
     expect(mod.getClientIpSafe(c, { TRUSTED_PROXY: "true" })).toBe("9.9.9.9");
   });

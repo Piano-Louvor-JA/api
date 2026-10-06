@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 /**
  * Onda 21: relay L102 — createRoom retorna null quando 5 tentativas de
@@ -24,7 +24,7 @@ vi.mock("node:crypto", async (importOriginal) => {
   };
 });
 
-import { createRoom, resetRelay, getRoom } from "../../src/v1/palco/relay.js";
+import { createRoom, getRoom, resetRelay } from "../../src/v1/palco/relay.js";
 
 const prevKey = process.env.PALCO_RELAY_KEY;
 

@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -9,7 +9,8 @@ const { registerUser } = await import("./helpers/custom-auth-helpers.js");
  * por request (vi.mock com contador). Cada it derruba um handler diferente.
  */
 vi.mock("../../src/db/connection.js", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../../src/db/connection.js")>();
+  const actual =
+    await importOriginal<typeof import("../../src/db/connection.js")>();
   let failNext = false;
   return {
     ...actual,
@@ -134,7 +135,10 @@ describe("custom.routes — erros internos (500)", () => {
     await expect500("/v1/custom/auth/login", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email: "loginboom@test.local", password: "SenhaForte1!" }),
+      body: JSON.stringify({
+        email: "loginboom@test.local",
+        password: "SenhaForte1!",
+      }),
     });
   });
 
@@ -142,7 +146,11 @@ describe("custom.routes — erros internos (500)", () => {
     await expect500("/v1/custom/auth/register", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email: "regboom@test.local", password: "SenhaForte1!", displayName: "z" }),
+      body: JSON.stringify({
+        email: "regboom@test.local",
+        password: "SenhaForte1!",
+        displayName: "z",
+      }),
     });
   });
 
@@ -154,7 +162,10 @@ describe("custom.routes — erros internos (500)", () => {
     await expect500("/v1/custom/auth/reset-password", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ token: "expired00000000001", password: "SenhaForte1!" }),
+      body: JSON.stringify({
+        token: "expired00000000001",
+        password: "SenhaForte1!",
+      }),
     });
   });
 });

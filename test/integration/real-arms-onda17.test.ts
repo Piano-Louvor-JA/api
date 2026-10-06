@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -39,7 +39,7 @@ describe("compat abbreviation por nome e por id", () => {
     const res = await router.request("/json_db/pt_bible_version");
     expect(res.status).toBe(200);
     const body = await res.json();
-    const items = Array.isArray(body) ? body : body.data ?? [];
+    const items = Array.isArray(body) ? body : (body.data ?? []);
     const found = (Array.isArray(items) ? items : []).find(
       (v: any) => v.id_version === 401,
     );
@@ -53,7 +53,7 @@ describe("compat abbreviation por nome e por id", () => {
     expect([200, 404]).toContain(res.status);
     if (res.status === 200) {
       const body = await res.json();
-      const items = Array.isArray(body) ? body : body.data ?? [];
+      const items = Array.isArray(body) ? body : (body.data ?? []);
       const kj = (Array.isArray(items) ? items : []).find(
         (v: any) => v.id_version === 402,
       );

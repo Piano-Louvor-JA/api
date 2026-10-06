@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -38,11 +38,14 @@ describe("fallback arms", () => {
 
   it("create lyric sem order → calcula próxima (L1258)", async () => {
     const cid = await newCollection("Order Auto");
-    const created = await router.request(`/v1/custom/collections/${cid}/musics`, {
-      method: "POST",
-      headers: { ...auth(token), "content-type": "application/json" },
-      body: JSON.stringify({ name: "L" }),
-    });
+    const created = await router.request(
+      `/v1/custom/collections/${cid}/musics`,
+      {
+        method: "POST",
+        headers: { ...auth(token), "content-type": "application/json" },
+        body: JSON.stringify({ name: "L" }),
+      },
+    );
     const cb = await created.json();
     const mid = cb.id_music ?? cb.id;
 
@@ -59,11 +62,14 @@ describe("fallback arms", () => {
 
   it("update music parcial: só lyric, resto herda (L1039)", async () => {
     const cid = await newCollection("Parcial");
-    const created = await router.request(`/v1/custom/collections/${cid}/musics`, {
-      method: "POST",
-      headers: { ...auth(token), "content-type": "application/json" },
-      body: JSON.stringify({ name: "Original", lyric: "letra original" }),
-    });
+    const created = await router.request(
+      `/v1/custom/collections/${cid}/musics`,
+      {
+        method: "POST",
+        headers: { ...auth(token), "content-type": "application/json" },
+        body: JSON.stringify({ name: "Original", lyric: "letra original" }),
+      },
+    );
     const cb = await created.json();
     const mid = cb.id_music ?? cb.id;
 
@@ -84,11 +90,14 @@ describe("fallback arms", () => {
 
   it("update lyric parcial: só time (L1346)", async () => {
     const cid = await newCollection("Lyric Parcial");
-    const created = await router.request(`/v1/custom/collections/${cid}/musics`, {
-      method: "POST",
-      headers: { ...auth(token), "content-type": "application/json" },
-      body: JSON.stringify({ name: "LP" }),
-    });
+    const created = await router.request(
+      `/v1/custom/collections/${cid}/musics`,
+      {
+        method: "POST",
+        headers: { ...auth(token), "content-type": "application/json" },
+        body: JSON.stringify({ name: "LP" }),
+      },
+    );
     const cb = await created.json();
     const mid = cb.id_music ?? cb.id;
 
@@ -138,7 +147,10 @@ describe("fallback arms", () => {
 
   it("upload sem kind → default imagens (L1490)", async () => {
     const fd = new FormData();
-    fd.append("file", new File([Buffer.from("z")], "semkind.png", { type: "image/png" }));
+    fd.append(
+      "file",
+      new File([Buffer.from("z")], "semkind.png", { type: "image/png" }),
+    );
     const res = await router.request("/v1/custom/files", {
       method: "POST",
       headers: auth(token),

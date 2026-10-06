@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -50,7 +50,7 @@ describe("Custom collections CRUD (HTTP)", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     const items = body.data ?? body;
-    for (const c of Array.isArray(items) ? items : items.items ?? []) {
+    for (const c of Array.isArray(items) ? items : (items.items ?? [])) {
       expect(c.visibility).toBe("public");
     }
   });

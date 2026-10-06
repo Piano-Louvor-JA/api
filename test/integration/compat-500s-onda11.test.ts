@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -7,7 +7,8 @@ import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
  * getDb injetado com falha — mesmo padrão da 11a.
  */
 vi.mock("../../src/db/connection.js", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../../src/db/connection.js")>();
+  const actual =
+    await importOriginal<typeof import("../../src/db/connection.js")>();
   let failNext = false;
   return {
     ...actual,
@@ -66,7 +67,10 @@ describe("compat + liturgy + remote — 500 com DB quebrado", () => {
     await expect500("/v1/remote/sessions", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ endpoint: "ws://192.168.0.42:8080/relay", token: "token-12345678" }),
+      body: JSON.stringify({
+        endpoint: "ws://192.168.0.42:8080/relay",
+        token: "token-12345678",
+      }),
     });
     delete process.env.REMOTE_SESSION_KEY;
   });

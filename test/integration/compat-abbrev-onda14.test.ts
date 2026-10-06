@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -40,7 +40,7 @@ describe("compat abbreviation matrix", () => {
     const res = await router.request("/json_db/pt_bible_version");
     expect(res.status).toBe(200);
     const body = await res.json();
-    const items = Array.isArray(body) ? body : body.data ?? [];
+    const items = Array.isArray(body) ? body : (body.data ?? []);
     if (Array.isArray(items)) {
       const byId = new Map(items.map((v: any) => [v.id_version, v]));
       const vca = byId.get(301);
@@ -85,7 +85,7 @@ describe("compat abbreviation matrix", () => {
     const res = await router.request("/json_db/es_bible_version");
     expect([200]).toContain(res.status);
     const body = await res.json();
-    const items = Array.isArray(body) ? body : body.data ?? [];
+    const items = Array.isArray(body) ? body : (body.data ?? []);
     if (Array.isArray(items) && items.length > 0) {
       expect(items[0].id_bible_version ?? items[0].id).toBeDefined();
     }

@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -17,7 +17,10 @@ describe("es_bible_book fallback real (es vazio)", () => {
     app = await setupSeededDb();
     router = app.router;
     // cenário: catálogo ES ainda não populado
-    app.getDb().prepare("DELETE FROM bible_books WHERE id_language = 'es'").run();
+    app
+      .getDb()
+      .prepare("DELETE FROM bible_books WHERE id_language = 'es'")
+      .run();
   });
 
   afterAll(() => {

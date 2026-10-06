@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -28,7 +28,11 @@ describe("Auth flows (register/login/me/logout/reset)", () => {
     const r1 = await router.request("/v1/custom/auth/register", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email: EMAIL, password: PASS, displayName: "Auth" }),
+      body: JSON.stringify({
+        email: EMAIL,
+        password: PASS,
+        displayName: "Auth",
+      }),
     });
     expect(r1.status).toBe(201);
     const b1 = await r1.json();
@@ -37,7 +41,11 @@ describe("Auth flows (register/login/me/logout/reset)", () => {
     const r2 = await router.request("/v1/custom/auth/register", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email: EMAIL, password: PASS, displayName: "Auth2" }),
+      body: JSON.stringify({
+        email: EMAIL,
+        password: PASS,
+        displayName: "Auth2",
+      }),
     });
     expect([400, 409]).toContain(r2.status);
   });
@@ -46,7 +54,11 @@ describe("Auth flows (register/login/me/logout/reset)", () => {
     const res = await router.request("/v1/custom/auth/register", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email: "fraca@test.local", password: "123", displayName: "F" }),
+      body: JSON.stringify({
+        email: "fraca@test.local",
+        password: "123",
+        displayName: "F",
+      }),
     });
     expect(res.status).toBe(400);
   });
@@ -135,7 +147,10 @@ describe("Auth flows (register/login/me/logout/reset)", () => {
     const res = await router.request("/v1/custom/auth/reset-password", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ token: "token-falso-123456", password: "NovaSenha1!" }),
+      body: JSON.stringify({
+        token: "token-falso-123456",
+        password: "NovaSenha1!",
+      }),
     });
     expect([400, 401, 404]).toContain(res.status);
   });

@@ -62,7 +62,9 @@ describe("importMusicById (upstream mockado)", () => {
     expect(ok).toBe(true);
     const row = app
       .getDb()
-      .prepare("SELECT id_file_image, id_file_music, id_file_instrumental_music FROM musics WHERE id_music = 778")
+      .prepare(
+        "SELECT id_file_image, id_file_music, id_file_instrumental_music FROM musics WHERE id_music = 778",
+      )
       .get() as any;
     expect(row.id_file_image).toBeNull();
     expect(row.id_file_music).toBeNull();

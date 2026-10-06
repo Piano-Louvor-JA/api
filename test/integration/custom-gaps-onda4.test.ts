@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -28,7 +28,11 @@ describe("custom.routes gaps", () => {
     return b.id_collection ?? b.id;
   }
 
-  async function newMusic(t: string, cid: number, name: string): Promise<number> {
+  async function newMusic(
+    t: string,
+    cid: number,
+    name: string,
+  ): Promise<number> {
     const r = await router.request(`/v1/custom/collections/${cid}/musics`, {
       method: "POST",
       headers: { ...auth(t), "content-type": "application/json" },

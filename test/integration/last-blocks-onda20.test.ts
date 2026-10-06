@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -27,7 +27,9 @@ describe("rateLimit sweep com 10k keys", () => {
         req: {
           path: "/v1/sweep",
           header: (h: string) =>
-            h === "x-forwarded-for" ? `172.16.${Math.floor(i / 255) % 256}.${i % 255}` : undefined,
+            h === "x-forwarded-for"
+              ? `172.16.${Math.floor(i / 255) % 256}.${i % 255}`
+              : undefined,
         },
         header: () => {},
         json: () => ({}),
@@ -56,18 +58,22 @@ describe("rateLimit sweep com 10k keys", () => {
 describe("telemetry expireOldMinutes (handler direto)", () => {
   it("10k buckets fake-ctx no minuto M + sleep 61s + request M+1 → expire", async () => {
     const mod = await import("../../src/middleware/telemetry.js");
-    const mkCtx = (ip: string) => ({
-      req: {
-        header: (h: string) => (h === "x-real-ip" ? ip : undefined),
-        routePath: "/json_db",
-        path: "/json_db",
-        method: "GET",
-        raw: { headers: new Map() },
-      },
-    } as any);
+    const mkCtx = (ip: string) =>
+      ({
+        req: {
+          header: (h: string) => (h === "x-real-ip" ? ip : undefined),
+          routePath: "/json_db",
+          path: "/json_db",
+          method: "GET",
+          raw: { headers: new Map() },
+        },
+      }) as any;
     const next = async () => {};
     for (let i = 0; i < 10_100; i++) {
-      await mod.telemetryMiddleware(mkCtx(`10.4.${Math.floor(i / 255) % 256}.${i % 255}`), next);
+      await mod.telemetryMiddleware(
+        mkCtx(`10.4.${Math.floor(i / 255) % 256}.${i % 255}`),
+        next,
+      );
     }
     await new Promise((r) => setTimeout(r, 61_000));
     await mod.telemetryMiddleware(mkCtx("10.4.99.99"), next);

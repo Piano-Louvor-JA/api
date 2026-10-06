@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync, existsSync, readFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -49,7 +49,9 @@ describe("Upload custom files (multipart)", () => {
     const fd = new FormData();
     fd.append(
       "file",
-      new File([Buffer.from("fakepng")], "capa teste.png", { type: "image/png" }),
+      new File([Buffer.from("fakepng")], "capa teste.png", {
+        type: "image/png",
+      }),
     );
     fd.append("kind", "imagens");
     const res = await router.request("/v1/custom/files", {
@@ -65,7 +67,10 @@ describe("Upload custom files (multipart)", () => {
   it("upload com mesmo nome 2x → 2º ganha sufixo timestamp", async () => {
     const mk = () => {
       const fd = new FormData();
-      fd.append("file", new File([Buffer.from("aa")], "mesmo.jpg", { type: "image/jpeg" }));
+      fd.append(
+        "file",
+        new File([Buffer.from("aa")], "mesmo.jpg", { type: "image/jpeg" }),
+      );
       fd.append("kind", "imagens");
       return fd;
     };
@@ -88,7 +93,10 @@ describe("Upload custom files (multipart)", () => {
 
   it("upload kind=audio grava em /custom/<id>/audio/", async () => {
     const fd = new FormData();
-    fd.append("file", new File([Buffer.alloc(64, 1)], "tom.mp3", { type: "audio/mpeg" }));
+    fd.append(
+      "file",
+      new File([Buffer.alloc(64, 1)], "tom.mp3", { type: "audio/mpeg" }),
+    );
     fd.append("kind", "audio");
     const res = await router.request("/v1/custom/files", {
       method: "POST",
@@ -102,7 +110,10 @@ describe("Upload custom files (multipart)", () => {
 
   it("nome só de caracteres perigosos → sanitizado ou 400", async () => {
     const fd = new FormData();
-    fd.append("file", new File([Buffer.from("x")], "..%2f..%2fevil", { type: "text/plain" }));
+    fd.append(
+      "file",
+      new File([Buffer.from("x")], "..%2f..%2fevil", { type: "text/plain" }),
+    );
     fd.append("kind", "imagens");
     const res = await router.request("/v1/custom/files", {
       method: "POST",

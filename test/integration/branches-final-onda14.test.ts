@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -82,7 +82,9 @@ describe("branches finais custom.routes", () => {
 
   it("upload acima da quota → 413 (L1500)", async () => {
     // quota default ~100MB; manda "arquivo" de 101MB declarado (size do File)
-    const big = new File([new ArrayBuffer(1)], "grande.bin", { type: "application/octet-stream" });
+    const big = new File([new ArrayBuffer(1)], "grande.bin", {
+      type: "application/octet-stream",
+    });
     Object.defineProperty(big, "size", { value: 101 * 1024 * 1024 });
     const fd = new FormData();
     fd.append("file", big);
@@ -97,7 +99,10 @@ describe("branches finais custom.routes", () => {
 
   it("upload nome que sanitiza pra vazio → 400 (L1509)", async () => {
     const fd = new FormData();
-    fd.append("file", new File([Buffer.from("x")], "///", { type: "text/plain" }));
+    fd.append(
+      "file",
+      new File([Buffer.from("x")], "///", { type: "text/plain" }),
+    );
     fd.append("kind", "imagens");
     const res = await router.request("/v1/custom/files", {
       method: "POST",
@@ -111,12 +116,20 @@ describe("branches finais custom.routes", () => {
     await router.request("/v1/custom/auth/register", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email: "dupbr@test.local", password: "SenhaForte1!", displayName: "D" }),
+      body: JSON.stringify({
+        email: "dupbr@test.local",
+        password: "SenhaForte1!",
+        displayName: "D",
+      }),
     });
     const r2 = await router.request("/v1/custom/auth/register", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email: "dupbr@test.local", password: "SenhaForte1!", displayName: "D2" }),
+      body: JSON.stringify({
+        email: "dupbr@test.local",
+        password: "SenhaForte1!",
+        displayName: "D2",
+      }),
     });
     expect([409, 400]).toContain(r2.status);
   });
@@ -126,7 +139,10 @@ describe("branches finais custom.routes", () => {
     const res = await router.request("/v1/custom/auth/login", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email: "finalbr@test.local", password: "SenhaForte1!" }),
+      body: JSON.stringify({
+        email: "finalbr@test.local",
+        password: "SenhaForte1!",
+      }),
     });
     expect(res.status).toBe(200);
     // dá tempo do void promise rejeitar e ser engolido pelo .catch
@@ -139,7 +155,10 @@ describe("branches finais custom.routes", () => {
     const login = await router.request("/v1/custom/auth/login", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email: "finalbr@test.local", password: "SenhaForte1!" }),
+      body: JSON.stringify({
+        email: "finalbr@test.local",
+        password: "SenhaForte1!",
+      }),
     });
     const { token: sessionToken } = await login.json();
     if (!sessionToken) {
@@ -155,7 +174,9 @@ describe("branches finais custom.routes", () => {
   });
 
   it("logout sem header → 401 (L1788)", async () => {
-    const res = await router.request("/v1/custom/auth/logout", { method: "POST" });
+    const res = await router.request("/v1/custom/auth/logout", {
+      method: "POST",
+    });
     expect([401, 403]).toContain(res.status);
   });
 

@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -62,11 +62,15 @@ describe("Ranking + record use", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     const items = body.data ?? body;
-    expect(Array.isArray(items) ? items.length : items.items?.length ?? 0).toBeGreaterThan(0);
+    expect(
+      Array.isArray(items) ? items.length : (items.items?.length ?? 0),
+    ).toBeGreaterThan(0);
   });
 
   it("POST use idempotente por dia: 2º uso não dobra pontos", async () => {
-    const r1 = await router.request("/v1/custom/ranking", { headers: auth(token) });
+    const r1 = await router.request("/v1/custom/ranking", {
+      headers: auth(token),
+    });
     const b1 = await r1.json();
     const items1 = b1.data ?? b1;
     const me1 = (Array.isArray(items1) ? items1 : items1.items).find(
@@ -80,7 +84,9 @@ describe("Ranking + record use", () => {
       body: JSON.stringify({}),
     });
 
-    const r2 = await router.request("/v1/custom/ranking", { headers: auth(token) });
+    const r2 = await router.request("/v1/custom/ranking", {
+      headers: auth(token),
+    });
     const b2 = await r2.json();
     const items2 = b2.data ?? b2;
     const me2 = (Array.isArray(items2) ? items2 : items2.items).find(
@@ -130,14 +136,11 @@ describe("Weekly tasks + moderação", () => {
     const cb = await coll.json();
     const cid = cb.id_collection ?? cb.id;
 
-    const res = await router.request(
-      `/v1/custom/collections/${cid}/report`,
-      {
-        method: "POST",
-        headers: { ...auth(token), "content-type": "application/json" },
-        body: JSON.stringify({ reason: "conteúdo impróprio" }),
-      },
-    );
+    const res = await router.request(`/v1/custom/collections/${cid}/report`, {
+      method: "POST",
+      headers: { ...auth(token), "content-type": "application/json" },
+      body: JSON.stringify({ reason: "conteúdo impróprio" }),
+    });
     expect([200, 201, 404]).toContain(res.status);
   });
 });

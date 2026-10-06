@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -30,7 +30,7 @@ describe("compat abbreviation + es fallback", () => {
     const res = await router.request("/json_db/pt_bible_version");
     expect(res.status).toBe(200);
     const body = await res.json();
-    const items = Array.isArray(body) ? body : body.data ?? [];
+    const items = Array.isArray(body) ? body : (body.data ?? []);
     if (items.length > 0) {
       // cada item tem abbreviation (do campo ou do mapa por nome)
       for (const v of items.slice(0, 3)) {
@@ -61,7 +61,8 @@ describe("compat abbreviation + es fallback", () => {
   });
 
   it("mirror: UPSTREAM_FALLBACK_API com host extra não quebra /file", async () => {
-    process.env.UPSTREAM_FALLBACK_API = "https://mirror-a.example.com,https://mirror-b.example.com";
+    process.env.UPSTREAM_FALLBACK_API =
+      "https://mirror-a.example.com,https://mirror-b.example.com";
     globalThis.fetch = vi.fn().mockRejectedValue(new Error("down"));
     const res = await router.request("/file/mp3/fallback-host.mp3");
     expect([200, 206, 302, 400, 404, 503]).toContain(res.status);

@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -94,7 +94,9 @@ describe("Custom musics update/delete + lyrics", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     const items = body.data ?? body;
-    expect((Array.isArray(items) ? items : items.items ?? []).length).toBeGreaterThan(0);
+    expect(
+      (Array.isArray(items) ? items : (items.items ?? [])).length,
+    ).toBeGreaterThan(0);
   });
 
   it("PUT update lyric edita estrofe", async () => {
@@ -104,7 +106,7 @@ describe("Custom musics update/delete + lyrics", () => {
     });
     const lb = await list.json();
     const items = lb.data ?? lb;
-    const arr = Array.isArray(items) ? items : items.items ?? [];
+    const arr = Array.isArray(items) ? items : (items.items ?? []);
     expect(arr.length).toBeGreaterThan(0);
     const lyricId = arr[0].id_lyric ?? arr[0].id;
 
@@ -122,7 +124,7 @@ describe("Custom musics update/delete + lyrics", () => {
     });
     const lb = await list.json();
     const items = lb.data ?? lb;
-    const arr = Array.isArray(items) ? items : items.items ?? [];
+    const arr = Array.isArray(items) ? items : (items.items ?? []);
     const lyricId = arr[arr.length - 1]?.id_lyric ?? arr[arr.length - 1]?.id;
 
     const res = await router.request(`/v1/custom/lyrics/${lyricId}`, {

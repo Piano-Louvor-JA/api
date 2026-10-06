@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -71,9 +71,12 @@ describe("custom.routes branches (caminhos alternativos)", () => {
       { method: "POST", headers: auth(token), body: JSON.stringify({}) },
     );
     // copy by id: primeira cria, segunda devolve 200
-    const musics = await router.request(`/v1/custom/collections/${cid}/musics`, {
-      headers: auth(token),
-    });
+    const musics = await router.request(
+      `/v1/custom/collections/${cid}/musics`,
+      {
+        headers: auth(token),
+      },
+    );
     const mb = await musics.json();
     const items = mb.data ?? mb;
     const first = (Array.isArray(items) ? items : items.items)[0];
@@ -92,7 +95,10 @@ describe("custom.routes branches (caminhos alternativos)", () => {
   it("upload: colisão de nome (L1521) gera 2º arquivo com timestamp", async () => {
     const mk = (name: string) => {
       const fd = new FormData();
-      fd.append("file", new File([Buffer.from("data")], name, { type: "text/plain" }));
+      fd.append(
+        "file",
+        new File([Buffer.from("data")], name, { type: "text/plain" }),
+      );
       fd.append("kind", "imagens");
       return fd;
     };
@@ -112,11 +118,14 @@ describe("custom.routes branches (caminhos alternativos)", () => {
 
   it("lyrics: PUT/DELETE de lyric inexistente → 404 (L1337/L1408)", async () => {
     const cid = await newCollection(token, "Lyric 404");
-    const created = await router.request(`/v1/custom/collections/${cid}/musics`, {
-      method: "POST",
-      headers: { ...auth(token), "content-type": "application/json" },
-      body: JSON.stringify({ name: "Ly" }),
-    });
+    const created = await router.request(
+      `/v1/custom/collections/${cid}/musics`,
+      {
+        method: "POST",
+        headers: { ...auth(token), "content-type": "application/json" },
+        body: JSON.stringify({ name: "Ly" }),
+      },
+    );
     const cb = await created.json();
     const mid = cb.id_music ?? cb.id;
 
@@ -154,7 +163,10 @@ describe("custom.routes branches (caminhos alternativos)", () => {
     const res = await router.request("/v1/custom/auth/reset-password", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ token: "expired0000000001", password: "SenhaForte1!" }),
+      body: JSON.stringify({
+        token: "expired0000000001",
+        password: "SenhaForte1!",
+      }),
     });
     expect(res.status).toBe(400);
   });

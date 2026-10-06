@@ -1,13 +1,12 @@
-import { describe, expect, it, beforeAll, afterAll, vi } from "vitest";
-
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 // IMPORTANTE: createApp importado no topo SEM setupSeededDb ter setado
 // MEDIA_MIRROR=off — assim MIRROR_ENABLED (const no import de compat.ts)
 // nasce true (default de produção).
 import { createApp } from "../../src/app.js";
-import { initDb, closeDb, getDb } from "../../src/db/connection.js";
-import { mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { closeDb, getDb, initDb } from "../../src/db/connection.js";
 
 describe("mirror ON (app real, MEDIA_MIRROR default): L664-668 + L732+", () => {
   let router: any;

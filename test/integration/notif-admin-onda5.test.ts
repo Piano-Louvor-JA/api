@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -73,14 +73,11 @@ describe("notifications + admin + upload", () => {
       return b.id_collection ?? b.id;
     })();
 
-    const res = await router.request(
-      "/v1/custom/admin/promote-music",
-      {
-        method: "POST",
-        headers: { ...auth(token), "content-type": "application/json" },
-        body: JSON.stringify({ musicId: 1, target: "F" }),
-      },
-    );
+    const res = await router.request("/v1/custom/admin/promote-music", {
+      method: "POST",
+      headers: { ...auth(token), "content-type": "application/json" },
+      body: JSON.stringify({ musicId: 1, target: "F" }),
+    });
     expect([400, 403, 404]).toContain(res.status);
   });
 });

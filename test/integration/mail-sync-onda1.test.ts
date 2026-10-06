@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -75,7 +75,9 @@ describe("Mail service (SMTP mockado)", () => {
     const t = await import("../../src/v1/custom/email-templates.js");
     expect(t.renderWelcomeEmail("Rafael")).toContain("Rafael");
     expect(t.renderResetPasswordEmail("Rafael", "123456")).toContain("123456");
-    expect(t.renderNewLoginEmail("Rafael", "Chrome/Linux")).toContain("Chrome/Linux");
+    expect(t.renderNewLoginEmail("Rafael", "Chrome/Linux")).toContain(
+      "Chrome/Linux",
+    );
   });
 });
 

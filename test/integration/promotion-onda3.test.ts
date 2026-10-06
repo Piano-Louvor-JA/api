@@ -1,7 +1,6 @@
-import { describe, expect, it, beforeAll, afterAll } from "vitest";
-
-import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { getDb } from "../../src/db/connection.js";
+import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
 const {
   PROMOTION_POINTS,
@@ -56,20 +55,26 @@ describe("promotion.service", () => {
 
   it("creditPointsSeasonal credita com multiplicador", () => {
     const before = db
-      .prepare("SELECT COALESCE(SUM(points),0) p FROM contrib_points WHERE user_id = ?")
+      .prepare(
+        "SELECT COALESCE(SUM(points),0) p FROM contrib_points WHERE user_id = ?",
+      )
       .get(userId) as { p: number };
 
     creditPointsSeasonal(db, userId, "publish", 999999);
 
     const after = db
-      .prepare("SELECT COALESCE(SUM(points),0) p FROM contrib_points WHERE user_id = ?")
+      .prepare(
+        "SELECT COALESCE(SUM(points),0) p FROM contrib_points WHERE user_id = ?",
+      )
       .get(userId) as { p: number };
     expect(after.p).toBeGreaterThanOrEqual(before.p);
   });
 
   it("promoteMusicToF: música inexistente → false/erro controlado", async () => {
     const r = await promoteMusicToF(db, 424242, userId);
-    expect([false, null, undefined].includes(r as any) || typeof r === "object").toBe(true);
+    expect(
+      [false, null, undefined].includes(r as any) || typeof r === "object",
+    ).toBe(true);
   });
 
   it("listUnreadNotifications: lista vazia pra usuário novo", () => {

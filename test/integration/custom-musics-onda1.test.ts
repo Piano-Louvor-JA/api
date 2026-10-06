@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -69,7 +69,9 @@ describe("Custom musics (HTTP)", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     const items = body.data ?? body;
-    expect(Array.isArray(items) ? items.length : items.items.length).toBeGreaterThan(0);
+    expect(
+      Array.isArray(items) ? items.length : items.items.length,
+    ).toBeGreaterThan(0);
   });
 
   it("copy de música oficial pra coletânea", async () => {
