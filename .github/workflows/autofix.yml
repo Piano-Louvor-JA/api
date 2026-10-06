@@ -1,0 +1,97 @@
+name: Auto-fix
+
+on:
+  push:
+    branches: [staging]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: autofix-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect:
+    name: Detect fixable formatting
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      changed: ${{ steps.patch.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - id: patch
+        run: |
+          set -euo pipefail
+          npm run lint:fix
+          if git diff --quiet; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if git diff --name-only | grep -Ev '^(src|test)/'; then
+            echo '::error::Auto-fix may only change src/ or test/.'
+            exit 1
+          fi
+          git diff --binary --no-ext-diff > autofix.patch
+          echo 'changed=true' >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        if: steps.patch.outputs.changed == 'true'
+        with:
+          name: autofix-patch
+          path: autofix.patch
+          if-no-files-found: error
+          retention-days: 1
+
+  apply:
+    needs: detect
+    if: needs.detect.outputs.changed == 'true'
+    name: Create autofix pull request
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: staging
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: autofix-patch
+      - name: Apply reviewed patch without executing repository code
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA" || {
+            echo 'staging moved; a newer push will generate a fresh patch.'
+            exit 0
+          }
+          git apply --check autofix.patch
+          git apply autofix.patch
+      - name: Commit and open pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          branch="autofix/staging/$SOURCE_SHA"
+          git switch -c "$branch"
+          git config user.name 'pianolouvorja[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src test
+          git commit -m 'chore: auto-fix lint and formatting'
+          git push origin "HEAD:refs/heads/$branch"
+          gh pr create \
+            --base staging \
+            --head "$branch" \
+            --title 'chore: auto-fix lint and formatting' \
+            --body 'Automated fix generated from a read-only detection job. Merges only after all checks pass.'
