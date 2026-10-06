@@ -543,6 +543,35 @@ function handleAlbumDetail(c: any, db: any, idAlbum: number) {
   });
 }
 
+/**
+ * Limpa ruído da fonte NTLH antes de cachear/servir o capítulo:
+ * tags `<J>` (letra vermelha), marcador de fala `  -  ` após quebra de
+ * linha e versos vazios. Valores que não são string são omitidos.
+ */
+export function sanitizeBibleChapter(
+  chapter: Record<string, string>,
+): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [verse, raw] of Object.entries(chapter)) {
+    if (typeof raw !== "string") continue;
+    const text = raw
+      .replace(/<\/?J>/g, "")
+      .replace(/\n {2}- {2}/g, "\n")
+      .trim();
+    if (!text) continue;
+    out[verse] = text;
+  }
+  return out;
+}
+
+function chapterForCache(data: string): unknown {
+  const parsed: unknown = JSON.parse(data);
+  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return parsed;
+  }
+  return sanitizeBibleChapter(parsed as Record<string, string>);
+}
+
 // ==============================================
 // Handler: bible chapter (lazy proxy com cache)
 // ==============================================
@@ -565,8 +594,9 @@ async function handleBibleChapter(c: any, cacheKey: string) {
       return c.json({ error: "Arquivo nao encontrado!" }, 404);
     }
     const data = await res.text();
-    writeFileSync(cacheFile, data, "utf-8");
-    return c.json(JSON.parse(data));
+    const body = chapterForCache(data);
+    writeFileSync(cacheFile, JSON.stringify(body), "utf-8");
+    return c.json(body);
   } catch (e: unknown) {
     if (e instanceof UpstreamError && e.status === 404) {
       // Versão/capítulo não existe no upstream — espelha o 404 em vez de 502

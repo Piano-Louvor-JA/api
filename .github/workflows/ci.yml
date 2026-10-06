@@ -13,11 +13,18 @@ permissions:
   contents: read
   pull-requests: write
 
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+
 jobs:
   # Camada 1: Lint + Format (< 15s) — fast feedback
+  # ubuntu-24.04 fixo: ubuntu-latest não recebia runner hospedado
+  # (run 37365233813). O label migra para Ubuntu 26 em 19/10/2026.
   lint:
     name: Lint & Format
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -30,7 +37,7 @@ jobs:
   # Camada 2: Type Check (< 30s) — depende de lint
   typecheck:
     name: Type Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: lint
     steps:
       - uses: actions/checkout@v4
@@ -44,7 +51,7 @@ jobs:
   # Camada 3: Tests + Coverage (< 1min) — depende de typecheck
   test:
     name: Tests + Coverage
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: typecheck
     steps:
       - uses: actions/checkout@v4
@@ -63,7 +70,7 @@ jobs:
   # Camada 4: Docker Build (< 2min) — depende de test
   build:
     name: Docker Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: test
     steps:
       - uses: actions/checkout@v4
@@ -80,7 +87,7 @@ jobs:
 
   smoke:
     name: Docker Smoke Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
     steps:
       - uses: actions/checkout@v4
@@ -120,7 +127,10 @@ jobs:
 
   audit:
     name: Security Audit
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    # Depois do lint: no mesmo instante, o GitHub abandonava este job
+    # sem entregar runner, enquanto o restante da fila seguia.
+    needs: lint
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -133,7 +143,7 @@ jobs:
   # Camada 4.5: Regression Gate (anti-regressão) — baseline staging vs PR
   regression-gate:
     name: Regression Gate (anti-regressão)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [lint, typecheck, test]
     if: github.event_name == 'pull_request'
     steps:
@@ -146,22 +156,34 @@ jobs:
           cache: npm
       - run: npm ci
       - run: mkdir -p data
-      - name: Baseline (staging)
+      - name: Baseline (base da PR)
         run: |
-          # O script ainda não existe na staging neste PR. Copia antes do checkout.
+          # O script pode ainda não existir na base. Copia antes do checkout e
+          # guarda o merge calculado pelo GitHub para comparar base vs base+PR.
+          MERGE_SHA="$(git rev-parse HEAD)"
           cp scripts/test-regression.mjs /tmp/test-regression.mjs
-          git checkout staging
+          git checkout "${{ github.base_ref }}"
           node /tmp/test-regression.mjs --baseline
-          git checkout "${{ github.head_ref }}"
-      - name: Compare (PR branch)
+          git checkout "$MERGE_SHA"
+      - name: Compare (merge da PR)
         run: npm run test:regression -- --compare
 
   # Quality Gate: so passa se TODAS as camadas passaram
   quality-gate:
     name: Quality Gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [lint, typecheck, test, build, smoke, audit, regression-gate]
-    if: always()
+    # Não pede runner de novo quando um job anterior foi cancelado
+    # (runner hospedado não atribuído). Sem isso o gate espera mais 15 min.
+    if: >-
+      always() &&
+      needs.lint.result != 'cancelled' &&
+      needs.typecheck.result != 'cancelled' &&
+      needs.test.result != 'cancelled' &&
+      needs.build.result != 'cancelled' &&
+      needs.smoke.result != 'cancelled' &&
+      needs.audit.result != 'cancelled' &&
+      needs.regression-gate.result != 'cancelled'
     steps:
       - name: Verifica se todos os gates passaram
         run: |
