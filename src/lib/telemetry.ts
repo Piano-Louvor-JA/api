@@ -1,3 +1,5 @@
+import type { ErrorEvent } from "@sentry/node";
+
 /**
  * Telemetria de erros — Glitchtip/Sentry (server-side).
  *
@@ -15,6 +17,43 @@ type SentryNode = {
 
 let captureException: SentryNode["captureException"] | null = null;
 
+// Use an allowlist: SDK integrations may attach request data or breadcrumbs.
+function sanitizeEvent(event: ErrorEvent): ErrorEvent {
+  return {
+    type: undefined,
+    event_id: event.event_id,
+    timestamp: event.timestamp,
+    platform: event.platform,
+    level: "error",
+    exception: {
+      values: event.exception?.values?.map((exception) => ({
+        type: [
+          "Error",
+          "TypeError",
+          "RangeError",
+          "SyntaxError",
+          "ReferenceError",
+        ].includes(exception.type ?? "")
+          ? exception.type
+          : "Error",
+        value: "Unhandled API error (message redacted)",
+        stacktrace: {
+          frames: exception.stacktrace?.frames?.map((frame) => ({
+            filename: frame.filename?.split(/[\\/]/).pop()?.split(/[?#]/)[0],
+            lineno: frame.lineno,
+            colno: frame.colno,
+            in_app: frame.in_app,
+          })),
+        },
+      })),
+    },
+    extra: {
+      route: event.extra?.route,
+      method: event.extra?.method,
+    },
+  };
+}
+
 export function initTelemetry(): void {
   const dsn = process.env.SENTRY_DSN;
   if (!dsn) return;
@@ -26,6 +65,8 @@ export function initTelemetry(): void {
         environment: process.env.NODE_ENV ?? "production",
         sendDefaultPii: false,
         tracesSampleRate: 0,
+        defaultIntegrations: false,
+        beforeSend: sanitizeEvent,
       });
       captureException = sentry.captureException;
     })

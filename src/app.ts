@@ -105,7 +105,10 @@ export function createApp() {
   // RF-02: error handler global — nunca vaza stack/erro cru do SQLite
   app.onError((err, c) => {
     console.error("[piano-api] unhandled error:", err.message);
-    reportError(err, { path: c.req.path, method: c.req.method });
+    reportError(err, {
+      route: c.req.routePath || "unmatched",
+      method: c.req.method,
+    });
     return c.json({ error: "Internal Server Error" }, 500);
   });
   app.notFound((c) => c.json({ error: "Not Found" }, 404));
