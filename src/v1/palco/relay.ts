@@ -99,6 +99,9 @@ export function createRoom(): { code: string; token: string } | null {
       return { code, token: signRoom(code) };
     }
   }
+  // Inalcançável na prática: exigiria 5 colisões seguidas de makeCode
+  // (36^6 ≈ 2.2e9 combinações) — defesa em profundidade p/ loop infinito.
+  /* v8 ignore next -- 5 colisões de randomBytes são estatisticamente impossíveis */
   return null;
 }
 

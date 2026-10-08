@@ -25,3 +25,4 @@ __pycache__/
 /wt*-*.mjs
 .regression-baseline.json
 .vitest-results.json
+coverage-gate/

@@ -146,11 +146,12 @@ customRoutes.openapi(listCollectionsRoute, (c) => {
     const user = c.get("user") as { id_user: number } | undefined;
 
     // api#82: privada só o dono vê. Deslogado vê apenas públicas.
-    // Ordem dos placeholders: 1º o do is_owner (SELECT), 2º o do WHERE.
+    // is_owner é FLAG booleano (1/0) — NUNCA o id do usuário (bug achado por
+    // E2E do APK 07/10/2026: dono aparecia como não-dono no app).
     const params: unknown[] = [];
     const query = `
       SELECT cc.*, COUNT(cm.id_music) as musics_count,
-             ${user ? "?" : "0"} as is_owner
+             ${user ? "CASE WHEN cc.owner_id = ? THEN 1 ELSE 0 END" : "0"} as is_owner
       FROM custom_collections cc
       LEFT JOIN custom_musics cm ON cm.id_collection = cc.id_collection
       WHERE ${user ? "(cc.visibility = 'public' OR cc.owner_id = ?)" : "cc.visibility = 'public'"}

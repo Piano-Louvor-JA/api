@@ -1,0 +1,41 @@
+name: Coverage Gate 100%
+
+on:
+  pull_request:
+    branches: [staging, main]
+  push:
+    branches: [staging]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: coverage-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    name: Coverage 100/100/100/100 (prune phantom)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Coverage gate (podado de fantasmas, 100x4)
+        run: npm run test:coverage:gate
+
+      - name: Upload pruned coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-pruned
+          path: coverage-gate/pruned.json
+          retention-days: 7

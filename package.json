@@ -18,7 +18,8 @@
     "import:upstream": "tsx scripts/import-upstream.ts",
     "import:sda": "tsx scripts/import-sda-hymnal.ts",
     "prepare": "[ \"$NODE_ENV\" = production ] || husky",
-    "test:regression": "node scripts/test-regression.mjs"
+    "test:regression": "node scripts/test-regression.mjs",
+    "test:coverage:gate": "node scripts/coverage-gate.mjs"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.1",
@@ -41,17 +42,19 @@
     ]
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.14",
+    "@biomejs/biome": "^2.5.15",
     "@types/better-sqlite3": "^7.6.0",
-    "@types/node": "^26.6.3",
+    "@types/node": "^26.6.4",
     "@types/nodemailer": "^8.0.2",
     "@types/ws": "^8.18.1",
-    "@vitest/coverage-istanbul": "^5.0.2",
+    "@vitest/coverage-istanbul": "^5.0.3",
+    "@vitest/coverage-v8": "^5.0.3",
     "husky": "^9.1.7",
-    "lint-staged": "^17.5.1",
+    "istanbul-lib-coverage": "^3.2.2",
+    "lint-staged": "^17.6.0",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
-    "vite": "^8.3.1",
+    "vite": "^8.3.2",
     "vitest": "^5.0.0"
   },
   "overrides": {
