@@ -16,6 +16,10 @@ try {
 // RF-04: fail fast se env inválida
 validateEnv(process.env as Record<string, string | undefined>);
 
+// Telemetria Glitchtip: no-op sem SENTRY_DSN; nunca bloqueia o boot
+const { initTelemetry } = await import("./lib/telemetry.js");
+initTelemetry();
+
 const app = createApp();
 const port = Number(process.env.PORT ?? 3100);
 
