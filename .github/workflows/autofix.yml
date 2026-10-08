@@ -94,4 +94,4 @@ jobs:
             --base staging \
             --head "$branch" \
             --title 'chore: auto-fix lint and formatting' \
-            --body 'Automated fix generated from a read-only detection job. Merges only after all checks pass.'
+            --body 'Automated fix generated from a read-only detection job. Review CI results and merge manually; failed pull requests remain open for human decision.'
