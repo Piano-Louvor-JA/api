@@ -7,6 +7,7 @@ import { secureHeaders } from "hono/secure-headers";
 import { getDbStats } from "./db/connection.js";
 import { APP_VERSION } from "./lib/version.js";
 import { antiBotMiddleware } from "./middleware/antiBot.js";
+import { metricsHandler, metricsMiddleware } from "./middleware/metrics.js";
 import { rateLimit } from "./middleware/rateLimit.js";
 // SEC-6 Fase 0: telemetria log-only por IP/min (api#127) — nunca bloqueia
 import { telemetryMiddleware } from "./middleware/telemetry.js";
@@ -17,6 +18,7 @@ import { categoriesRoutes } from "./v1/categories/categories.routes.js";
 import { customRoutes } from "./v1/custom/custom.routes.js";
 import { syncRoutes } from "./v1/custom/sync.routes.js";
 // Rotas OpenAPI (V1)
+import { liturgyRoutes } from "./v1/liturgy/liturgy.routes.js";
 import { musicsRoutes } from "./v1/musics/musics.routes.js";
 import {
   getPalcoWs,
@@ -92,6 +94,9 @@ export function createApp() {
   // Rate limiting Token Bucket (boas práticas louvorja/api)
   app.use("*", rateLimit);
 
+  // Prometheus: coleta pós-next, sem derrubar a request. /metrics fica de fora.
+  app.use("*", metricsMiddleware);
+
   // SEC-6 Fase 0 (api#127): contagem por IP/min — LOG-ONLY, nunca bloqueia.
   // Desligável sem deploy: TELEMETRY_DISABLED=true
   app.use("*", telemetryMiddleware);
@@ -139,6 +144,8 @@ export function createApp() {
     );
   });
 
+  app.get("/metrics", metricsHandler);
+
   // WT-5J: receiver desktop/TV browser na mesma origem da API/relay.
   // `index: "index.html"` evita redirect que descartaria ?code= e ?api=.
   app.use("/palco", serveStatic({ root: "./static", index: "index.html" }));
@@ -152,6 +159,7 @@ export function createApp() {
   app.route("/", compatRoutes);
 
   app.route("/v1/bible", bibleRoutes);
+  app.route("/v1/liturgy", liturgyRoutes);
   app.route("/v1/remote", remoteRoutes);
   app.route("/v1/custom", customRoutes);
   app.route("/v1/custom", syncRoutes);

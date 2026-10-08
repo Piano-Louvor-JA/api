@@ -93,6 +93,9 @@ export const CreateCustomMusicSchema = z
     // Hino oficial da API (link): id_music da tabela musics. Quando presente,
     // a faixa é um atalho — playback/letra resolvem pelo catálogo oficial.
     official_music_id: z.number().int().positive().optional(),
+    // Dedup de imports (app#336 fase 3): uuid v5 determinístico do hash do
+    // conteúdo. Mesmo arquivo do mesmo dono = mesmo uuid = no-op na rota.
+    client_uuid: z.string().min(8).max(64).optional(),
   })
   .refine(
     (v) => v.official_music_id != null || (v.name?.trim().length ?? 0) > 0,
