@@ -1,3 +1,5 @@
+-- Preserva dados existentes: URLs duplicadas bloqueiam esta migration.
+-- Não deduplicar automaticamente, pois os ids podem ter referências.
 -- 029: files.url precisa de UNIQUE — importMusicById usa
 -- INSERT ... ON CONFLICT(url) DO NOTHING (lib/importMusicOnMiss.ts),
 -- que exige constraint/índice único em url. Sem isso, o import on-miss

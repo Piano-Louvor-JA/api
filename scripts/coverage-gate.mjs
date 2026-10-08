@@ -1,14 +1,6 @@
 #!/usr/bin/env node
-/**
- * coverage-gate.mjs — gate de coverage 100/100/100/100 com poda de fantasmas.
- *
- * O agregador nativo do vitest soma spans duplicados de workers v8 como
- * statements separados (remap divergente entre forks) — statements/fns 0-hit
- * clones derrubam o número sem serem gaps reais (mesmo bug contornado no
- * repo app com merge por posição). Fluxo:
- *   1. vitest run --coverage (json) com thresholds desligados
- *   2. prune-phantom-coverage.mjs (regras provadas no app: 9121bd7)
- *   3. gate: pruned summary >= 100/100/100/100
+/** Coverage 100x4. Only exact duplicate statement spans may be removed.
+ * Branches and functions with zero hits remain gaps, even on executed lines.
  */
 import { execSync } from "node:child_process";
 import { existsSync, rmSync } from "node:fs";
