@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { captureExceptionMock, initMock } = vi.hoisted(() => ({
   captureExceptionMock: vi.fn(),
@@ -21,7 +21,7 @@ describe("telemetria api", () => {
   it("sem SENTRY_DSN não inicializa e captureException é no-op", async () => {
     vi.stubEnv("SENTRY_DSN", "");
     const { initTelemetry, reportError } = await import(
-      "../../src/lib/telemetry.js",
+      "../../src/lib/telemetry.js"
     );
     initTelemetry();
     reportError(new Error("não enviar"));
@@ -32,7 +32,7 @@ describe("telemetria api", () => {
   it("com SENTRY_DSN inicializa sem PII/tracing e captura", async () => {
     vi.stubEnv("SENTRY_DSN", "https://key@errors.example/1");
     const { initTelemetry, reportError } = await import(
-      "../../src/lib/telemetry.js",
+      "../../src/lib/telemetry.js"
     );
     initTelemetry();
     const error = new Error("boom");

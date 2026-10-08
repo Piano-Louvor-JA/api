@@ -6,18 +6,18 @@
  * instrumentação no app.ts) e erros manuais. Nunca propaga falha própria:
  * telemetria é opcional, a API segue de pé.
  */
-type ErrorContext = Record<string, unknown>
+type ErrorContext = Record<string, unknown>;
 
 type SentryNode = {
-  captureException(error: unknown, hint?: { extra?: ErrorContext }): void
-  init(options: Record<string, unknown>): void
-}
+  captureException(error: unknown, hint?: { extra?: ErrorContext }): void;
+  init(options: Record<string, unknown>): void;
+};
 
-let captureException: SentryNode["captureException"] | null = null
+let captureException: SentryNode["captureException"] | null = null;
 
 export function initTelemetry(): void {
-  const dsn = process.env.SENTRY_DSN
-  if (!dsn) return
+  const dsn = process.env.SENTRY_DSN;
+  if (!dsn) return;
 
   import("@sentry/node")
     .then((sentry: SentryNode) => {
@@ -26,17 +26,17 @@ export function initTelemetry(): void {
         environment: process.env.NODE_ENV ?? "production",
         sendDefaultPii: false,
         tracesSampleRate: 0,
-      })
-      captureException = sentry.captureException
+      });
+      captureException = sentry.captureException;
     })
     .catch(() => {
       // Telemetria opcional: indisponibilidade nunca derruba a API.
-    })
+    });
 }
 
 export function reportError(error: unknown, context?: ErrorContext): void {
   try {
-    captureException?.(error, context ? { extra: context } : undefined)
+    captureException?.(error, context ? { extra: context } : undefined);
   } catch {
     // SDK opcional: nunca propaga erro de diagnóstico.
   }
