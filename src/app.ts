@@ -11,6 +11,7 @@ import { metricsHandler, metricsMiddleware } from "./middleware/metrics.js";
 import { rateLimit } from "./middleware/rateLimit.js";
 // SEC-6 Fase 0: telemetria log-only por IP/min (api#127) — nunca bloqueia
 import { telemetryMiddleware } from "./middleware/telemetry.js";
+import { reportError } from "./lib/telemetry.js";
 import { compatRoutes } from "./routes/compat.js";
 import { albumsRoutes } from "./v1/albums/albums.routes.js";
 import { bibleRoutes } from "./v1/bible/bible.routes.js";
@@ -104,6 +105,7 @@ export function createApp() {
   // RF-02: error handler global — nunca vaza stack/erro cru do SQLite
   app.onError((err, c) => {
     console.error("[piano-api] unhandled error:", err.message);
+    reportError(err, { path: c.req.path, method: c.req.method });
     return c.json({ error: "Internal Server Error" }, 500);
   });
   app.notFound((c) => c.json({ error: "Not Found" }, 404));
