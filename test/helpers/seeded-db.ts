@@ -13,7 +13,9 @@ export interface SeededDb {
  * e retorna o router da app apontando para ele.
  * Sempre chame cleanup() no afterAll.
  */
-export async function setupSeededDb(): Promise<SeededDb> {
+export async function setupSeededDb(
+  options: { mediaMirror?: "on" | "off"; onMiss?: "on" | "off" } = {},
+): Promise<SeededDb> {
   const tmpDir = mkdtempSync(join(tmpdir(), "piano-seed-"));
   const originalDbPath = process.env.DB_PATH;
   const originalOnMiss = process.env.ON_MISS_FETCH;
@@ -21,9 +23,9 @@ export async function setupSeededDb(): Promise<SeededDb> {
   process.env.DB_PATH = join(tmpDir, "test.db");
   process.env.PORT = "0";
   // Evita fetch real ao upstream em /json_db/music_{id} (timeouts flaky no CI).
-  process.env.ON_MISS_FETCH = "off";
+  process.env.ON_MISS_FETCH = options.onMiss ?? "off";
   // Evita download on-demand em /file/* (mesmo problema de timeout).
-  process.env.MEDIA_MIRROR = "off";
+  process.env.MEDIA_MIRROR = options.mediaMirror ?? "off";
 
   const { initDb, getDb, closeDb } = await import("../../src/db/connection.js");
 

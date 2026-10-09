@@ -129,4 +129,29 @@ describe("telemetria api", () => {
     });
     expect(() => reportError(new Error("boom"))).not.toThrow();
   });
+  it("sanitizes incomplete events and unknown exception types without leaking values", async () => {
+    vi.stubEnv("SENTRY_DSN", "https://key@errors.example/1");
+    vi.stubEnv("NODE_ENV", undefined);
+    const { initTelemetry } = await import("../../src/lib/telemetry.js");
+    initTelemetry();
+    await vi.waitFor(() => expect(initMock).toHaveBeenCalled());
+    const options = initMock.mock.calls[0][0];
+    expect(options.environment).toBe("production");
+    expect(options.beforeSend({}).extra).toEqual({
+      route: undefined,
+      method: undefined,
+    });
+    const event = options.beforeSend({
+      exception: {
+        values: [
+          { type: "PrivateCustomerError", value: "secret" },
+          { value: "secret", stacktrace: { frames: [{}] } },
+        ],
+      },
+    });
+    expect(
+      event.exception.values.map((value: { type: string }) => value.type),
+    ).toEqual(["Error", "Error"]);
+    expect(JSON.stringify(event)).not.toContain("secret");
+  });
 });
