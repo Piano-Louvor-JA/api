@@ -5,6 +5,7 @@ import { apiReference } from "@scalar/hono-api-reference";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import { getDbStats } from "./db/connection.js";
+import { reportError } from "./lib/telemetry.js";
 import { APP_VERSION } from "./lib/version.js";
 import { antiBotMiddleware } from "./middleware/antiBot.js";
 import { metricsHandler, metricsMiddleware } from "./middleware/metrics.js";
@@ -104,6 +105,10 @@ export function createApp() {
   // RF-02: error handler global — nunca vaza stack/erro cru do SQLite
   app.onError((err, c) => {
     console.error("[piano-api] unhandled error:", err.message);
+    reportError(err, {
+      route: c.req.routePath || "unmatched",
+      method: c.req.method,
+    });
     return c.json({ error: "Internal Server Error" }, 500);
   });
   app.notFound((c) => c.json({ error: "Not Found" }, 404));

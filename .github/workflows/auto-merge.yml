@@ -27,7 +27,7 @@ jobs:
     if: github.event_name == 'workflow_run' || github.event_name == 'check_suite' || github.event_name == 'pull_request_target'
     steps:
       - name: Avaliar elegibilidade e mergear
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const pr = context.payload.pull_request || context.payload.workflow_run?.pull_requests?.[0];
