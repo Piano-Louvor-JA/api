@@ -64,6 +64,19 @@ describe("isE2EFixture — campos vazios/ausentes", () => {
   it("name null (música pode ser só link) → false", () => {
     expect(isE2EFixture({ name: null })).toBe(false);
   });
+
+  it("email sem @ (não deveria passar do schema, mas helper é puro) → false", () => {
+    expect(isE2EFixture({ email: "sem-arroba" })).toBe(false);
+  });
+
+  it("local part vazio (@teste.com) → bloqueia (fail-safe)", () => {
+    expect(isE2EFixture({ email: "@teste.com" })).toBe(true);
+  });
+
+  it("domínio vazio após @ (email terminando em @) → false", () => {
+    expect(isE2EFixture({ email: "x@" })).toBe(false);
+    expect(isE2EFixture({ email: "x@ " })).toBe(false);
+  });
 });
 
 describe("isE2EFixtureBlockEnabled — flag trivaluada (D1)", () => {
