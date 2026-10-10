@@ -92,6 +92,28 @@ describe("operator_state (sync v2 LWW)", () => {
     expect(r.operator_state?.[0].value_json).toContain("Hino 101");
   });
 
+  it("consulta com fila vazia devolve estado sem gravar alterações", () => {
+    const r = runSync(user.id_user, { collections: [], operator_state: [] });
+    expect(r.applied).toEqual({ created: 0, updated: 0 });
+    expect(r.operator_state?.[0]).toMatchObject({
+      client_uuid: "op-lit-0001",
+      updated_at_ms: T0 + 5_000,
+    });
+    expect(r.operator_state?.[0].value_json).toContain("Hino 101");
+  });
+
+  it("consulta vazia de outra conta não devolve dados do primeiro usuário", () => {
+    const other = registerUser("sync-op-other@test.local", "S3nh@F0rte");
+    const r = runSync(other.id_user, { collections: [], operator_state: [] });
+    expect(r.operator_state).toEqual([]);
+    expect(r.applied).toEqual({ created: 0, updated: 0 });
+  });
+
+  it("preserva resposta legada quando operator_state é omitido", () => {
+    const r = runSync(user.id_user, { collections: [] });
+    expect(r).not.toHaveProperty("operator_state");
+  });
+
   it("tombstone aplica e remove do estado ativo", () => {
     const r = runSync(user.id_user, {
       collections: [],
