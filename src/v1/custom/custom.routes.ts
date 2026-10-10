@@ -26,6 +26,11 @@ import {
   UpdateCustomLyricSchema,
   UpdateCustomMusicSchema,
 } from "./custom.schemas.js";
+import {
+  e2eFixtureBlockedJson,
+  isE2EFixtureBlockEnabled,
+  whichE2EFixtureField,
+} from "./e2e-fixture-guard.js";
 import { firebaseAuth } from "./firebase-auth.middleware.js";
 import {
   listUnreadNotifications,
@@ -45,6 +50,17 @@ import {
   getWeeklyTasksForUser,
   isoWeekKey,
 } from "./weekly-tasks.service.js";
+
+// G1 guardrail E2E — resposta 403 declarada nas rotas de escrita (OpenAPI).
+const E2E_FIXTURE_BLOCKED_RESPONSE = {
+  description:
+    "Fixture de teste E2E bloqueada (guardrail: produção não recebe dados de teste; BLOCK_E2E_FIXTURES=false desativa em staging/local)",
+  content: {
+    "application/json": {
+      schema: z.object({ error: z.string(), message: z.string() }),
+    },
+  },
+} as const;
 
 // lint: row types das tabelas custom (evitam 'as any' nas queries)
 type CollectionRow = {
@@ -223,6 +239,7 @@ const createCollectionRoute = createRoute({
       },
       description: "Não autenticado (api#82: escrita exige identidade)",
     },
+    403: E2E_FIXTURE_BLOCKED_RESPONSE,
     500: {
       content: {
         "application/json": { schema: z.object({ error: z.string() }) },
@@ -241,6 +258,12 @@ customRoutes.openapi(createCollectionRoute, async (c) => {
     // api#82 hardening: escrita na API exige identidade (sem auth cria
     // local no cliente — a API nunca recebe anônimo).
     if (!user) return c.json({ error: "Não autenticado" }, 401);
+
+    // G1 guardrail E2E: fixture de teste não entra em produção (D4: name).
+    if (isE2EFixtureBlockEnabled()) {
+      const field = whichE2EFixtureField({ name: body.name });
+      if (field) return c.json(e2eFixtureBlockedJson(field), 403);
+    }
 
     const result = db
       .prepare(
@@ -795,6 +818,7 @@ const createMusicRoute = createRoute({
       },
       description: "Coletânea não encontrada",
     },
+    403: E2E_FIXTURE_BLOCKED_RESPONSE,
     500: {
       content: {
         "application/json": { schema: z.object({ error: z.string() }) },
@@ -808,6 +832,14 @@ customRoutes.openapi(createMusicRoute, (c) => {
   try {
     const { id } = c.req.valid("param");
     const body = c.req.valid("json");
+
+    // G1 guardrail E2E: fixture de teste não entra em produção (D4: name
+    // se não-null — música pode ser só link p/ hino oficial).
+    if (isE2EFixtureBlockEnabled()) {
+      const field = whichE2EFixtureField({ name: body.name });
+      if (field) return c.json(e2eFixtureBlockedJson(field), 403);
+    }
+
     const db = getDb();
 
     const collection = db
@@ -1579,6 +1611,7 @@ const registerRoute = createRoute({
       content: { "application/json": { schema: AuthResponseSchema } },
       description: "Usuário criado",
     },
+    403: E2E_FIXTURE_BLOCKED_RESPONSE,
     409: {
       content: {
         "application/json": { schema: z.object({ error: z.string() }) },
@@ -1603,6 +1636,17 @@ const registerRoute = createRoute({
 customRoutes.openapi(registerRoute, (c) => {
   try {
     const body = c.req.valid("json");
+
+    // G1 guardrail E2E: produção não recebe fixture de teste (403 antes de
+    // qualquer write). Leitura por-request (D6) — fora do validateEnv.
+    if (isE2EFixtureBlockEnabled()) {
+      const field = whichE2EFixtureField({
+        email: body.email,
+        name: body.displayName,
+      });
+      if (field) return c.json(e2eFixtureBlockedJson(field), 403);
+    }
+
     const db = getDb();
 
     const passwordHash = hashPassword(body.password);
