@@ -210,8 +210,8 @@ export async function materialize(
     "INSERT OR IGNORE INTO languages (id_language, name) VALUES ('es', 'Espanol')",
   ).run();
   db.prepare(
-    `INSERT OR IGNORE INTO categories (id_category, name, "order", id_language)
-     VALUES (?, 'CDs Oficiales', 0, 'es')`,
+    `INSERT OR IGNORE INTO categories (id_category, name, id_language)
+     VALUES (?, 'CDs Oficiales', 'es')`,
   ).run(options.esCategoryId);
 
   // import de auditoria: idempotencia por manifest hash
