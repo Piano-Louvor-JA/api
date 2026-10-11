@@ -48,11 +48,13 @@ function readEntries(
       }
       total += entry.uncompressedSize;
       if (total > maxBytes) {
+        zipfile.close();
         reject(new Error("ZIP exceeds size limit"));
         return;
       }
       zipfile.openReadStream(entry, (error, stream) => {
         if (error || !stream) {
+          zipfile.close();
           reject(error ?? new Error("cannot read ZIP entry"));
           return;
         }
