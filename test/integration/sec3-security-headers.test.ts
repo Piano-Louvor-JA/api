@@ -47,11 +47,24 @@ describe("SEC-3: headers de segurança em todas as rotas", () => {
     expect(csp).not.toBe("default-src 'none'");
   });
 
-  it("override de CSP no /doc permite CDN do Scalar", async () => {
+  it("override de CSP no /doc permite CDN do Scalar E o script inline do apiReference (hash exato)", async () => {
     const res = await app.request("http://localhost/doc");
     const csp = res.headers.get("content-security-policy") ?? "";
     expect(csp).toContain("https://cdn.jsdelivr.net");
+    // o HTML do @scalar/hono-api-reference injeta <script type="module">
+    // inline; sem hash o browser bloqueia e a página fica branca.
+    // Hash = sha256 do corpo exato do script inline (371 chars), verificado
+    // contra o HTML servido em dev e stg (idênticos).
+    expect(csp).toContain(
+      "script-src 'self' 'sha256-70926eb8897bb11e9749edc727bbd49672653fdcb505e2e25f45c93e33d644f7=' https://cdn.jsdelivr.net",
+    );
+    // script-src NÃO pode ter 'unsafe-inline' (hash é o mecanismo exato);
+    // style-src mantém 'unsafe-inline' — Scalar injeta <style> inline
+    const scriptSrc = csp.match(/script-src ([^;]+)/)?.[1] ?? "";
+    expect(scriptSrc).not.toContain("'unsafe-inline'");
     expect(csp).not.toBe("default-src 'none'");
+    // ponytail: guarda de hash-vs-HTML-real não roda aqui (test env não serve
+    // o HTML completo do Scalar); valida-se no smoke pós-deploy (stg/dev).
   });
 
   it("mantém CORP cross-origin em dev (CORS_ORIGINS=*) para mídia do web/Electron", async () => {
