@@ -15,7 +15,7 @@
  */
 
 import { createHash } from "node:crypto";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import {
   copyFile,
   mkdir,
@@ -70,11 +70,25 @@ export function sha256File(buffer: Buffer): string {
   return createHash("sha256").update(buffer).digest("hex");
 }
 
-/** Executa as migrations existentes uma unica vez por DB (tabela de controle propria). */
+/** Executa APENAS as migrations do import ES-JA (idempotentes por IF NOT
+ *  EXISTS) sobre DB ja migrado pelo runner oficial da API. Rodar todo o dir
+ *  falha: staging aplicou 023_custom_password_reset antes de 023_offline_sync
+ *  e a ordem lexicografica quebraria tabelas custom_* existentes. */
 export function applyMigrations(db: DatabaseSync, migrationsDir: string): void {
   db.exec(
     "CREATE TABLE IF NOT EXISTS es_ja_applied_migrations (file TEXT PRIMARY KEY, applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)",
   );
+  const ES_JA_MIGRATIONS = [
+    "001_languages.sql",
+    "002_files.sql",
+    "003_albums.sql",
+    "004_musics.sql",
+    "005_lyrics.sql",
+    "006_albums_musics.sql",
+    "007_categories.sql",
+    "008_categories_albums.sql",
+    "030_es_ja_catalog_imports.sql",
+  ];
   const applied = new Set(
     (
       db.prepare("SELECT file FROM es_ja_applied_migrations").all() as {
@@ -82,8 +96,8 @@ export function applyMigrations(db: DatabaseSync, migrationsDir: string): void {
       }[]
     ).map((row) => row.file),
   );
-  for (const file of readdirSync(migrationsDir).sort()) {
-    if (!file.endsWith(".sql") || applied.has(file)) continue;
+  for (const file of ES_JA_MIGRATIONS) {
+    if (applied.has(file)) continue;
     const sql = readFileSync(path.join(migrationsDir, file), "utf8");
     try {
       db.exec(sql);
@@ -92,8 +106,6 @@ export function applyMigrations(db: DatabaseSync, migrationsDir: string): void {
       );
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      // ALTERs repetidos entre migrations (023/025) sao inofensivos: o que
-      // falha por duplicidade ja foi aplicado antes (mesmas colunas/indexes).
       if (!message.includes("duplicate column name")) throw error;
       db.prepare(
         "INSERT OR REPLACE INTO es_ja_applied_migrations (file) VALUES (?)",
