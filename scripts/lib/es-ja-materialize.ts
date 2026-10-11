@@ -153,7 +153,7 @@ function ensureMusic(
   db: DatabaseSync,
   name: string,
   language: string,
-  vocalFileId: number,
+  vocalFileId: number | null,
   instrumentalFileId: number | null,
 ): number {
   const existing = db
@@ -331,16 +331,19 @@ export async function materialize(
         }
 
         for (const music of album.musics) {
-          const vocal = ensureFile(db, {
-            name: music.name,
-            url: music.vocal.url,
-            dir: path.posix.dirname(music.vocal.url),
-            fileName: music.vocal.fileName,
-            size: stagedSize(staged, music.vocal.driveFileId),
-            duration: null,
-            type: "music",
-          });
-          if (vocal.created) createdFiles += 1;
+          // letra-only (vocal null): sem file de audio, id_file_music NULL
+          const vocal = music.vocal
+            ? ensureFile(db, {
+                name: music.name,
+                url: music.vocal.url,
+                dir: path.posix.dirname(music.vocal.url),
+                fileName: music.vocal.fileName,
+                size: stagedSize(staged, music.vocal.driveFileId),
+                duration: null,
+                type: "music",
+              })
+            : null;
+          if (vocal?.created) createdFiles += 1;
           let instrumentalId: number | null = null;
           if (music.instrumental) {
             const instrumental = ensureFile(db, {
@@ -360,7 +363,7 @@ export async function materialize(
             db,
             music.name,
             "es",
-            vocal.id,
+            vocal?.id ?? null,
             instrumentalId,
           );
           db.prepare(

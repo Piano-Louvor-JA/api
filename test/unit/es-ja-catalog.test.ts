@@ -93,8 +93,11 @@ describe("ES JA catalog planner", () => {
     expect(plan.albums.map((a) => a.order)).toEqual([12, 33]);
   });
 
-  it("rejeita musica sem vocal e duplicidade de variante", () => {
-    expect(() => planCatalog([pista("p1", "Solo Pista")])).toThrow("no vocal");
+  it("musica sem vocal vira letra-only; duplicidade de variante rejeita", () => {
+    const plan = planCatalog([pista("p1", "Solo Pista")]);
+    expect(plan.albums[0]?.musics[0]?.vocal).toBeNull();
+    expect(plan.musicCount).toBe(1);
+    expect(plan.fileCount).toBe(1); // so a pista
     expect(() =>
       planCatalog([vocal("v1", "A"), pista("p1", "A"), pista("p2", "A")]),
     ).toThrow("duplicate instrumental");

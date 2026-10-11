@@ -197,10 +197,8 @@ export function planCatalog(items: readonly EsJaManifestItem[]): CatalogPlan {
     const musics = [...album.musics.values()]
       .sort((a, b) => a.key.localeCompare(b.key, "es"))
       .map((music, index) => {
-        if (!music.vocal)
-          throw new Error(
-            `music "${music.key}" in ${collectionDir} has no vocal (audio-cantado) asset`,
-          );
+        // track sem audio na fonte (ex.: titulo JA 2003 "Enseñame a Servir"
+        // existe so como .slja) entra como letra-only; nao aborta o album.
         musicCount += 1;
         fileCount += 1 + (music.instrumental ? 1 : 0);
         return { ...music, track: index + 1 };
