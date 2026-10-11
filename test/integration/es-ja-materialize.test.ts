@@ -168,7 +168,9 @@ describe("ES JA materialize", () => {
 
     // album + categoria 12
     const album = db
-      .prepare("SELECT id_album, name, id_file_image FROM albums WHERE id_language='es'")
+      .prepare(
+        "SELECT id_album, name, id_file_image FROM albums WHERE id_language='es'",
+      )
       .get() as { id_album: number; name: string; id_file_image: number };
     expect(album.name).toBe("JA 2003 - Enséñame a Servir");
     const catLink = db
@@ -178,9 +180,15 @@ describe("ES JA materialize", () => {
 
     // capa: files image shape PT (/covers/es/<ano>.jpg) ligada ao album
     const coverRow = db
-      .prepare("SELECT path, type, url, dir, file_name FROM files WHERE id_file = ?")
+      .prepare(
+        "SELECT path, type, url, dir, file_name FROM files WHERE id_file = ?",
+      )
       .get(album.id_file_image) as {
-      path: string; type: string; url: string; dir: string; file_name: string;
+      path: string;
+      type: string;
+      url: string;
+      dir: string;
+      file_name: string;
     };
     expect(coverRow).toEqual({
       path: "/covers/es/2003.jpg",
