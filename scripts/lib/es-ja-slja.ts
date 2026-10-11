@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import yauzl from "yauzl";
 
 export type SljaSlide = {
@@ -18,17 +19,22 @@ const MAX_UNCOMPRESSED_BYTES = 64 * 1024 * 1024;
 
 type Entry = { name: string; buffer: Buffer };
 
+// yauzl.open(fd-slicer) pendura em Node 26; fromBuffer é estável. Cap 64MB cobre custo de memória.
 function promisifiedOpen(path: string): Promise<yauzl.ZipFile> {
-  return new Promise((resolve, reject) => {
-    yauzl.open(
-      path,
-      { lazyEntries: true, decodeStrings: true, autoClose: true },
-      (error, zipfile) => {
-        if (error || !zipfile) reject(error ?? new Error("cannot open ZIP"));
-        else resolve(zipfile);
-      },
-    );
-  });
+  return readFile(path).then(
+    (buffer) =>
+      new Promise((resolve, reject) => {
+        yauzl.fromBuffer(
+          buffer,
+          { lazyEntries: true, decodeStrings: true, autoClose: true },
+          (error, zipfile) => {
+            if (error || !zipfile)
+              reject(error ?? new Error("cannot open ZIP"));
+            else resolve(zipfile);
+          },
+        );
+      }),
+  );
 }
 
 function readEntries(
