@@ -97,13 +97,11 @@ export const firebaseAuth: MiddlewareHandler<CustomAuthEnv> =
         }
       }
 
-      if (user) {
-        c.set("user", {
-          id_user: user.id_user,
-          email: user.email,
-          display_name: user.display_name,
-        });
-      }
+      c.set("user", {
+        id_user: user.id_user,
+        email: user.email,
+        display_name: user.display_name,
+      });
     } catch (e) {
       // Token Firebase inválido/expirado → segue anônimo (mesma semântica do optionalAuth)
       console.warn(

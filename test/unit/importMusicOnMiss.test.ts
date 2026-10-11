@@ -3,9 +3,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import Database from "better-sqlite3";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { importMusicById } from "../../src/lib/importMusicOnMiss";
+import { importMusicById } from "../../src/lib/importMusicOnMiss.js";
 
-vi.mock("../../src/lib/upstream", () => ({
+vi.mock("../../src/lib/upstream.js", () => ({
   UpstreamError: class extends Error {
     status: number;
     constructor(msg: string, status: number) {
@@ -125,4 +125,39 @@ describe("importMusicById (fetch on-miss)", () => {
     expect(files.n).toBe(2);
     expect(lyrics.n).toBe(1);
   });
+});
+
+it("importa imagens e estrofe sem identificador opcional", async () => {
+  const upstream = await import("../../src/lib/upstream.js");
+  vi.mocked(upstream.fetchUpstream).mockResolvedValueOnce(
+    new Response(
+      JSON.stringify({
+        id_music: 7777,
+        name: "Optional media",
+        url_image: "https://files.louvorja.com.br/optional.jpg",
+        lyric: [
+          {
+            lyric: "Verse",
+            url_image: "https://files.louvorja.com.br/verse.jpg",
+          },
+        ],
+      }),
+    ),
+  );
+  expect(await importMusicById(7777, db)).toBe(true);
+  expect(
+    db
+      .prepare(
+        "SELECT image_position FROM files WHERE url LIKE '%optional.jpg'",
+      )
+      .get(),
+  ).toEqual({ image_position: null });
+  const verse = db
+    .prepare(
+      "SELECT id_lyric,lyric,id_file_image FROM lyrics WHERE id_music=7777",
+    )
+    .get() as any;
+  expect(verse.id_lyric).toBeGreaterThan(0);
+  expect(verse.lyric).toBe("Verse");
+  expect(verse.id_file_image).toBeGreaterThan(0);
 });

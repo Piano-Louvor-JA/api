@@ -1,4 +1,4 @@
-name: Coverage Gate 100%
+name: Coverage Gate
 
 on:
   pull_request:
@@ -29,7 +29,10 @@ jobs:
 
       - run: npm ci
 
-      - name: Coverage gate (podado de fantasmas, 100x4)
+      - name: Validate coverage destination policy
+        run: node --test scripts/coverage-policy.test.mjs
+
+      - name: Coverage gate (staging 50%, main 100%)
         run: npm run test:coverage:gate
 
       - name: Upload pruned coverage

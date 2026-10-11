@@ -60,7 +60,9 @@ export function promoteMusicToF(
   officialMusicId: number,
   promotedByUserId: number,
   sendEmail: (to: string, subject: string, body: string) => void,
-): { ok: boolean; error?: string; awardedTo?: number; points?: number } {
+):
+  | { ok: false; error: string; awardedTo?: never; points?: never }
+  | { ok: true; error?: never; awardedTo?: number; points: number } {
   const music = db
     .prepare(
       `SELECT id_music, name, owner_id, official_music_id FROM custom_musics WHERE id_music = ?`,
