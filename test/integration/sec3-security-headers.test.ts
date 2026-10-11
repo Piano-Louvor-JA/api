@@ -39,6 +39,22 @@ describe("SEC-3: headers de segurança em todas as rotas", () => {
     },
   );
 
+  it("override de CSP em /file/* permite media/img documents no browser (media-src/img-src 'self')", async () => {
+    // SEC-3 (api#124): default-src 'none' global bloqueia o media-document
+    // quando o usuário abre o mp3/cover direto na URL — Chrome bloqueia o
+    // próprio playback ("media-src … falls back to default-src 'none'").
+    // Override só em /file/*; script/object/frame continuam bloqueados
+    // (fallback default). Header aplica-se pós-next, independe do status.
+    const res = await app.request("http://localhost/file/musics/pt/x.mp3");
+    expect(res.headers.get("content-security-policy")).toBe(
+      "media-src 'self'; img-src 'self'",
+    );
+    const res2 = await app.request("http://localhost/file/covers/x.jpg");
+    expect(res2.headers.get("content-security-policy")).toBe(
+      "media-src 'self'; img-src 'self'",
+    );
+  });
+
   it("override de CSP no /palco permite script inline + WS do receiver", async () => {
     const res = await app.request("http://localhost/palco/");
     const csp = res.headers.get("content-security-policy") ?? "";

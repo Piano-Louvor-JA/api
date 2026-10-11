@@ -60,6 +60,14 @@ export function createApp() {
   // este executa por último e vence.
   const cspOverrides: Array<[RegExp, string]> = [
     [
+      // SEC-3 (api#124): media-document — abrir mp3/cover direto na URL no
+      // browser faz o player nativo herdar o CSP; default-src 'none' bloqueia
+      // o próprio playback. Override só em /file/*; script/object/frame
+      // seguem bloqueados (fallback default-src).
+      /^\/file\//,
+      "media-src 'self'; img-src 'self'",
+    ],
+    [
       /^\/palco(\/|$)/,
       "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' blob:; connect-src 'self' ws: wss:",
     ],
