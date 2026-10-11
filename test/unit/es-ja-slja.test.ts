@@ -45,6 +45,20 @@ describe("SLJA parser", () => {
     await expect(parseSlja(file)).rejects.toThrow();
   });
 
+  it("lê slides.lja com nomes de entrada em barra invertida (Windows)", async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), "slja-win-"));
+    const file = path.join(dir, "win.slja");
+    execFileSync("python3", [
+      "-c",
+      "import sys,zipfile; z=zipfile.ZipFile(sys.argv[1],'w'); z.writestr('audio\\\\x.mp3','a'); z.writestr('slides.lja','[Geral]\\nslides=0'); z.close()",
+      file,
+    ]);
+    await expect(parseSlja(file)).resolves.toMatchObject({
+      title: "Sin título",
+      slides: [],
+    });
+  });
+
   it("rejeita ZIP acima do limite de bytes descomprimidos", async () => {
     const file = await zip({ "slides.lja": Buffer.from("[Geral]\nslides=0") });
     await expect(parseSlja(file, 1)).rejects.toThrow("size limit");

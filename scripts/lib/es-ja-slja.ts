@@ -1,4 +1,3 @@
-import { open } from "node:fs/promises";
 import yauzl from "yauzl";
 
 export type SljaSlide = {
@@ -114,31 +113,12 @@ export async function parseSlja(
   zipPath: string,
   maxBytes = MAX_UNCOMPRESSED_BYTES,
 ): Promise<SljaArchive> {
-  let entries = (
+  const entries = (
     await readEntries(await promisifiedOpen(zipPath), maxBytes)
   ).map((entry) => {
     assertSafeEntry(entry.name);
     return { ...entry, name: entry.name.replaceAll("\\", "/") };
   });
-
-  // ponytail: nested .slja.zip (WhatsApp) — unwrap one level only; drop when source is always Drive-native.
-  if (!entries.some((entry) => entry.name === "slides.lja")) {
-    const nested = entries.find((entry) =>
-      entry.name.toLowerCase().endsWith(".slja"),
-    );
-    if (nested) {
-      const temp = `${zipPath}.inner`;
-      const handle = await open(temp, "w");
-      await handle.writeFile(nested.buffer);
-      await handle.close();
-      entries = (await readEntries(await promisifiedOpen(temp), maxBytes)).map(
-        (entry) => {
-          assertSafeEntry(entry.name);
-          return { ...entry, name: entry.name.replaceAll("\\", "/") };
-        },
-      );
-    }
-  }
 
   const iniEntry = entries.find((entry) => entry.name === "slides.lja");
   if (!iniEntry) throw new Error("slides.lja not found");
