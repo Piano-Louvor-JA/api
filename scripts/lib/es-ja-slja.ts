@@ -23,7 +23,7 @@ function promisifiedOpen(path: string): Promise<yauzl.ZipFile> {
   return new Promise((resolve, reject) => {
     yauzl.open(
       path,
-      { lazyEntries: true, decodeStrings: true },
+      { lazyEntries: true, decodeStrings: true, autoClose: true },
       (error, zipfile) => {
         if (error || !zipfile) reject(error ?? new Error("cannot open ZIP"));
         else resolve(zipfile);
