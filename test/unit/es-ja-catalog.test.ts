@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   collectionMeta,
+  collectionYear,
   planCatalog,
   sanitizeSegment,
 } from "../../scripts/lib/es-ja-catalog.js";
@@ -49,6 +50,15 @@ describe("ES JA catalog planner", () => {
     expect(meta.albumDir).toBe("12. JA 2003 - Enséñame a Servir");
     expect(() => sanitizeSegment("../evil")).toThrow("unsafe path segment");
     expect(() => sanitizeSegment("a/b")).toThrow("unsafe path segment");
+  });
+
+  it("extrai ano do tema (inclui pastas 2-em-1) e deriva coverUrl", () => {
+    expect(collectionYear("12. JA 2003 - Enséñame a Servir")).toBe(2003);
+    expect(collectionYear("31. JA 2022 y 2023 - Yo Voy")).toBe(2022);
+    expect(collectionYear("Himnario Adventista")).toBeNull();
+    const plan = planCatalog([vocal("v1", "Alpha")]);
+    expect(plan.albums[0].year).toBe(2003);
+    expect(plan.albums[0].coverUrl).toBe("/covers/es/2003.jpg");
   });
 
   it("agrupa em albums com tracks ordenadas e URLs musics/es/<album>/", () => {

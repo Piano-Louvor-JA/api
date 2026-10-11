@@ -38,6 +38,7 @@ function options(args: readonly string[]): Options {
     dbPath: value("--db"),
     mediaRoot: value("--media-root"),
     esCategoryId: value("--es-category-id"),
+    coversDir: value("--es-covers-dir"),
   };
 }
 
@@ -93,6 +94,7 @@ async function main(): Promise<void> {
     mediaRoot: input.mediaRoot,
     licenseApprovalId: input.licenseApprovalId,
     esCategoryId: Number.parseInt(input.esCategoryId, 10),
+    ...(input.coversDir ? { coversDir: input.coversDir } : {}),
   });
   process.stdout.write(`${JSON.stringify(result)}\n`);
 }

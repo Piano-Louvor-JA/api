@@ -37,7 +37,9 @@ export type PlannedAlbum = {
   collectionDir: string; // "12. JA 2003 - Enséñame a Servir"
   name: string; // nome de exibicao (sem prefixo numerico)
   order: number; // numero da colecao
+  year: number | null; // primeiro ano do tema ("JA 2022 y 2023" -> 2022)
   albumDir: string; // segmento de path seguro
+  coverUrl: string | null; // /covers/es/<year>.jpg quando year conhecido
   musics: PlannedMusic[];
 };
 
@@ -74,6 +76,12 @@ export function collectionMeta(collectionDir: string): {
   const name = (match?.[2] ?? collectionDir).trim();
   const order = Number.parseInt(match?.[1] ?? "0", 10) || 0;
   return { name, order, albumDir: sanitizeSegment(collectionDir) };
+}
+
+/** "JA 2022 y 2023 - Yo Voy" -> 2022 (primeiro ano do tema); null se nao ha ano. */
+export function collectionYear(collectionDir: string): number | null {
+  const match = /(?:^|\s)JA\s+(\d{4})/u.exec(collectionDir);
+  return match ? Number.parseInt(match[1], 10) : null;
 }
 
 function musicNameFrom(fileName: string): {
@@ -184,6 +192,7 @@ export function planCatalog(items: readonly EsJaManifestItem[]): CatalogPlan {
   let fileCount = 0;
   for (const [collectionDir, album] of albums) {
     const meta = collectionMeta(collectionDir);
+    const year = collectionYear(collectionDir);
     // validar: toda musica precisa de vocal; track = ordem alfabetica do nome
     const musics = [...album.musics.values()]
       .sort((a, b) => a.key.localeCompare(b.key, "es"))
@@ -197,7 +206,13 @@ export function planCatalog(items: readonly EsJaManifestItem[]): CatalogPlan {
         return { ...music, track: index + 1 };
       });
     if (musics.length === 0) continue;
-    plannedAlbums.push({ collectionDir, ...meta, musics });
+    plannedAlbums.push({
+      collectionDir,
+      ...meta,
+      year,
+      coverUrl: year ? `/covers/es/${year}.jpg` : null,
+      musics,
+    });
   }
 
   plannedAlbums.sort(

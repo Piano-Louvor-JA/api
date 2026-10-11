@@ -68,6 +68,8 @@ function readFileSyncOf(p: string) {
 beforeAll(buildSource);
 
 async function buildSource(): Promise<void> {
+  // cover do ano do tema (mesma disposicao do es-ja-source/covers/)
+  await writeSource("covers/2003.jpg", Buffer.from("fake-cover-2003"));
   await writeSource(
     `${AUDIO_DIR}/Beta (audio-cantado).mp3`,
     Buffer.from("fake-vocal-beta"),
@@ -145,7 +147,7 @@ describe("ES JA materialize", () => {
     expect(result.status).toBe("published");
     expect(result.albums).toBe(1);
     expect(result.musics).toBe(2);
-    expect(result.files).toBe(3);
+    expect(result.files).toBe(4); // 3 mp3 + 1 cover image
 
     const db = new DatabaseSync(dbPath);
     // files: URLs /musics/es/<album>/<nome>.mp3
@@ -166,13 +168,27 @@ describe("ES JA materialize", () => {
 
     // album + categoria 12
     const album = db
-      .prepare("SELECT id_album, name FROM albums WHERE id_language='es'")
-      .get() as { id_album: number; name: string };
+      .prepare("SELECT id_album, name, id_file_image FROM albums WHERE id_language='es'")
+      .get() as { id_album: number; name: string; id_file_image: number };
     expect(album.name).toBe("JA 2003 - Enséñame a Servir");
     const catLink = db
       .prepare("SELECT id_category FROM categories_albums WHERE id_album = ?")
       .get(album.id_album) as { id_category: number };
     expect(catLink.id_category).toBe(12);
+
+    // capa: files image shape PT (/covers/es/<ano>.jpg) ligada ao album
+    const coverRow = db
+      .prepare("SELECT path, type, url, dir, file_name FROM files WHERE id_file = ?")
+      .get(album.id_file_image) as {
+      path: string; type: string; url: string; dir: string; file_name: string;
+    };
+    expect(coverRow).toEqual({
+      path: "/covers/es/2003.jpg",
+      type: "image",
+      url: "/covers/es/2003.jpg",
+      dir: "/covers/es",
+      file_name: "2003.jpg",
+    });
 
     // musicas com tracks ordenadas (Alfa=1, Beta=2) e files ligados
     const rows = db
@@ -240,6 +256,11 @@ describe("ES JA materialize", () => {
       path.join(mediaRoot, ".es-ja-staging"),
     );
     expect(stagingEntries).toHaveLength(0);
+
+    // cover promovido para media/covers/es/
+    expect(
+      await readFile(path.join(mediaRoot, "covers", "es", "2003.jpg"), "utf8"),
+    ).toBe("fake-cover-2003");
 
     // idempotencia: reexecutar nao duplica nada (noop por manifest hash)
     const again = await materialize(baseOptions);

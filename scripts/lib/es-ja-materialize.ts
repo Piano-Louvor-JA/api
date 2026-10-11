@@ -42,6 +42,7 @@ export type MaterializeOptions = {
   licenseApprovalId: string;
   esCategoryId: number; // categoria "CDs Oficiais" ES (12 na VM)
   stagingParent?: string; // default: mediaRoot/.es-ja-staging
+  coversDir?: string; // default: <sourceDir>/covers (arquivos <year>.jpg)
 };
 
 export type MaterializeResult = {
@@ -231,11 +232,37 @@ export async function materialize(
   let lyricsSlides = 0;
 
   try {
-    // 1) staging: copiar mp3 approved para fora do media root
+    // 1) staging: copiar mp3 approved + covers para fora do media root
     const staged = new Map<
       string,
       { sourceAbs: string; stagedAbs: string; destAbs: string }
     >();
+    const coversDir = options.coversDir ?? path.join(options.sourceDir, "covers");
+    const stagedCovers = new Map<
+      string,
+      { stagedAbs: string; destAbs: string }
+    >();
+    const seenCoverYears = new Set<number>();
+    const coverYearsAvailable = new Set<number>();
+    for (const album of plan.albums) {
+      if (!album.year || seenCoverYears.has(album.year)) continue;
+      seenCoverYears.add(album.year);
+      const sourceCover = path.join(coversDir, `${album.year}.jpg`);
+      if (!existsSync(sourceCover)) continue; // cover ausente: album sem capa
+      const destAbs = path.join(
+        options.mediaRoot,
+        album.coverUrl?.replace(/^\//u, "") ?? "",
+      );
+      if (existsSync(destAbs)) {
+        coverYearsAvailable.add(album.year); // ja promovido em run anterior
+        skippedExisting += 1;
+        continue;
+      }
+      const stagedAbs = path.join(staging, `cover-${album.year}.jpg`);
+      await copyFile(sourceCover, stagedAbs);
+      stagedCovers.set(String(album.year), { stagedAbs, destAbs });
+      coverYearsAvailable.add(album.year);
+    }
     for (const album of plan.albums) {
       for (const music of album.musics) {
         for (const variant of ["vocal", "instrumental"] as const) {
@@ -284,6 +311,24 @@ export async function materialize(
           `INSERT OR IGNORE INTO categories_albums (id_category, id_album, name, "order", id_language)
            VALUES (?, ?, NULL, ?, 'es')`,
         ).run(options.esCategoryId, idAlbum, album.order);
+
+        // capa: file image + id_file_image (shape PT: path=url=/covers/es/<ano>.jpg)
+        // somente quando o jpg existe (staged neste run ou ja promovido antes)
+        if (album.coverUrl && album.year && coverYearsAvailable.has(album.year)) {
+          const cover = ensureFile(db, {
+            name: path.posix.basename(album.coverUrl),
+            url: album.coverUrl,
+            dir: path.posix.dirname(album.coverUrl),
+            fileName: path.posix.basename(album.coverUrl),
+            size: stagedSize2(stagedCovers, String(album.year)),
+            duration: null,
+            type: "image",
+          });
+          if (cover.created) createdFiles += 1;
+          db.prepare(
+            "UPDATE albums SET id_file_image = ? WHERE id_album = ? AND (id_file_image IS NULL OR id_file_image != ?)",
+          ).run(cover.id, idAlbum, cover.id);
+        }
 
         for (const music of album.musics) {
           const vocal = ensureFile(db, {
@@ -376,6 +421,11 @@ export async function materialize(
 
     // 3) promocao atomica: rename staging -> media (fora da transacao SQL;
     //    falha aqui deixa staging para tras, reexecucao recupera)
+    for (const { stagedAbs, destAbs } of stagedCovers.values()) {
+      await mkdir(path.dirname(destAbs), { recursive: true });
+      await rename(stagedAbs, destAbs);
+      promoted.push(destAbs);
+    }
     for (const { stagedAbs, destAbs } of staged.values()) {
       await mkdir(path.dirname(destAbs), { recursive: true });
       await rename(stagedAbs, destAbs);
@@ -404,6 +454,19 @@ export async function materialize(
     lyricsSlides,
     skippedExistingFiles: skippedExisting,
   };
+}
+
+function stagedSize2(
+  staged: Map<string, { stagedAbs: string }>,
+  key: string,
+): number {
+  const entry = staged.get(key);
+  if (!entry) return 0;
+  try {
+    return readFileSync(entry.stagedAbs).length;
+  } catch {
+    return 0;
+  }
 }
 
 function stagedSize(
