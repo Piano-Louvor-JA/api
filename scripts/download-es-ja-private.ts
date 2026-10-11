@@ -88,7 +88,7 @@ async function main(): Promise<void> {
       });
       continue;
     }
-    if ((await freeBytes(path.dirname(target))) < MIN_FREE_BYTES) {
+    if ((await freeBytes(destination)) < MIN_FREE_BYTES) {
       report.push({
         id: item.driveFileId,
         path: item.relativePath,
