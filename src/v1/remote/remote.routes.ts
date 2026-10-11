@@ -69,18 +69,14 @@ function normalizeCode(input: string) {
   return input.toUpperCase().replace(/[^A-Z0-9]/g, "");
 }
 
+// O único chamador já validou a URL com createSchema.
 function isPrivateWsEndpoint(endpoint: string) {
-  try {
-    const url = new URL(endpoint);
-    const host = url.hostname;
-    return (
-      /^192\.168\./.test(host) ||
-      /^10\./.test(host) ||
-      /^172\.(1[6-9]|2\d|3[0-1])\./.test(host)
-    );
-  } catch {
-    return false;
-  }
+  const host = new URL(endpoint).hostname;
+  return (
+    /^192\.168\./.test(host) ||
+    /^10\./.test(host) ||
+    /^172\.(1[6-9]|2\d|3[0-1])\./.test(host)
+  );
 }
 
 export const remoteRoutes = new Hono();

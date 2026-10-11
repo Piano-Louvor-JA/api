@@ -82,3 +82,16 @@ describe("SEC-143: Semaphore (cap de downloads concorrentes)", () => {
     expect(sem.tryAcquire()).toBe(true);
   });
 });
+
+it("liberação sem aquisição não cria capacidade extra", () => {
+  const sem = new Semaphore(1);
+  sem.release();
+  expect(sem.tryAcquire()).toBe(true);
+  expect(sem.tryAcquire()).toBe(false);
+});
+it("cache inicialmente vazio aceita cap zero sem excluir chave inexistente", () => {
+  const cache = new NegativeCache(1000, 0);
+  cache.set("first");
+  expect(cache.has("first")).toBe(true);
+  expect(cache.size()).toBe(1);
+});

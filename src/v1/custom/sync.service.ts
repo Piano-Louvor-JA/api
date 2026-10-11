@@ -455,16 +455,16 @@ export function runSync(userId: number, body: SyncRequest) {
     applyCollection(db, userId, col, applied, conflicts);
   }
 
-  const operatorApplied = body.operator_state?.length
-    ? applyOperatorState(db, userId, body.operator_state, applied, conflicts)
-    : null;
+  if (body.operator_state?.length) {
+    applyOperatorState(db, userId, body.operator_state, applied, conflicts);
+  }
 
   return {
     server_time: nowMs(),
     applied,
     conflicts,
     collections: loadServerCollections(db, userId),
-    ...(operatorApplied
+    ...(body.operator_state !== undefined
       ? { operator_state: loadServerOperatorState(db, userId) }
       : {}),
   };

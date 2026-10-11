@@ -415,7 +415,7 @@ customRoutes.openapi(updateCollectionRoute, (c) => {
       body.name ?? collection.name,
       body.description ?? collection.description,
       body.cover_url !== undefined ? body.cover_url : collection.cover_url,
-      body.visibility ?? collection.visibility ?? "public",
+      body.visibility ?? collection.visibility,
       parseInt(id, 10),
     );
 
@@ -2383,7 +2383,7 @@ customRoutes.openapi(promoteRoute, (c) => {
       console.log(`[f6-mail] to=${to} subject=${subject}`);
     },
   );
-  if (!result.ok) return c.json({ error: result.error ?? "Erro" }, 400);
+  if (!result.ok) return c.json({ error: result.error }, 400);
   return c.json(
     { ok: true, awarded_to: result.awardedTo ?? null, points: result.points },
     200,
