@@ -114,8 +114,30 @@ export function parseIni(ini: string): Map<string, Map<string, string>> {
   return result;
 }
 
+// tempo=HH:MM:SS (formato antigo) ou MM:SS/HH:MM:SS via tempo_hms (formato novo,
+// JA ~2012+). tempo inteiro do formato novo não é linear (frames de export) e
+// é ignorado — tempo_hms é a fonte confiável quando presente.
 function hms(value: string | undefined): string {
   return value && /^\d{1,2}:\d{2}(:\d{2})?$/u.test(value) ? value : "00:00:00";
+}
+
+function pad2(n: number): string {
+  return n.toString().padStart(2, "0");
+}
+
+function hmsFromTempoHms(value: string | undefined): string | null {
+  if (!value) return null;
+  const m = /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/u.exec(value.trim());
+  if (!m) return null;
+  // tempo_hms grava MM:SS; com 3 grupos é HH:MM:SS
+  return m[3] ? value.trim() : `00:${pad2(Number(m[1]))}:${m[2]}`;
+}
+
+function slideTime(
+  tempoHms: string | undefined,
+  tempo: string | undefined,
+): string {
+  return hmsFromTempoHms(tempoHms) ?? hms(tempo);
 }
 
 export async function parseSlja(
@@ -152,7 +174,7 @@ export async function parseSlja(
       lyric: (section.get("letra") ?? "").replaceAll("|", "\n"),
       auxiliaryLyric: section.get("letra_aux")?.replaceAll("|", "\n") ?? null,
       type: section.get("tipo") ?? (index === 1 ? "CAPA" : "LETRA"),
-      time: hms(section.get("tempo")),
+      time: slideTime(section.get("tempo_hms"), section.get("tempo")),
       imageName: imageName && imageName.length > 0 ? imageName : null,
       imagePosition:
         imagePosition !== null && Number.isFinite(imagePosition)
