@@ -105,5 +105,6 @@ export async function fetchUpstream(url: string): Promise<Response> {
       attempt++;
     }
   }
-  throw lastError ?? new UpstreamError("Upstream failed on all hosts", 502);
+  // Cada host que chega aqui já registrou sua falha.
+  throw lastError!;
 }

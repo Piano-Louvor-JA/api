@@ -86,7 +86,7 @@ function withVersionAbbreviation<T extends Record<string, unknown>>(row: T): T {
     abbreviation: resolveVersionAbbreviation(
       row.abbreviation,
       row.name,
-      row.id_bible_version ?? row.id_version,
+      row.id_bible_version,
     ),
   };
 }
@@ -276,7 +276,7 @@ compatRoutes.get("/json_db/:file", async (c) => {
         name: m.name,
         has_instrumental_music: m.has_instrumental_music,
         duration: m.duration || null,
-        lyric: m.lyric ?? "",
+        lyric: m.lyric,
         albums_names: m.albums_names || null,
         albums: albums.map((a) => ({
           id_album: a.id_album,
@@ -689,17 +689,17 @@ compatRoutes.get("/file/:path{.*}", async (c) => {
 
   // 1. Serve do disco se ja existe no mirror
   if (existsSync(localPath)) {
-    const ext = localPath.split(".").pop()?.toLowerCase() ?? "";
-    const mime =
-      ext === "mp3"
-        ? "audio/mpeg"
-        : ext === "bmp"
-          ? "image/bmp"
-          : ext === "jpg" || ext === "jpeg"
-            ? "image/jpeg"
-            : ext === "png"
-              ? "image/png"
-              : "application/octet-stream";
+    // mirrorablePath já restringiu as extensões à mídia suportada.
+    const ext = localPath.split(".").pop()!.toLowerCase();
+    const mime = (
+      {
+        mp3: "audio/mpeg",
+        bmp: "image/bmp",
+        jpg: "image/jpeg",
+        jpeg: "image/jpeg",
+        png: "image/png",
+      } as Record<string, string>
+    )[ext]!;
     const fileStat = await fsStat(localPath);
     // Range requests (seek de audio)
     const range = c.req.header("range");

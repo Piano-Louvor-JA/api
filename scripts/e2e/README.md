@@ -11,6 +11,17 @@ npm run dev        # API na :3100
 npm i              # ws precisa estar instalado (já é dep de dev)
 ```
 
+## Ambiente da API (guardrail E2E)
+
+Todos os scripts leem `PALCO_E2E_API_URL` (default `http://localhost:3100`)
+e **abortam antes de qualquer request** se o hostname for de produção
+(`api.pianolouvorja.com.br`). Para rodar contra staging:
+
+```bash
+PALCO_E2E_API_URL=https://api-stg.pianolouvorja.com.br node scripts/e2e/wt5-e2e-manual.mjs
+```
+
+
 ## wt5-e2e-manual.mjs — fluxo completo de sessão (auto-contido)
 
 Cria sessão, busca token público, conecta receiver + operator fake,

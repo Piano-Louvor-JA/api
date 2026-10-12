@@ -15,7 +15,7 @@ const MIRRORABLE_EXT = new Set(["mp3", "bmp", "jpg", "jpeg", "png"]);
  */
 export function mirrorablePath(path: string): boolean {
   if (!path || path.includes("..") || path.startsWith("/")) return false;
-  const ext = path.split(".").pop()?.toLowerCase() ?? "";
+  const ext = path.split(".").pop()!.toLowerCase();
   return MIRRORABLE_EXT.has(ext);
 }
 
