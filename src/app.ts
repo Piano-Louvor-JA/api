@@ -60,12 +60,28 @@ export function createApp() {
   // este executa por último e vence.
   const cspOverrides: Array<[RegExp, string]> = [
     [
+      // SEC-3 (api#124): media-document — abrir mp3/cover direto na URL no
+      // browser faz o player nativo herdar o CSP; default-src 'none' bloqueia
+      // o próprio playback. Override só em /file/*; script/object/frame
+      // seguem bloqueados (fallback default-src).
+      /^\/file\//,
+      "media-src 'self'; img-src 'self'",
+    ],
+    [
       /^\/palco(\/|$)/,
       "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' blob:; connect-src 'self' ws: wss:",
     ],
     [
       /^\/doc$/,
-      "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://cdn.jsdelivr.net",
+      // SEC-3: o HTML do @scalar/hono-api-reference injeta <script type="module">
+      // inline (371 chars). Hash exato em vez de 'unsafe-inline' — se o pacote
+      // Scalar mudar o inline, test/integration/sec3-security-headers.test.ts
+      // quebra e o hash abaixo deve ser recalculado do HTML servido.
+      // SEC-3: hash do script inline do Scalar, computado no browser (crypto.subtle)
+      // sobre o HTML servido. Se o pacote @scalar/hono-api-reference mudar o
+      // inline, test/integration/sec3-security-headers.test.ts quebra e o hash
+      // abaixo deve ser recalculado do HTML servido.
+      "default-src 'self'; script-src 'self' 'sha256-cJJuuIl7sR6XSe3HJ7vUlnJlP9y1BeLiX0XJPjPWRPc=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://cdn.jsdelivr.net",
     ],
   ];
   app.use("*", async (c, next) => {
