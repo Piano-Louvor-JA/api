@@ -129,4 +129,35 @@ describe("telemetria api", () => {
     });
     expect(() => reportError(new Error("boom"))).not.toThrow();
   });
+  it("exceções incompletas são sanitizadas sem falhar", async () => {
+    vi.stubEnv("SENTRY_DSN", "https://key@errors.example/1");
+    vi.stubEnv("NODE_ENV", undefined);
+    const { initTelemetry, reportError } = await import(
+      "../../src/lib/telemetry.js"
+    );
+    initTelemetry();
+    await vi.waitFor(() => expect(initMock).toHaveBeenCalled());
+    const options = initMock.mock.calls[0][0];
+    expect(options.environment).toBe("production");
+    expect(options.beforeSend({}).exception.values).toBeUndefined();
+    const result = options.beforeSend({
+      exception: {
+        values: [
+          { value: "secret" },
+          { type: "PrivateError", stacktrace: { frames: [{}] } },
+        ],
+      },
+    });
+    expect(
+      result.exception.values.map((value: { type: string }) => value.type),
+    ).toEqual(["Error", "Error"]);
+    expect(result.exception.values[0].stacktrace.frames).toBeUndefined();
+    expect(
+      result.exception.values[1].stacktrace.frames[0].filename,
+    ).toBeUndefined();
+    expect(JSON.stringify(result)).not.toContain("secret");
+    const error = new Error("boom");
+    reportError(error);
+    expect(captureExceptionMock).toHaveBeenCalledWith(error, undefined);
+  });
 });

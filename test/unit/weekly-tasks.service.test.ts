@@ -35,6 +35,11 @@ describe("weekly-tasks.service (F4)", () => {
     expect(key).toBe(isoWeekKey(new Date("2026-09-16T12:00:00Z")));
   });
 
+  it("domingo pertence à semana ISO anterior mesmo na virada do ano", () => {
+    expect(isoWeekKey(new Date("2021-01-03T23:59:59Z"))).toBe("2020-W53");
+    expect(isoWeekKey(new Date("2021-01-04T00:00:00Z"))).toBe("2021-W01");
+  });
+
   it("rotação: 3 tarefas por semana, determinísticas por weekKey", () => {
     const t1 = weeklyTasksFor("2026-W37");
     const t1again = weeklyTasksFor("2026-W37");

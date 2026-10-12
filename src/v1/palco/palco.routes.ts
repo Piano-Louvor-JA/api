@@ -79,7 +79,7 @@ export function registerPalcoWs(
           };
           const joined = joinRoom(room, client);
           if (!joined.ok) {
-            ws.close(4409, joined.error ?? "join_negado");
+            ws.close(4409, joined.error);
             return;
           }
           state.client = client;
