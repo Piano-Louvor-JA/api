@@ -112,6 +112,28 @@ export function applyMigrations(db: DatabaseSync, migrationsDir: string): void {
       ).run(file);
     }
   }
+  const columns: Record<string, Record<string, string>> = {
+    files: {
+      dir: "TEXT",
+      file_name: "TEXT",
+      duration: "TEXT",
+      version: "INTEGER",
+      image_position: "INTEGER",
+    },
+    albums_musics: { track: "INTEGER", id_language: "TEXT" },
+    categories_albums: { name: "TEXT", order: "INTEGER", id_language: "TEXT" },
+  };
+  for (const [table, additions] of Object.entries(columns)) {
+    const existing = new Set(
+      (
+        db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[]
+      ).map((row) => row.name),
+    );
+    for (const [column, type] of Object.entries(additions)) {
+      if (!existing.has(column))
+        db.exec(`ALTER TABLE ${table} ADD COLUMN "${column}" ${type}`);
+    }
+  }
 }
 
 function ensureFile(
@@ -165,6 +187,7 @@ function ensureMusic(
   db: DatabaseSync,
   name: string,
   language: string,
+  albumId: number,
   vocalFileId: number | null,
   instrumentalFileId: number | null,
 ): number {
@@ -173,9 +196,9 @@ function ensureMusic(
       `SELECT m.id_music FROM musics m
        JOIN albums_musics am ON am.id_music = m.id_music
        JOIN albums a ON a.id_album = am.id_album
-       WHERE m.name = ? AND m.id_language = ? AND a.id_language = ?`,
+       WHERE m.name = ? AND m.id_language = ? AND a.id_language = ? AND a.id_album = ?`,
     )
-    .get(name, language, language) as { id_music: number } | undefined;
+    .get(name, language, language, albumId) as { id_music: number } | undefined;
   if (existing) {
     db.prepare(
       "UPDATE musics SET id_file_music = ?, id_file_instrumental_music = ? WHERE id_music = ?",
@@ -249,7 +272,8 @@ export async function materialize(
       string,
       { sourceAbs: string; stagedAbs: string; destAbs: string }
     >();
-    const coversDir = options.coversDir ?? path.join(options.sourceDir, "covers");
+    const coversDir =
+      options.coversDir ?? path.join(options.sourceDir, "covers");
     const stagedCovers = new Map<
       string,
       { stagedAbs: string; destAbs: string }
@@ -326,7 +350,11 @@ export async function materialize(
 
         // capa: file image + id_file_image (shape PT: path=url=/covers/es/<ano>.jpg)
         // somente quando o jpg existe (staged neste run ou ja promovido antes)
-        if (album.coverUrl && album.year && coverYearsAvailable.has(album.year)) {
+        if (
+          album.coverUrl &&
+          album.year &&
+          coverYearsAvailable.has(album.year)
+        ) {
           const cover = ensureFile(db, {
             name: path.posix.basename(album.coverUrl),
             url: album.coverUrl,
@@ -375,6 +403,7 @@ export async function materialize(
             db,
             music.name,
             "es",
+            idAlbum,
             vocal?.id ?? null,
             instrumentalId,
           );
@@ -428,23 +457,21 @@ export async function materialize(
       db.prepare(
         "UPDATE catalog_imports SET status = 'published', published_at = CURRENT_TIMESTAMP WHERE import_id = ?",
       ).run(`esja-${manifestSha256.slice(0, 12)}`);
+      // Promote files before committing: a failed rename must roll back SQL.
+      for (const { stagedAbs, destAbs } of stagedCovers.values()) {
+        await mkdir(path.dirname(destAbs), { recursive: true });
+        await rename(stagedAbs, destAbs);
+        promoted.push(destAbs);
+      }
+      for (const { stagedAbs, destAbs } of staged.values()) {
+        await mkdir(path.dirname(destAbs), { recursive: true });
+        await rename(stagedAbs, destAbs);
+        promoted.push(destAbs);
+      }
       db.exec("COMMIT");
     } catch (error) {
       db.exec("ROLLBACK");
       throw error;
-    }
-
-    // 3) promocao atomica: rename staging -> media (fora da transacao SQL;
-    //    falha aqui deixa staging para tras, reexecucao recupera)
-    for (const { stagedAbs, destAbs } of stagedCovers.values()) {
-      await mkdir(path.dirname(destAbs), { recursive: true });
-      await rename(stagedAbs, destAbs);
-      promoted.push(destAbs);
-    }
-    for (const { stagedAbs, destAbs } of staged.values()) {
-      await mkdir(path.dirname(destAbs), { recursive: true });
-      await rename(stagedAbs, destAbs);
-      promoted.push(destAbs);
     }
   } catch (error) {
     // desfaz promocoes parciais e mantem DB consistente (rollback ja feito se falhou no SQL)

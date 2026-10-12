@@ -296,3 +296,73 @@ describe("ES JA materialize", () => {
     db2.close();
   });
 });
+
+describe("ES JA import recovery and album identity", () => {
+  it("upgrades an existing legacy schema twice without losing rows", () => {
+    const db = new DatabaseSync(path.join(root, "legacy.db"));
+    db.exec(
+      "CREATE TABLE files (id_file INTEGER PRIMARY KEY, name TEXT, path TEXT, type TEXT, url TEXT, size INTEGER); INSERT INTO files(id_file,name) VALUES(1,'preserved'); CREATE TABLE albums_musics(id_album INTEGER,id_music INTEGER,PRIMARY KEY(id_album,id_music)); CREATE TABLE categories_albums(id_category INTEGER,id_album INTEGER,PRIMARY KEY(id_category,id_album));",
+    );
+    applyMigrations(db, migrationsDir);
+    applyMigrations(db, migrationsDir);
+    expect(
+      db.prepare("SELECT name FROM files WHERE id_file=1").get()?.name,
+    ).toBe("preserved");
+    expect(
+      db
+        .prepare("PRAGMA table_info(albums_musics)")
+        .all()
+        .map((row) => row.name),
+    ).toContain("track");
+    db.close();
+  });
+
+  it("keeps homonymous songs independent across albums", async () => {
+    const manifest = path.join(root, "two-albums.tsv");
+    const rows = [];
+    for (const year of [2004, 2005]) {
+      const rel = `13. JA ${year} - Tema/Beta (audio-cantado).mp3`;
+      await writeSource(rel, `audio-${year}`);
+      rows.push(`id-${year}\t${rel}`);
+    }
+    await writeFile(manifest, rows.join("\n"));
+    const separateDb = path.join(root, "two-albums.db");
+    await materialize({
+      ...baseOptions,
+      manifestPath: manifest,
+      dbPath: separateDb,
+    });
+    const db = new DatabaseSync(separateDb);
+    expect(
+      db.prepare("SELECT id_music FROM musics WHERE name='Beta'").all(),
+    ).toHaveLength(2);
+    expect(
+      db
+        .prepare("SELECT DISTINCT id_file_music FROM musics WHERE name='Beta'")
+        .all(),
+    ).toHaveLength(2);
+    db.close();
+  });
+
+  it("rolls back SQL on publication failure and permits retry", async () => {
+    const failedMedia = path.join(root, "failed-media");
+    await mkdir(failedMedia);
+    await writeFile(
+      path.join(failedMedia, "musics"),
+      "blocks directory creation",
+    );
+    const failedDb = path.join(root, "failed.db");
+    const opts = { ...baseOptions, dbPath: failedDb, mediaRoot: failedMedia };
+    await expect(materialize(opts)).rejects.toThrow();
+    const db = new DatabaseSync(failedDb);
+    expect(db.prepare("SELECT * FROM catalog_imports").all()).toHaveLength(0);
+    expect(db.prepare("SELECT * FROM musics").all()).toHaveLength(0);
+    db.close();
+    const { rm } = await import("node:fs/promises");
+    await rm(path.join(failedMedia, "musics"));
+    expect((await materialize(opts)).status).toBe("published");
+    expect(
+      await readFile(path.join(failedMedia, "covers/es/2003.jpg"), "utf8"),
+    ).toBe("fake-cover-2003");
+  });
+});

@@ -25,10 +25,14 @@ type Options = {
   dbPath?: string;
   mediaRoot?: string;
   esCategoryId?: string;
+  coversDir?: string;
 };
 
 function options(args: readonly string[]): Options {
-  const value = (name: string) => args[args.indexOf(name) + 1];
+  const value = (name: string) => {
+    const index = args.indexOf(name);
+    return index < 0 ? undefined : args[index + 1];
+  };
   return {
     manifest: value("--manifest"),
     sourceDir: value("--source-dir"),
