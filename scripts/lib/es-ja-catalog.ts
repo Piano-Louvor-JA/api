@@ -148,7 +148,7 @@ export function planCatalog(items: readonly EsJaManifestItem[]): CatalogPlan {
       if (!music) {
         music = {
           key,
-          name: key,
+          name: stem.trim(), // nome display = stem do .slja, não a chave
           track: 0,
           vocal: null,
           instrumental: null,
