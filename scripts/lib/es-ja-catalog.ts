@@ -97,6 +97,20 @@ function musicNameFrom(fileName: string): {
   throw new Error(`approved mp3 without known variant suffix: ${fileName}`);
 }
 
+/**
+ * Chave canônica para agrupar vocal/pista/slja da mesma música quando a
+ * grafia diverge entre arquivos (acento, case, pontuação):
+ * "Enseñame a Servir" ≡ "Enséñame a Servir" ≡ "VEN, Espíritu Santo".
+ * NFKD + remove diacríticos, casefold, remove não-alfanuméricos.
+ */
+export function musicKey(name: string): string {
+  return name
+    .normalize("NFKD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/gu, "");
+}
+
 function fileNameFrom(relativePath: string): string {
   return sanitizeSegment(path.posix.basename(relativePath));
 }
@@ -129,7 +143,7 @@ export function planCatalog(items: readonly EsJaManifestItem[]): CatalogPlan {
       const stem = path.posix
         .basename(item.relativePath)
         .replace(/\.slja$/u, "");
-      const key = stem.trim();
+      const key = musicKey(stem.trim());
       let music = album.musics.get(key);
       if (!music) {
         music = {
@@ -164,7 +178,7 @@ export function planCatalog(items: readonly EsJaManifestItem[]): CatalogPlan {
       url: `/musics/es/${albumDir}/${fileName}`,
     };
 
-    const key = name;
+    const key = musicKey(name);
     let music = album.musics.get(key);
     if (!music) {
       music = {

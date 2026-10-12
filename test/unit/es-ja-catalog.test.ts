@@ -102,4 +102,32 @@ describe("ES JA catalog planner", () => {
       planCatalog([vocal("v1", "A"), pista("p1", "A"), pista("p2", "A")]),
     ).toThrow("duplicate instrumental");
   });
+
+  it("slja e mp3 com grafia divergente (acento/case/pontuacao) viram UMA musica", () => {
+    // caso real JA 2003: .slja "Enseñame a Servir" vs mp3 "Enséñame a Servir"
+    const plan = planCatalog([
+      vocal("v1", "Enséñame a Servir"),
+      pista("p1", "Enséñame a Servir"),
+      slja("s1", "Enseñame a Servir"),
+    ]);
+    expect(plan.albums[0]?.musics).toHaveLength(1);
+    expect(plan.albums[0]?.musics[0]?.vocal?.url).toContain("Enséñame");
+    expect(plan.albums[0]?.musics[0]?.sljaPath).toContain("Enseñame");
+    expect(plan.musicCount).toBe(1);
+
+    // caso real JA 2010: slja "Te voy a abrazar" vs mp3 "Te Voy a Abrazar"
+    const plan2 = planCatalog([
+      vocal("v9", "Te Voy a Abrazar", "19. JA 2010 - Generación Esperanza"),
+      slja("s9", "Te voy a abrazar", "19. JA 2010 - Generación Esperanza"),
+    ]);
+    expect(plan2.albums[0]?.musics).toHaveLength(1);
+    expect(plan2.musicCount).toBe(1);
+
+    // pontuacao "Ven, Espíritu Santo" vs "Ven Espíritu Santo"
+    const plan3 = planCatalog([
+      vocal("v3", "Ven Espíritu Santo", "22. JA 2013 - Gente como Jesús"),
+      slja("s3", "Ven, Espíritu Santo", "22. JA 2013 - Gente como Jesús"),
+    ]);
+    expect(plan3.albums[0]?.musics).toHaveLength(1);
+  });
 });
