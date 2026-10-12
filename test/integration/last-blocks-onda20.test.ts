@@ -1,6 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-
-import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 /**
  * Onda 20: últimos 4 blocos reais:
@@ -15,8 +13,14 @@ import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
  *   exportado; caminho L102 (5 colisões) é estatisticamente impossível
  *   (36^6); marcação com justificativa é a opção honesta.
  */
+afterEach(() => {
+  vi.useRealTimers();
+  vi.restoreAllMocks();
+});
+
 describe("rateLimit sweep com 10k keys", () => {
   it("10_100 IPs distintos (TRUSTED_PROXY) enchem o state; sweep roda", async () => {
+    vi.useFakeTimers();
     process.env.RATE_LIMIT_MAX = "999999";
     process.env.RATE_LIMIT_DECAY = "60";
     process.env.TRUSTED_PROXY = "true";
@@ -39,7 +43,7 @@ describe("rateLimit sweep com 10k keys", () => {
     }
     expect(guard).toBeGreaterThanOrEqual(10_099);
     // 60s desde lastSweep: o próximo request passa pelo guard e roda o sweep
-    await new Promise((r) => setTimeout(r, 61_000));
+    await vi.advanceTimersByTimeAsync(61_000);
     const c2: any = {
       req: {
         path: "/v1/sweep",
@@ -49,7 +53,12 @@ describe("rateLimit sweep com 10k keys", () => {
       header: () => {},
       json: () => ({}),
     };
-    await mod.rateLimit(c2, async () => {});
+    const next = vi.fn(async () => {});
+    await mod.rateLimit(c2, next);
+    expect(next).toHaveBeenCalledOnce();
+    await vi.advanceTimersByTimeAsync(601_000);
+    await mod.rateLimit(c2, next);
+    expect(next).toHaveBeenCalledTimes(2);
     delete process.env.RATE_LIMIT_MAX;
     delete process.env.TRUSTED_PROXY;
   }, 180_000);
@@ -57,6 +66,7 @@ describe("rateLimit sweep com 10k keys", () => {
 
 describe("telemetry expireOldMinutes (handler direto)", () => {
   it("10k buckets fake-ctx no minuto M + sleep 61s + request M+1 → expire", async () => {
+    vi.useFakeTimers();
     const mod = await import("../../src/middleware/telemetry.js");
     const mkCtx = (ip: string) =>
       ({
@@ -75,7 +85,7 @@ describe("telemetry expireOldMinutes (handler direto)", () => {
         next,
       );
     }
-    await new Promise((r) => setTimeout(r, 61_000));
+    await vi.advanceTimersByTimeAsync(601_000);
     await mod.telemetryMiddleware(mkCtx("10.4.99.99"), next);
     expect(true).toBe(true);
   }, 180_000);

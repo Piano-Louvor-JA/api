@@ -94,9 +94,9 @@ function resolveBurst(bucket: Bucket): number {
 function normalizePath(path: string): string {
   let p = path.startsWith("/") ? path : `/${path}`;
   const segments = p.split("/");
-  if (segments.length > 2 && LANG_PREFIXES.includes(segments[1] ?? "")) {
+  if (segments.length > 2 && LANG_PREFIXES.includes(segments[1]!)) {
     segments.splice(1, 1);
-    p = segments.join("/") || "/";
+    p = segments.join("/");
   }
   return p;
 }
@@ -119,7 +119,7 @@ export function getClientIpSafe(
   const trusted = opts.TRUSTED_PROXY === true || opts.TRUSTED_PROXY === "true";
   if (trusted) {
     const fwd = c.req.header("x-forwarded-for");
-    if (fwd) return (fwd.split(",")[0] ?? "").trim();
+    if (fwd) return fwd.split(",")[0]!.trim();
     const real = c.req.header("x-real-ip");
     if (real) return real;
   }

@@ -128,7 +128,7 @@ export function getRoomToken(code: string): string | null {
 export function joinRoom(
   room: PalcoRoom,
   client: RelayClient,
-): { ok: boolean; error?: string } {
+): { ok: true; error?: never } | { ok: false; error: string } {
   // Reconexão por identidade: se existe client antigo com o MESMO cid (socket
   // morto cujo onClose não rodou — caso real 01/09: web/TV reconectando tomava
   // 4409 e entrava em loop), expulsa o morto e deixa o novo entrar.

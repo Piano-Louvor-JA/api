@@ -45,7 +45,7 @@ interface UpstreamMusicDetail {
 function parseFilePath(fullPath: string): { dir: string; file_name: string } {
   const clean = fullPath.replace(/^https?:\/\/[^/]+\//, "");
   const parts = clean.split("/");
-  const file_name = parts.pop() ?? clean;
+  const file_name = parts.pop()!;
   const dir = parts.join("/");
   return { dir, file_name };
 }

@@ -77,6 +77,28 @@ describe("firebaseAuth middleware (RF-003/RF-004)", () => {
     expect(verifyIdTokenMock).not.toHaveBeenCalled();
   });
 
+  it("configuração ausente mantém sessão anônima e informa falha", async () => {
+    vi.resetModules();
+    vi.stubEnv("FIREBASE_SERVICE_ACCOUNT", undefined);
+    const { firebaseAuth: freshAuth } = await import(
+      "../../src/v1/custom/firebase-auth.middleware.js"
+    );
+    const warning = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const ctx = makeContext({ authorization: "Bearer a.b.c" }),
+        next = vi.fn(async () => {});
+      await freshAuth(ctx as never, next);
+      expect(next).toHaveBeenCalledOnce();
+      expect(ctx.get("user")).toBeUndefined();
+      expect(verifyIdTokenMock).not.toHaveBeenCalled();
+      expect(warning).toHaveBeenCalledWith(
+        "[firebaseAuth] verifyIdToken FALHOU:",
+        "FIREBASE_SERVICE_ACCOUNT não configurado",
+      );
+    } finally {
+      warning.mockRestore();
+    }
+  });
   it("ID token Firebase válido + usuário novo → INSERT com firebase_uid e seta user", async () => {
     verifyIdTokenMock.mockResolvedValue({
       uid: "fb-uid-1",
@@ -193,5 +215,20 @@ describe("firebaseAuth middleware (RF-003/RF-004)", () => {
       "fb-uid-4",
       "fb-uid-4",
     );
+  });
+  it("falha de verificação sem objeto Error não interrompe o fluxo", async () => {
+    verifyIdTokenMock.mockRejectedValue("provider unavailable");
+    const warning = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const ctx = makeContext({ authorization: "Bearer a.b.c" });
+      await callMiddleware(ctx, async () => {});
+      expect(ctx.get("user")).toBeUndefined();
+      expect(warning).toHaveBeenCalledWith(
+        "[firebaseAuth] verifyIdToken FALHOU:",
+        "provider unavailable",
+      );
+    } finally {
+      warning.mockRestore();
+    }
   });
 });

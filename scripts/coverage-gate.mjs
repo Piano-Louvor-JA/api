@@ -1,12 +1,17 @@
 #!/usr/bin/env node
-/** Coverage 100x4. Only exact duplicate statement spans may be removed.
+/** Coverage by destination. Only exact duplicate statement spans may be removed.
  * Branches and functions with zero hits remain gaps, even on executed lines.
  */
 import { execSync } from "node:child_process";
 import { existsSync, rmSync } from "node:fs";
+import { coverageThreshold } from "./coverage-policy.mjs";
 
 const REPORTS = "coverage-gate";
-const GATE = 100;
+const GATE = coverageThreshold({
+  eventName: process.env.GITHUB_EVENT_NAME,
+  baseRef: process.env.GITHUB_BASE_REF,
+  ref: process.env.GITHUB_REF,
+});
 
 console.log("[gate] 1/3 vitest run --coverage ...");
 rmSync(REPORTS, { recursive: true, force: true });
@@ -24,7 +29,7 @@ execSync(
   { stdio: "inherit" },
 );
 
-console.log("[gate] 3/3 thresholds 100x4 ...");
+console.log(`[gate] 3/3 thresholds ${GATE}x4 ...`);
 const summary = JSON.parse(
   existsSync(`${REPORTS}/pruned-summary.json`)
     ? await import("node:fs").then((m) => m.readFileSync(`${REPORTS}/pruned-summary.json`, "utf8"))
@@ -41,4 +46,4 @@ if (failed) {
   console.error("[gate] FALHOU — coverage abaixo do gate");
   process.exit(1);
 }
-console.log("[gate] PASSOU — 100/100/100/100 (pós-poda de fantasmas)");
+console.log(`[gate] PASSOU — mínimo ${GATE}% por métrica (pós-poda de fantasmas)`);
