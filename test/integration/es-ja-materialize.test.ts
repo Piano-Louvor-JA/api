@@ -82,7 +82,8 @@ async function buildSource(): Promise<void> {
     `${AUDIO_DIR}/Beta.slja`,
     sljaZip({
       "slides.lja":
-        "[Geral]\r\nslides=2\r\ntitulo=Beta\r\n[Slide:1]\r\nletra=Estrofa|uno\r\ntempo_hms=00:00:05\r\n[Slide:2]\r\nletra=Estrofa|dos\r\n",
+        "[Geral]\r\nslides=3\r\ntitulo=Beta\r\nurl_musica=audio\\Beta (audio-cantado).mp3\r\n[Slide:1]\r\nletra=Estrofa|uno\r\ntempo=00:00:05\r\nimagem=imagens\\hasd_297B.jpg\r\nimagem_posicao=5\r\n[Slide:2]\r\nletra=Estrofa|dos\r\ntempo=00:00:12\r\nimagem=imagens\\hasd_297B.jpg\r\nimagem_posicao=5\r\n[Slide:3]\r\nletra=\r\ntempo=00:00:00\r\n",
+      "imagens/hasd_297B.jpg": Buffer.from("fake-image-297"),
     }),
   );
   await writeSource(
@@ -111,6 +112,8 @@ const baseOptions = {
   mediaRoot,
   licenseApprovalId: "LA-ESJA-20261011",
   esCategoryId: 12,
+  // duração real vem do ffprobe no runner; no teste, probe determinístico
+  probeDuration: async () => 294.879125,
 };
 
 describe("ES JA materialize", () => {
@@ -147,7 +150,7 @@ describe("ES JA materialize", () => {
     expect(result.status).toBe("published");
     expect(result.albums).toBe(1);
     expect(result.musics).toBe(2);
-    expect(result.files).toBe(4); // 3 mp3 + 1 cover image
+    expect(result.files).toBe(5); // 3 mp3 + 1 cover + 1 imagem de slide
 
     const db = new DatabaseSync(dbPath);
     // files: URLs /musics/es/<album>/<nome>.mp3
@@ -224,17 +227,73 @@ describe("ES JA materialize", () => {
       },
     ]);
 
-    // lyrics do slja (2 slides, ordem preservada)
+    // lyrics do slja: tempo real por slide, instrumental_time = cópia (tem pista),
+    // imagem ligada por slide, slide vazio show_slide=0
     const lyrics = db
       .prepare(
-        `SELECT l.lyric, l."order" FROM lyrics l JOIN musics m ON m.id_music=l.id_music
+        `SELECT l.lyric, l."order", l.time, l.instrumental_time, l.show_slide, fi.url AS url_image, fi.image_position
+         FROM lyrics l JOIN musics m ON m.id_music=l.id_music
+         LEFT JOIN files fi ON fi.id_file=l.id_file_image
          WHERE m.name='Beta' ORDER BY l."order"`,
       )
-      .all() as { lyric: string; order: number }[];
+      .all() as {
+      lyric: string;
+      order: number;
+      time: string;
+      instrumental_time: string;
+      show_slide: number;
+      url_image: string | null;
+      image_position: number | null;
+    }[];
     expect(lyrics).toEqual([
-      { lyric: "Estrofa\nuno", order: 1 },
-      { lyric: "Estrofa\ndos", order: 2 },
+      {
+        lyric: "Estrofa\nuno",
+        order: 1,
+        time: "00:00:05",
+        instrumental_time: "00:00:05",
+        show_slide: 1,
+        url_image: "/images/es/hasd_297B.jpg",
+        image_position: 5,
+      },
+      {
+        lyric: "Estrofa\ndos",
+        order: 2,
+        time: "00:00:12",
+        instrumental_time: "00:00:12",
+        show_slide: 1,
+        url_image: "/images/es/hasd_297B.jpg",
+        image_position: 5,
+      },
+      {
+        lyric: "",
+        order: 3,
+        time: "00:00:00",
+        instrumental_time: "00:00:00",
+        show_slide: 0,
+        url_image: null,
+        image_position: null,
+      },
     ]);
+
+    // musics.id_file_image = primeira imagem válida do slja
+    const musicImg = db
+      .prepare(
+        `SELECT fi.url FROM musics m JOIN files fi ON fi.id_file=m.id_file_image WHERE m.name='Beta'`,
+      )
+      .get() as { url: string };
+    expect(musicImg.url).toBe("/images/es/hasd_297B.jpg");
+
+    // durations aferidas: vocal e pista
+    const durations = db
+      .prepare(
+        `SELECT vf.duration AS vocal, IFNULL(if2.duration,'') AS pista
+         FROM musics m
+         JOIN files vf ON vf.id_file=m.id_file_music
+         LEFT JOIN files if2 ON if2.id_file=m.id_file_instrumental_music
+         WHERE m.name='Beta'`,
+      )
+      .get() as { vocal: string; pista: string };
+    expect(durations).toEqual({ vocal: "00:04:55", pista: "00:04:55" });
 
     // auditoria
     const audit = db
@@ -269,6 +328,14 @@ describe("ES JA materialize", () => {
     expect(
       await readFile(path.join(mediaRoot, "covers", "es", "2003.jpg"), "utf8"),
     ).toBe("fake-cover-2003");
+
+    // imagem de slide extraída do slja promovida para media/images/es/
+    expect(
+      await readFile(
+        path.join(mediaRoot, "images", "es", "hasd_297B.jpg"),
+        "utf8",
+      ),
+    ).toBe("fake-image-297");
 
     // idempotencia: reexecutar nao duplica nada (noop por manifest hash)
     const again = await materialize(baseOptions);

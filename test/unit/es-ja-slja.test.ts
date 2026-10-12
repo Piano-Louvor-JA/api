@@ -18,13 +18,40 @@ describe("SLJA parser", () => {
   it("lê slides.lja Windows-1252 e converte slides", async () => {
     const file = await zip({
       "slides.lja": Buffer.from(
-        "[Geral]\r\nslides=1\r\ntitulo=Canci\u00f3n\r\n[Slide:1]\r\nletra=Ol\u00e1|mundo\r\ntempo_hms=00:01:02\r\n",
+        "[Geral]\r\nslides=1\r\ntitulo=Canci\u00f3n\r\n[Slide:1]\r\nletra=Ol\u00e1|mundo\r\ntempo=00:01:02\r\n",
         "latin1",
       ),
     });
     await expect(parseSlja(file)).resolves.toMatchObject({
       title: "Canción",
       slides: [{ lyric: "Olá\nmundo", time: "00:01:02", order: 1 }],
+    });
+  });
+
+  it("lê tempo pela chave real 'tempo' (não tempo_hms)", async () => {
+    const file = await zip({
+      "slides.lja": Buffer.from(
+        "[Geral]\r\nslides=2\r\n[Slide:1]\r\nletra=A\r\ntempo=00:00:18\r\n[Slide:2]\r\nletra=B\r\ntempo=00:00:23\r\n",
+        "latin1",
+      ),
+    });
+    await expect(parseSlja(file)).resolves.toMatchObject({
+      slides: [
+        { time: "00:00:18", order: 1 },
+        { time: "00:00:23", order: 2 },
+      ],
+    });
+  });
+
+  it("lê imagem com caminho Windows (imagens\\hasd.jpg) e posição", async () => {
+    const file = await zip({
+      "slides.lja": Buffer.from(
+        "[Geral]\r\nslides=1\r\n[Slide:1]\r\nletra=A\r\nimagem=imagens\\hasd_297B.jpg\r\nimagem_posicao=5\r\n",
+        "latin1",
+      ),
+    });
+    await expect(parseSlja(file)).resolves.toMatchObject({
+      slides: [{ imageName: "hasd_297B.jpg", imagePosition: 5 }],
     });
   });
 

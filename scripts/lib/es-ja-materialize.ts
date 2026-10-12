@@ -14,6 +14,7 @@
  * SQLite: node:sqlite (DatabaseSync) — better-sqlite3 nao compila em Node 26.
  */
 
+import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import {
@@ -23,16 +24,60 @@ import {
   readFile,
   rename,
   rm,
+  writeFile,
 } from "node:fs/promises";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
+import { promisify } from "node:util";
 import { planCatalog } from "./es-ja-catalog.js";
 import {
   type EsJaManifestItem,
   normalizedManifestHash,
   parseManifest,
 } from "./es-ja-manifest.js";
-import { parseSlja } from "./es-ja-slja.js";
+import { parseSlja, type SljaArchive } from "./es-ja-slja.js";
+
+const execFileAsync = promisify(execFile);
+
+/** ffprobe local; lança erro explícito se binário ausente (sem dep npm). */
+async function probeDurationFfprobe(filePath: string): Promise<number> {
+  const { stdout } = await execFileAsync(
+    "ffprobe",
+    [
+      "-v",
+      "error",
+      "-show_entries",
+      "format=duration",
+      "-of",
+      "default=noprint_wrappers=1:nokey=1",
+      filePath,
+    ],
+    { timeout: 30_000 },
+  );
+  const seconds = Number.parseFloat(stdout.trim());
+  if (!Number.isFinite(seconds) || seconds <= 0) {
+    throw new Error(`ffprobe sem duração válida: ${filePath}`);
+  }
+  return seconds;
+}
+
+/** 294.879125s -> "00:04:55" (round-half-up determinístico, igual shape PT). */
+export function secondsToHms(seconds: number): string {
+  const total = Math.round(seconds);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  return [h, m, s].map((n) => String(n).padStart(2, "0")).join(":");
+}
+
+/** nome seguro p/ extração: basename, sem path/absolute/NUL. */
+export function safeImageName(name: string): string | null {
+  if (!name || name.includes("\0")) return null;
+  const base = path.posix.basename(name.replaceAll("\\", "/"));
+  if (!base || base === "." || base === ".." || base === "/") return null;
+  if (!/^[\w.\- À-ÿ()]+$/.test(base)) return null;
+  return base;
+}
 
 export type MaterializeOptions = {
   manifestPath: string;
@@ -43,6 +88,8 @@ export type MaterializeOptions = {
   esCategoryId: number; // categoria "CDs Oficiais" ES (12 na VM)
   stagingParent?: string; // default: mediaRoot/.es-ja-staging
   coversDir?: string; // default: <sourceDir>/covers (arquivos <year>.jpg)
+  /** Afere duração (segundos) do arquivo de áudio; default = ffprobe local. */
+  probeDuration?: (filePath: string) => Promise<number>;
 };
 
 export type MaterializeResult = {
@@ -151,7 +198,15 @@ function ensureFile(
   const existing = db
     .prepare("SELECT id_file FROM files WHERE url = ?")
     .get(row.url) as FileRow | undefined;
-  if (existing) return { id: existing.id_file, created: false };
+  if (existing) {
+    // backfill: duração aferida depois preenche NULL de import antigo
+    if (row.duration !== null) {
+      db.prepare(
+        "UPDATE files SET duration = ? WHERE id_file = ? AND duration IS NULL",
+      ).run(row.duration, existing.id_file);
+    }
+    return { id: existing.id_file, created: false };
+  }
   const result = db
     .prepare(
       `INSERT INTO files (name, path, type, url, size, dir, file_name, duration)
@@ -278,6 +333,11 @@ export async function materialize(
       string,
       { stagedAbs: string; destAbs: string }
     >();
+    // imagens de slides extraídas dos .slja: dedup por nome no run
+    const stagedImages = new Map<
+      string,
+      { stagedAbs: string; destAbs: string; imagePosition: number | null }
+    >();
     const seenCoverYears = new Set<number>();
     const coverYearsAvailable = new Set<number>();
     for (const album of plan.albums) {
@@ -371,7 +431,26 @@ export async function materialize(
         }
 
         for (const music of album.musics) {
+          // probe de duração: staged se disponível (fonte), senão destino já promovido
+          const probe = options.probeDuration ?? probeDurationFfprobe;
+          const durationOf = async (
+            file: { driveFileId: string; url: string } | null,
+          ): Promise<string | null> => {
+            if (!file) return null;
+            const stagedEntry = staged.get(file.driveFileId);
+            const abs =
+              stagedEntry?.stagedAbs ??
+              path.join(options.mediaRoot, file.url.replace(/^\//u, ""));
+            if (!existsSync(abs)) return null; // áudio ausente: duração fica NULL
+            try {
+              return secondsToHms(await probe(abs));
+            } catch {
+              return null; // ffprobe falhou p/ este arquivo: não aborta o import
+            }
+          };
+
           // letra-only (vocal null): sem file de audio, id_file_music NULL
+          const vocalDuration = await durationOf(music.vocal);
           const vocal = music.vocal
             ? ensureFile(db, {
                 name: music.name,
@@ -379,20 +458,21 @@ export async function materialize(
                 dir: path.posix.dirname(music.vocal.url),
                 fileName: music.vocal.fileName,
                 size: stagedSize(staged, music.vocal.driveFileId),
-                duration: null,
+                duration: vocalDuration,
                 type: "music",
               })
             : null;
           if (vocal?.created) createdFiles += 1;
           let instrumentalId: number | null = null;
           if (music.instrumental) {
+            const instrDuration = await durationOf(music.instrumental);
             const instrumental = ensureFile(db, {
               name: music.name,
               url: music.instrumental.url,
               dir: path.posix.dirname(music.instrumental.url),
               fileName: music.instrumental.fileName,
               size: stagedSize(staged, music.instrumental.driveFileId),
-              duration: null,
+              duration: instrDuration,
               type: "music",
             });
             instrumentalId = instrumental.id;
@@ -412,7 +492,8 @@ export async function materialize(
              VALUES (?, ?, ?, 'es')`,
           ).run(idAlbum, idMusic, music.track);
 
-          // lyrics a partir do .slja (fonte privada, nunca publicada)
+          // lyrics a partir do .slja (fonte privada, nunca publicada):
+          // tempo real por slide, imagem extraída do ZIP, convenção PT
           if (music.sljaPath) {
             const sljaAbs = path.join(options.sourceDir, music.sljaPath);
             if (existsSync(sljaAbs)) {
@@ -420,20 +501,77 @@ export async function materialize(
               db.prepare(
                 "DELETE FROM lyrics WHERE id_music = ? AND id_language = 'es'",
               ).run(idMusic);
+
+              // imagens: extrai p/ staging (1ª vez) e resolve id_file_image por slide
+              const slideImageIds = new Map<string, number>();
+              let firstImageId: number | null = null;
+              for (const slide of archive.slides) {
+                if (!slide.imageName) continue;
+                const safe = safeImageName(slide.imageName);
+                if (!safe) continue; // nome inválido: slide fica sem imagem
+                const buffer = archive.images.get(slide.imageName);
+                if (!buffer) continue; // ZIP sem a imagem: sem vínculo
+                if (!slideImageIds.has(safe)) {
+                  const url = `/images/es/${safe}`;
+                  const destAbs = path.join(
+                    options.mediaRoot,
+                    url.replace(/^\//u, ""),
+                  );
+                  if (!existsSync(destAbs) && !stagedImages.has(safe)) {
+                    const stagedAbs = path.join(staging, `img-${safe}`);
+                    await writeFile(stagedAbs, buffer);
+                    stagedImages.set(safe, {
+                      stagedAbs,
+                      destAbs,
+                      imagePosition: slide.imagePosition,
+                    });
+                  }
+                  const file = ensureFile(db, {
+                    name: safe,
+                    url,
+                    dir: "/images/es",
+                    fileName: safe,
+                    size: buffer.length,
+                    duration: null,
+                    type: "image",
+                  });
+                  if (file.created) createdFiles += 1;
+                  slideImageIds.set(safe, file.id);
+                }
+                const fileId = slideImageIds.get(safe) ?? null;
+                if (fileId !== null && firstImageId === null)
+                  firstImageId = fileId;
+              }
+
               const insertLyric = db.prepare(
                 `INSERT INTO lyrics
                  (id_music, lyric, aux_lyric, id_file_image, time, instrumental_time, show_slide, "order", id_language)
-                 VALUES (?, ?, ?, NULL, ?, '00:00:00', 1, ?, 'es')`,
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'es')`,
               );
               for (const slide of archive.slides) {
+                const safe = slide.imageName
+                  ? safeImageName(slide.imageName)
+                  : null;
+                const imageId = safe ? (slideImageIds.get(safe) ?? null) : null;
+                const hasInstrumental = instrumentalId !== null;
                 insertLyric.run(
                   idMusic,
                   slide.lyric,
                   slide.auxiliaryLyric,
+                  imageId,
                   slide.time,
+                  hasInstrumental ? slide.time : "00:00:00", // convenção PT: cópia quando há pista
+                  slide.lyric.trim().length === 0 ? 0 : 1, // slide vazio → não exibe
                   slide.order,
                 );
                 lyricsSlides += 1;
+              }
+
+              // capa da música = primeira imagem válida dos slides
+              if (firstImageId !== null) {
+                db.prepare(
+                  "UPDATE musics SET id_file_image = ? WHERE id_music = ? AND id_file_image IS NULL",
+                ).run(firstImageId, idMusic);
               }
             }
           }
@@ -467,6 +605,18 @@ export async function materialize(
         await mkdir(path.dirname(destAbs), { recursive: true });
         await rename(stagedAbs, destAbs);
         promoted.push(destAbs);
+      }
+      for (const [
+        safe,
+        { stagedAbs, destAbs, imagePosition },
+      ] of stagedImages) {
+        await mkdir(path.dirname(destAbs), { recursive: true });
+        await rename(stagedAbs, destAbs);
+        promoted.push(destAbs);
+        // image_position vive em files; atualiza dentro da mesma transação.
+        db.prepare(
+          "UPDATE files SET image_position = ? WHERE url = ? AND (image_position IS NULL OR image_position != ?)",
+        ).run(imagePosition, `/images/es/${safe}`, imagePosition);
       }
       db.exec("COMMIT");
     } catch (error) {

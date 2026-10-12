@@ -7,12 +7,15 @@ export type SljaSlide = {
   type: string;
   time: string;
   imageName: string | null;
+  imagePosition: number | null;
   order: number;
 };
 
 export type SljaArchive = {
   title: string;
   slides: SljaSlide[];
+  /** Buffers das imagens referenciadas em slides (chave = nome do arquivo). */
+  images: Map<string, Buffer>;
 };
 
 const MAX_UNCOMPRESSED_BYTES = 64 * 1024 * 1024;
@@ -139,14 +142,32 @@ export async function parseSlja(
     const section = ini.get(`Slide:${index}`);
     if (!section) continue;
     const imagem = section.get("imagem");
+    // INI real usa backslash: imagem=imagens\hasd_297B.jpg
+    const imageName = imagem
+      ? imagem.replace(/^imagens[\\/]/u, "").replaceAll("\\", "/")
+      : null;
+    const posicaoRaw = section.get("imagem_posicao");
+    const imagePosition = posicaoRaw ? Number.parseInt(posicaoRaw, 10) : null;
     slides.push({
       lyric: (section.get("letra") ?? "").replaceAll("|", "\n"),
       auxiliaryLyric: section.get("letra_aux")?.replaceAll("|", "\n") ?? null,
       type: section.get("tipo") ?? (index === 1 ? "CAPA" : "LETRA"),
-      time: hms(section.get("tempo_hms")),
-      imageName: imagem ? imagem.replace(/^imagens\//u, "") : null,
+      time: hms(section.get("tempo")),
+      imageName: imageName && imageName.length > 0 ? imageName : null,
+      imagePosition:
+        imagePosition !== null && Number.isFinite(imagePosition)
+          ? imagePosition
+          : null,
       order: index,
     });
   }
-  return { title, slides };
+  const images = new Map<string, Buffer>();
+  for (const slide of slides) {
+    if (!slide.imageName || images.has(slide.imageName)) continue;
+    const imgEntry = entries.find(
+      (entry) => entry.name === `imagens/${slide.imageName}`,
+    );
+    if (imgEntry) images.set(slide.imageName, imgEntry.buffer);
+  }
+  return { title, slides, images };
 }
