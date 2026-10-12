@@ -66,6 +66,18 @@ describe("E2E fixture block (POST register/collections/musics)", () => {
       process.env.BLOCK_E2E_FIXTURES = undefined;
     });
 
+    it("register legítimo continua disponível com o guard de produção ativo", async () => {
+      const res = await postJson("/v1/custom/auth/register", {
+        email: "registro-legitimo@rank.local",
+        password: "SenhaForte1!",
+        displayName: "Maria",
+      });
+      expect(res.status).toBe(201);
+      const body = await res.json();
+      expect(body.token).toBeTruthy();
+      expect(body.user.email).toBe("registro-legitimo@rank.local");
+    });
+
     it("register e2e_x@teste.com → 403 E2E_FIXTURE_BLOCKED sem criar usuário", async () => {
       const usersBefore = (
         app.getDb().prepare("SELECT COUNT(*) AS n FROM custom_users").get() as {
