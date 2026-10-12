@@ -7,7 +7,7 @@ export function resolveApiBase(source = "process.env") {
   const base = process.env.PALCO_E2E_API_URL ?? "http://localhost:3100";
   let host;
   try {
-    host = new URL(base).hostname.toLowerCase();
+    host = new URL(base).hostname.toLowerCase().replace(/\.$/, "");
   } catch {
     throw new Error(`PALCO_E2E_API_URL inválida: ${base}`);
   }
