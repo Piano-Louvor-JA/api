@@ -80,6 +80,29 @@ beforeEach(() => {
 });
 
 describe("importMusicById (fetch on-miss)", () => {
+  it("preserva áudio sem duração e estrofe vazia vindos do upstream", async () => {
+    const upstream = await import("../../src/lib/upstream.js");
+    vi.mocked(upstream.fetchUpstream).mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          id_music: 7788,
+          name: "Áudio sem metadados",
+          url_music: "https://files.louvorja.com.br/no-duration.mp3",
+          lyric: [{ lyric: "" }],
+        }),
+      ),
+    );
+    expect(await importMusicById(7788, db)).toBe(true);
+    expect(
+      db
+        .prepare("SELECT duration FROM files WHERE url = ?")
+        .get("https://files.louvorja.com.br/no-duration.mp3"),
+    ).toEqual({ duration: null });
+    expect(
+      db.prepare("SELECT lyric, time FROM lyrics WHERE id_music = 7788").get(),
+    ).toEqual({ lyric: "", time: "00:00:00" });
+  });
+
   it("importa musica inexistente: musics + files + lyrics", async () => {
     const ok = await importMusicById(9999, db);
     expect(ok).toBe(true);
