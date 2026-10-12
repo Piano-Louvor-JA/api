@@ -11,6 +11,8 @@ services:
       - ./data:/app/data
       - ./media:/app/media:ro
       - ./media_community:/app/media_community:ro
+      - /opt/services/api-piano-louvorja/media/covers/es:/app/media/covers/es
+      - /opt/services/api-piano-louvorja/media/images/es:/app/media/images/es
     env_file:
       - .env
 
