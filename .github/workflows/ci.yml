@@ -61,6 +61,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: mkdir -p data
+      - name: Guardrail dos scripts E2E (sem rede)
+        run: node --test scripts/e2e/e2e-api.test.mjs
       - run: npm run test:coverage
       - uses: actions/upload-artifact@v4
         with:
