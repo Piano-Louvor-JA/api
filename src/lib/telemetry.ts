@@ -1,4 +1,4 @@
-import type { ErrorEvent } from "@sentry/node";
+import type { ErrorEvent, NodeOptions } from "@sentry/node";
 
 /**
  * Telemetria de erros — Glitchtip/Sentry (server-side).
@@ -12,7 +12,7 @@ type ErrorContext = Record<string, unknown>;
 
 type SentryNode = {
   captureException(error: unknown, hint?: { extra?: ErrorContext }): void;
-  init(options: Record<string, unknown>): void;
+  init(options: NodeOptions): void;
 };
 
 let captureException: SentryNode["captureException"] | null = null;
@@ -63,7 +63,19 @@ export function initTelemetry(): void {
       sentry.init({
         dsn,
         environment: process.env.NODE_ENV ?? "production",
-        sendDefaultPii: false,
+        dataCollection: {
+          userInfo: false,
+          cookies: false,
+          httpHeaders: { request: false, response: false },
+          httpBodies: [],
+          urlQueryParams: false,
+          genAI: { inputs: false, outputs: false },
+          databaseQueryData: false,
+          queues: false,
+          graphQL: { document: false, variables: false },
+          stackFrameVariables: false,
+          frameContextLines: 0,
+        },
         tracesSampleRate: 0,
         defaultIntegrations: false,
         beforeSend: sanitizeEvent,
