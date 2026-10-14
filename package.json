@@ -45,7 +45,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
     "@types/better-sqlite3": "^7.6.0",
-    "@types/node": "^26.6.4",
+    "@types/node": "^26.6.5",
     "@types/nodemailer": "^8.0.2",
     "@types/ws": "^8.18.2",
     "@types/yauzl": "3.4.0",
@@ -56,7 +56,7 @@
     "lint-staged": "^17.6.0",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
-    "vite": "^8.3.2",
+    "vite": "^8.3.4",
     "vitest": "^5.0.0"
   },
   "overrides": {
