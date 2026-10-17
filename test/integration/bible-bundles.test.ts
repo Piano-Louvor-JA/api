@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { gunzipSync } from "node:zlib";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
+import { _resetBibleBundleCacheForTest } from "../../src/v1/bible/bundle.service.js";
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
 /**
@@ -54,6 +55,15 @@ describe("GET /v1/bible/bundles", () => {
       INSERT INTO bible_books (id_book, name, abbreviation, chapters, book_number, id_language) VALUES
         (9001,'Livro Um','L1',2,1,'tt'),
         (9002,'Livro Dois','L2',1,2,'tt');
+      INSERT OR IGNORE INTO languages (id_language, name) VALUES ('zz','Sem livros'), ('uu','Capitulos nulos');
+      INSERT INTO bible_versions (id_version, name, language, abbreviation) VALUES
+        ('903','Sem Livros','zz','SL'),
+        ('904','Arquivos Ruins','tt','AR'),
+        ('905','Livro Nulo','uu','LN'),
+        ('906','Cache Em Memoria','tt','CM');
+      INSERT INTO bible_books (id_book, name, abbreviation, chapters, book_number, id_language) VALUES
+        (9101,'Sem Capitulos','SC',NULL,1,'uu'),
+        (9102,'Com Capitulo','CC',1,2,'uu');
     `);
 
     writeChapter(901, 9001, 1, { "1": "No princípio", "2": "<J>Eu sou</J>" });
@@ -62,6 +72,14 @@ describe("GET /v1/bible/bundles", () => {
     // 902: falta o capítulo 9001:2
     writeChapter(902, 9001, 1, { "1": "a" });
     writeChapter(902, 9002, 1, { "1": "b" });
+    // 904: cache com conteúdo que não é capítulo
+    writeChapter(904, 9001, 1, ["não", "é", "objeto"]);
+    writeChapter(904, 9001, 2, { "1": "   ", "2": "<J></J>" });
+    writeChapter(904, 9002, 1, { "1": "ok" });
+    writeChapter(905, 9102, 1, { "1": "único capítulo" });
+    writeChapter(906, 9001, 1, { "1": "a" });
+    writeChapter(906, 9001, 2, { "1": "b" });
+    writeChapter(906, 9002, 1, { "1": "c" });
   });
 
   afterAll(() => {
@@ -200,6 +218,64 @@ describe("GET /v1/bible/bundles", () => {
       "1": "No princípio",
       "2": "<J>Eu sou</J>",
     });
+  });
+
+  it("versão de idioma sem livros → 404 e manifesto sem capítulos", async () => {
+    expect((await router.request("/v1/bible/bundles/903")).status).toBe(404);
+    const body = await (await router.request("/v1/bible/bundles")).json();
+    expect(body.versions.find((v: any) => v.versionId === 903)).toMatchObject({
+      books: 0,
+      chapters: 0,
+      complete: false,
+      missing: 0,
+      sha256: null,
+      updatedAt: null,
+    });
+  });
+
+  it("arquivo que não é objeto ou capítulo vazio após sanitizar conta como faltando", async () => {
+    const res = await router.request("/v1/bible/bundles/904");
+    expect(res.status).toBe(409);
+    const body = await res.json();
+    expect(body.missing).toBe(2);
+    expect(body.sample).toEqual(["bible_904_9001_1", "bible_904_9001_2"]);
+  });
+
+  it("livro com capítulos nulos não gera capítulo esperado", async () => {
+    const res = await router.request("/v1/bible/bundles/905");
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.chapters).toEqual({
+      "9102": { "1": { "1": "único capítulo" } },
+    });
+  });
+
+  it("If-None-Match: * → 304; ETag diferente → 200", async () => {
+    const star = await router.request("/v1/bible/bundles/901", {
+      headers: { "If-None-Match": "*" },
+    });
+    expect(star.status).toBe(304);
+    const other = await router.request("/v1/bible/bundles/901", {
+      headers: { "If-None-Match": '"outro", W/"mais-um"' },
+    });
+    expect(other.status).toBe(200);
+  });
+
+  it("dentro do prazo de revalidação (padrão 60 s) serve o bundle em memória", async () => {
+    process.env.BIBLE_BUNDLE_REVALIDATE_MS = "invalido";
+    _resetBibleBundleCacheForTest();
+    try {
+      const first = await router.request("/v1/bible/bundles/906");
+      writeChapter(906, 9002, 1, { "1": "mudou no disco" });
+      const second = await router.request("/v1/bible/bundles/906");
+      expect(second.headers.get("etag")).toBe(first.headers.get("etag"));
+      expect((await second.json()).chapters["9002"]["1"]["1"]).toBe("c");
+    } finally {
+      process.env.BIBLE_BUNDLE_REVALIDATE_MS = "0";
+      _resetBibleBundleCacheForTest();
+    }
+    const fresh = await (await router.request("/v1/bible/bundles/906")).json();
+    expect(fresh.chapters["9002"]["1"]["1"]).toBe("mudou no disco");
   });
 
   it("contrato antigo: /v1/bible/{bookId}/{chapter} não é capturado pelos bundles", async () => {
