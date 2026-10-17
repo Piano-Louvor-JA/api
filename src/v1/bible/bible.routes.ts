@@ -1,7 +1,15 @@
+import { gunzipSync } from "node:zlib";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getDb } from "../../db/connection.js";
 import { zodErrorHook } from "../../lib/zodErrorHook.js";
-import { BibleBookSchema, BibleChapterSchema } from "./bible.schemas.js";
+import {
+  BibleBookSchema,
+  BibleBundleIncompleteSchema,
+  BibleBundleManifestSchema,
+  BibleBundleSchema,
+  BibleChapterSchema,
+} from "./bible.schemas.js";
+import { getBibleBundle, getBibleBundleManifest } from "./bundle.service.js";
 
 const app = new OpenAPIHono({ defaultHook: zodErrorHook });
 const ErrorResponseSchema = z.object({ error: z.string() });
@@ -65,6 +73,106 @@ app.openapi(listRoute, (c) => {
     console.error("Error fetching bible books:", error);
     return c.json({ error: "Erro ao buscar livros da biblia" }, 500);
   }
+});
+
+// GET /v1/bible/bundles — registrado ANTES de /{bookId}/{chapter}, senão
+// "bundles" casaria como bookId.
+const bundleManifestRoute = createRoute({
+  method: "get",
+  path: "/bundles",
+  tags: ["bible"],
+  summary: "Manifesto dos bundles da Biblia",
+  description:
+    "Lista as versoes com sha256/tamanho do bundle completo. O cliente compara o sha256 com o que tem no disco para decidir se baixa de novo.",
+  responses: {
+    200: {
+      content: { "application/json": { schema: BibleBundleManifestSchema } },
+      description: "Sucesso",
+    },
+  },
+});
+
+app.openapi(bundleManifestRoute, (c) => {
+  const versions = getBibleBundleManifest(getDb());
+  c.header("Cache-Control", "public, max-age=300");
+  return c.json({ schema: 1 as const, versions }, 200);
+});
+
+// GET /v1/bible/bundles/{versionId}
+const bundleRoute = createRoute({
+  method: "get",
+  path: "/bundles/{versionId}",
+  tags: ["bible"],
+  summary: "Versao inteira da Biblia (bundle)",
+  description:
+    "Todos os capitulos de uma versao num unico JSON, compactado com gzip quando o cliente aceita. ETag = sha256 dos bytes descompactados; If-None-Match igual responde 304.",
+  request: {
+    params: z.object({
+      versionId: z
+        .string()
+        .regex(/^\d+$/)
+        .openapi({ description: "ID da versao", example: "2" }),
+    }),
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: BibleBundleSchema } },
+      description: "Sucesso",
+    },
+    304: { description: "Bundle igual ao do cliente (If-None-Match)" },
+    404: {
+      content: { "application/json": { schema: ErrorResponseSchema } },
+      description: "Versao nao encontrada",
+    },
+    409: {
+      content: { "application/json": { schema: BibleBundleIncompleteSchema } },
+      description: "Cache da versao incompleto",
+    },
+  },
+});
+
+function etagMatches(header: string | undefined, etag: string): boolean {
+  if (!header) return false;
+  return header
+    .split(",")
+    .map((value) => value.trim().replace(/^W\//, ""))
+    .some((value) => value === etag || value === "*");
+}
+
+app.openapi(bundleRoute, (c) => {
+  const versionId = Number(c.req.valid("param").versionId);
+  const result = getBibleBundle(getDb(), versionId);
+
+  if (result.status === "not_found") {
+    return c.json({ error: "Versao nao encontrada" }, 404);
+  }
+  if (result.status === "incomplete") {
+    return c.json(
+      {
+        error: "bundle_incompleto" as const,
+        missing: result.missing,
+        sample: result.sample,
+      },
+      409,
+    );
+  }
+
+  const etag = `"${result.sha256}"`;
+  const headers: Record<string, string> = {
+    ETag: etag,
+    "Cache-Control": "public, max-age=300",
+    Vary: "Accept-Encoding",
+  };
+  if (etagMatches(c.req.header("If-None-Match"), etag)) {
+    return c.body(null, 304, headers);
+  }
+
+  const acceptsGzip = /\bgzip\b/i.test(c.req.header("Accept-Encoding") ?? "");
+  const body = acceptsGzip ? result.gzip : gunzipSync(result.gzip);
+  headers["Content-Type"] = "application/json; charset=utf-8";
+  headers["Content-Length"] = String(body.length);
+  if (acceptsGzip) headers["Content-Encoding"] = "gzip";
+  return c.body(new Uint8Array(body), 200, headers);
 });
 
 // GET /v1/bible/{bookId}/{chapter}

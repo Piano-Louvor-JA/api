@@ -9,6 +9,7 @@ import { readFile as fsReadFile, stat as fsStat } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { Hono } from "hono";
 import { getDb } from "../db/connection.js";
+import { resolveBibleCacheDir } from "../lib/bibleCacheDir.js";
 import { importMusicById, ON_MISS_ENABLED } from "../lib/importMusicOnMiss.js";
 import {
   escapesMediaDir,
@@ -21,7 +22,6 @@ import { fetchUpstream, UpstreamError } from "../lib/upstream.js";
 export const compatRoutes = new Hono();
 
 const UPSTREAM = process.env.UPSTREAM_API ?? "https://api.louvorja.workers.dev";
-const BIBLE_CACHE_DIR = join(process.cwd(), "data", "bible_cache");
 
 // Versões ES do ecossistema LouvorJA (mesmos ids da prod). Usadas como
 // fallback quando bible_versions ainda não tem linhas language='es'.
@@ -62,7 +62,7 @@ function cleanCatalogText(value: unknown): string {
   return text;
 }
 
-function resolveVersionAbbreviation(
+export function resolveVersionAbbreviation(
   abbreviation: unknown,
   name: unknown,
   versionId?: unknown,
@@ -576,8 +576,9 @@ function chapterForCache(data: string): unknown {
 // Handler: bible chapter (lazy proxy com cache)
 // ==============================================
 async function handleBibleChapter(c: any, cacheKey: string) {
-  mkdirSync(BIBLE_CACHE_DIR, { recursive: true });
-  const cacheFile = join(BIBLE_CACHE_DIR, `${cacheKey}.json`);
+  const cacheDir = resolveBibleCacheDir();
+  mkdirSync(cacheDir, { recursive: true });
+  const cacheFile = join(cacheDir, `${cacheKey}.json`);
 
   // Serve from local cache if available
   if (existsSync(cacheFile)) {
