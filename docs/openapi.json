@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "version": "1.7.1",
+    "version": "1.8.0",
     "title": "Piano Louvor JA API",
     "description": "API propria drop-in replacement para api.louvorja.com.br.\n\nFornece catalogo de musicas, hinos, albuns, categorias e biblia.\n\n**Endpoints de compatibilidade** (`/json_db/*`, `/file/*`, `/db/*`) nao aparecem nesta documentacao pois usam path matching dinamico."
   },
@@ -906,6 +906,183 @@
                   "type": "object",
                   "properties": { "error": { "type": "string" } },
                   "required": ["error"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/bible/bundles": {
+      "get": {
+        "tags": ["bible"],
+        "summary": "Manifesto dos bundles da Biblia",
+        "description": "Lista as versoes com sha256/tamanho do bundle completo. O cliente compara o sha256 com o que tem no disco para decidir se baixa de novo.",
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schema": { "type": "number", "enum": [1] },
+                    "versions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "versionId": { "type": "number", "example": 2 },
+                          "language": { "type": "string", "example": "pt" },
+                          "name": {
+                            "type": "string",
+                            "example": "Almeida Revista e Atualizada"
+                          },
+                          "abbreviation": {
+                            "type": "string",
+                            "example": "ARA"
+                          },
+                          "books": { "type": "number", "example": 66 },
+                          "chapters": { "type": "number", "example": 1189 },
+                          "complete": {
+                            "type": "boolean",
+                            "description": "false = falta capítulo no cache; bundle indisponível"
+                          },
+                          "missing": { "type": "number", "example": 0 },
+                          "sha256": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "sha256 dos bytes do JSON descompactado do bundle (igual ao ETag)"
+                          },
+                          "bytes": { "type": "number", "nullable": true },
+                          "gzipBytes": { "type": "number", "nullable": true },
+                          "updatedAt": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Data do capítulo mais recente no cache (ISO 8601)"
+                          }
+                        },
+                        "required": [
+                          "versionId",
+                          "language",
+                          "name",
+                          "abbreviation",
+                          "books",
+                          "chapters",
+                          "complete",
+                          "missing",
+                          "sha256",
+                          "bytes",
+                          "gzipBytes",
+                          "updatedAt"
+                        ]
+                      }
+                    }
+                  },
+                  "required": ["schema", "versions"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/bible/bundles/{versionId}": {
+      "get": {
+        "tags": ["bible"],
+        "summary": "Versao inteira da Biblia (bundle)",
+        "description": "Todos os capitulos de uma versao num unico JSON, compactado com gzip quando o cliente aceita. ETag = sha256 dos bytes descompactados; If-None-Match igual responde 304.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d+$",
+              "description": "ID da versao",
+              "example": "2"
+            },
+            "required": true,
+            "description": "ID da versao",
+            "name": "versionId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schema": { "type": "number", "enum": [1] },
+                    "versionId": { "type": "number", "example": 2 },
+                    "language": { "type": "string", "example": "pt" },
+                    "name": { "type": "string" },
+                    "abbreviation": { "type": "string" },
+                    "chapters": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "object",
+                          "additionalProperties": { "type": "string" }
+                        }
+                      },
+                      "description": "{ idLivro: { capítulo: { versículo: texto } } } — mesmos textos de /json_db/bible_{v}_{b}_{c}",
+                      "example": {
+                        "1": {
+                          "1": {
+                            "1": "No princípio, criou Deus os céus e a terra."
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "schema",
+                    "versionId",
+                    "language",
+                    "name",
+                    "abbreviation",
+                    "chapters"
+                  ]
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Bundle igual ao do cliente (If-None-Match)"
+          },
+          "404": {
+            "description": "Versao nao encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "error": { "type": "string" } },
+                  "required": ["error"]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Cache da versao incompleto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "enum": ["bundle_incompleto"]
+                    },
+                    "missing": { "type": "number" },
+                    "sample": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    }
+                  },
+                  "required": ["error", "missing", "sample"]
                 }
               }
             }
