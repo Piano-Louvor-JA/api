@@ -1,14 +1,16 @@
 # API — Endpoints Bíblia (catálogo oficial, espelho LouvorJA)
 
 > Fonte viva: `GET /openapi.json` · Swagger UI: `/doc`.
-> Complementa [CUSTOM_API.md](./CUSTOM_API.md). Última atualização: 2026-09-10 (feat/custom-auth).
+> Complementa [CUSTOM_API.md](./CUSTOM_API.md). Última atualização: 2026-10-17 (bundles para Bíblia offline).
 
 ## Visão geral
 
 A Bíblia é servida pelo **catálogo compat** (`/json_db/*`), o mesmo canal que os
 apps (Flutter mobile/desktop, web, Electron, Delphi) já usam pra hinários.
-Não há endpoint REST dedicado em uso — o `GET /v1/bible` existe mas está
-**semi-quebrado pra ES** (ver "Limitações").
+Para uso offline existem os **bundles** (`/v1/bible/bundles*`): a versão
+inteira num único request, com sha256 para o cliente detectar atualização.
+O `GET /v1/bible` e o `GET /v1/bible/{book}/{chapter}` existem mas estão
+**semi-quebrados pra ES** (ver "Limitações").
 
 ## Idiomas e versões
 
@@ -54,6 +56,40 @@ Resposta: `{"data": ["v1", "v2", ...]}`.
 Local: 15.458 arquivos (13 versões × 1189 caps — **completo**, pt+es).
 ⚠️ A prod do upstream (api.louvorja.com.br) **não tem capítulos ES** — o nosso
 mirror é mais completo que a origem; miss de ES nunca resolve no upstream.
+Diretório configurável por `BIBLE_CACHE_DIR` (padrão `data/bible_cache`).
+
+### `GET /v1/bible/bundles`
+Manifesto dos bundles, uma entrada por versão (só ids numéricos):
+
+```json
+{ "schema": 1, "versions": [{
+  "versionId": 2, "language": "pt", "name": "Almeida Revista e Atualizada",
+  "abbreviation": "ARA", "books": 66, "chapters": 1189,
+  "complete": true, "missing": 0,
+  "sha256": "<hex>", "bytes": 4400000, "gzipBytes": 1300000,
+  "updatedAt": "2026-09-10T12:00:00.000Z" }] }
+```
+
+`complete: false` (falta capítulo no cache) vem com `sha256`/`bytes`/`gzipBytes`
+nulos e `missing` = quantos capítulos faltam. O cliente compara o `sha256` com
+o do bundle que tem no disco; diferente → baixa de novo.
+
+### `GET /v1/bible/bundles/{versionId}`
+Versão inteira, montada a partir do `bible_cache` (mesmos textos de
+`/json_db/bible_*`, já sanitizados). **Nunca chama o upstream.**
+
+```json
+{ "schema": 1, "versionId": 2, "language": "pt", "name": "...", "abbreviation": "ARA",
+  "chapters": { "<idLivro>": { "<capítulo>": { "<versículo>": "texto" } } } }
+```
+
+- `Accept-Encoding: gzip` → resposta compactada (`Content-Encoding: gzip`).
+- `ETag` = `"<sha256>"` dos bytes **descompactados**; o cliente valida o
+  download fazendo sha256 do corpo. `If-None-Match` igual → `304`.
+- `409 { "error": "bundle_incompleto", "missing": N, "sample": ["bible_2_1_3", ...] }`
+  quando falta capítulo no cache; `404` para versão inexistente.
+- Bundle montado fica em memória (só o gzip) e é revalidado pelo `stat` dos
+  arquivos no máximo a cada 60 s (`BIBLE_BUNDLE_REVALIDATE_MS`).
 
 ## Limitações conhecidas
 
