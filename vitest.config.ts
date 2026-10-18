@@ -5,6 +5,7 @@ export default defineConfig({
     globals: true,
     environment: "node",
     include: ["test/**/*.test.ts"],
+    setupFiles: ["test/setup/isolate-bible-cache.ts"],
     // Serial: better-sqlite3 + mocks de migration não convivem bem com paralelismo
     // Vitest 5: poolOptions.forks.singleFork removido
     // Mantém isolate:true para não vazar mocks entre arquivos
