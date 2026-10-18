@@ -60,7 +60,9 @@ describe("GET /v1/bible/bundles", () => {
         ('903','Sem Livros','zz','SL'),
         ('904','Arquivos Ruins','tt','AR'),
         ('905','Livro Nulo','uu','LN'),
-        ('906','Cache Em Memoria','tt','CM');
+        ('906','Cache Em Memoria','tt','CM'),
+        ('907.0','Id Com Ponto Zero','tt','PZ'),
+        ('908.5','Id Fracionario','tt','FR');
       INSERT INTO bible_books (id_book, name, abbreviation, chapters, book_number, id_language) VALUES
         (9101,'Sem Capitulos','SC',NULL,1,'uu'),
         (9102,'Com Capitulo','CC',1,2,'uu');
@@ -80,6 +82,10 @@ describe("GET /v1/bible/bundles", () => {
     writeChapter(906, 9001, 1, { "1": "a" });
     writeChapter(906, 9001, 2, { "1": "b" });
     writeChapter(906, 9002, 1, { "1": "c" });
+    // produção grava os ids PT como texto "2.0", "13.0" (import antigo)
+    writeChapter(907, 9001, 1, { "1": "um" });
+    writeChapter(907, 9001, 2, { "1": "dois" });
+    writeChapter(907, 9002, 1, { "1": "três" });
   });
 
   afterAll(() => {
@@ -276,6 +282,27 @@ describe("GET /v1/bible/bundles", () => {
     }
     const fresh = await (await router.request("/v1/bible/bundles/906")).json();
     expect(fresh.chapters["9002"]["1"]["1"]).toBe("mudou no disco");
+  });
+
+  it('id gravado como "907.0" (formato de produção) entra no manifesto e no bundle como 907', async () => {
+    const manifest = await (await router.request("/v1/bible/bundles")).json();
+    expect(
+      manifest.versions.find((v: any) => v.versionId === 907),
+    ).toMatchObject({
+      abbreviation: "PZ",
+      complete: true,
+      missing: 0,
+    });
+    // id fracionário não tem chave bible_{v}_{b}_{c}: fica de fora
+    expect(manifest.versions.some((v: any) => v.abbreviation === "FR")).toBe(
+      false,
+    );
+
+    const res = await router.request("/v1/bible/bundles/907");
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.versionId).toBe(907);
+    expect(body.chapters["9001"]["2"]).toEqual({ "1": "dois" });
   });
 
   it("contrato antigo: /v1/bible/{bookId}/{chapter} não é capturado pelos bundles", async () => {

@@ -76,18 +76,22 @@ function revalidateMs(): number {
 
 function listVersionRows(db: Db): VersionRow[] {
   return (
-    db
-      .prepare(
-        "SELECT id_version, name, language, abbreviation FROM bible_versions",
+    (
+      db
+        .prepare(
+          "SELECT id_version, name, language, abbreviation FROM bible_versions",
+        )
+        .all() as VersionRow[]
+    )
+      // Produção grava os ids PT como texto "2.0", "13.0" (import antigo);
+      // Number() normaliza. Id não inteiro não tem chave bible_{v}_{b}_{c}.
+      .filter((row) => /^\d+(\.0+)?$/.test(String(row.id_version).trim()))
+      .sort(
+        (a, b) =>
+          a.language.localeCompare(b.language) ||
+          Number(a.id_version) - Number(b.id_version),
       )
-      .all() as VersionRow[]
-  )
-    .filter((row) => /^\d+$/.test(String(row.id_version)))
-    .sort(
-      (a, b) =>
-        a.language.localeCompare(b.language) ||
-        Number(a.id_version) - Number(b.id_version),
-    );
+  );
 }
 
 function findVersionRow(db: Db, versionId: number): VersionRow | null {
