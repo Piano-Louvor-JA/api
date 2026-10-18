@@ -14,4 +14,16 @@ describe("isolamento do cache da Bíblia nos testes", () => {
     expect(dir).not.toBe(join(process.cwd(), "data", "bible_cache"));
     expect(relative(tmpdir(), dir).startsWith("..")).toBe(false);
   });
+
+  it("sem BIBLE_CACHE_DIR (produção) o padrão continua data/bible_cache", () => {
+    const original = process.env.BIBLE_CACHE_DIR;
+    delete process.env.BIBLE_CACHE_DIR;
+    try {
+      expect(resolveBibleCacheDir()).toBe(
+        join(process.cwd(), "data", "bible_cache"),
+      );
+    } finally {
+      process.env.BIBLE_CACHE_DIR = original;
+    }
+  });
 });
