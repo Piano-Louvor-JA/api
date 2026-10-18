@@ -178,8 +178,23 @@ compatRoutes.get("/json_db", (c) => {
 // ==============================================
 // GET /json_db/:file — router generico que faz parse do filename
 // ==============================================
+// Listas do catálogo cujo GET monta um JSON pesado a partir do banco.
+const JSON_DB_LIST_RE =
+  /^(pt|es|en)_(musics|categories|hymnal|hymnal_1996|bible_book|bible_version)$/;
+
 compatRoutes.get("/json_db/:file", async (c) => {
   const file = c.req.param("file");
+
+  // HEAD das listas responde na hora: o teste de conexão dos apps
+  // (ApiStatusBanner) faz HEAD /json_db/pt_musics a cada 15 s, e o Hono
+  // atende HEAD com este handler — a lista inteira era montada (≈1–2,5 s
+  // de SQLite síncrono, travando a API) só para ser descartada.
+  if (c.req.method === "HEAD" && JSON_DB_LIST_RE.test(file)) {
+    return c.body(null, 200, {
+      "Content-Type": "application/json; charset=UTF-8",
+    });
+  }
+
   const db = getDb();
 
   // config
