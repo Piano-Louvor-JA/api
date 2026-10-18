@@ -13,6 +13,7 @@ vi.mock("../../src/lib/importMusicOnMiss.js", () => ({
 }));
 
 import { createApp } from "../../src/app.js";
+import { resolveBibleCacheDir } from "../../src/lib/bibleCacheDir.js";
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
 let fixture: SeededDb, app: ReturnType<typeof createApp>;
@@ -20,15 +21,9 @@ const prefix = `test-upstream-${process.pid}`;
 beforeAll(async () => {
   fixture = await setupSeededDb();
   for (const chapter of [1, 2, 3, 4])
-    rmSync(
-      join(
-        process.cwd(),
-        "data",
-        "bible_cache",
-        `bible_97531_1_${chapter}.json`,
-      ),
-      { force: true },
-    );
+    rmSync(join(resolveBibleCacheDir(), `bible_97531_1_${chapter}.json`), {
+      force: true,
+    });
   app = createApp();
 });
 afterEach(() => {
@@ -144,7 +139,7 @@ it("capítulo é sanitizado e servido do cache na segunda leitura", async () => 
   expect(await first.json()).toEqual({ 1: "texto" });
   expect((await app.request(path)).status).toBe(200);
   expect(upstream).toHaveBeenCalledOnce();
-  rmSync(join(process.cwd(), "data", "bible_cache", "bible_97531_1_1.json"), {
+  rmSync(join(resolveBibleCacheDir(), "bible_97531_1_1.json"), {
     force: true,
   });
 });
@@ -156,17 +151,9 @@ it.each([null, [], "scalar"])(
     const res = await app.request(`/json_db/bible_97531_1_${suffix}`);
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual(value);
-    rmSync(
-      join(
-        process.cwd(),
-        "data",
-        "bible_cache",
-        `bible_97531_1_${suffix}.json`,
-      ),
-      {
-        force: true,
-      },
-    );
+    rmSync(join(resolveBibleCacheDir(), `bible_97531_1_${suffix}.json`), {
+      force: true,
+    });
   },
 );
 

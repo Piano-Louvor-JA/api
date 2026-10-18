@@ -44,6 +44,11 @@ const VERSION_ABBREVIATION_BY_NAME: Array<{ match: RegExp; abbr: string }> = [
   { match: /almeida\s+revista\s+e\s+corrigida/i, abbr: "ARC" },
   { match: /king\s+james\s+atualizada/i, abbr: "KJA" },
   { match: /nova\s+vers[aã]o\s+internacional/i, abbr: "NVI" },
+  { match: /nova\s+vers[aã]o\s+transformadora/i, abbr: "NVT" },
+  {
+    match: /nova\s+tradu[cç][aã]o\s+na\s+linguagem\s+de\s+hoje/i,
+    abbr: "NTLH",
+  },
   { match: /sagradas\s+escrituras/i, abbr: "SEV" },
   { match: /reina[-\s]?valera\s*1989/i, abbr: "RVA" },
   { match: /reina[-\s]?valera/i, abbr: "RV" },
