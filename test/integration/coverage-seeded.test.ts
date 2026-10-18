@@ -2,6 +2,7 @@ import { existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { resolveBibleCacheDir } from "../../src/lib/bibleCacheDir.js";
 
 // DB temporario dedicado ANTES de qualquer import do app
 const tmpDir = mkdtempSync(join(tmpdir(), "piano-seeded-"));
@@ -388,7 +389,7 @@ describe("coverage gaps — seeded temp DB", () => {
   describe("bible proxy — cache e 502", () => {
     it("bible_1_50_1 via cache local e 502 quando upstream falha", async () => {
       // Pre-cache: simula arquivo já baixado
-      const cacheDir = join(process.cwd(), "data", "bible_cache");
+      const cacheDir = resolveBibleCacheDir();
       const cacheFile = join(cacheDir, "bible_1_50_1.json");
       const { mkdirSync } = await import("node:fs");
       mkdirSync(cacheDir, { recursive: true });

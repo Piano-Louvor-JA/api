@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { resolveBibleCacheDir } from "../../src/lib/bibleCacheDir.js";
 import { setupSeededDb } from "../helpers/seeded-db.js";
 
 describe("coverage gaps - functional HTTP paths", () => {
@@ -127,7 +128,7 @@ describe("coverage gaps - functional HTTP paths", () => {
     // Create cache file
     const fs = await import("node:fs");
     const path = await import("node:path");
-    const cacheDir = path.join(process.cwd(), "data", "bible_cache");
+    const cacheDir = resolveBibleCacheDir();
     if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
     const cacheFile = path.join(cacheDir, "bible_1_1_1.json");
     fs.writeFileSync(
