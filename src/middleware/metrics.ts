@@ -16,6 +16,7 @@
  *   http_errors_total{method,route}              — contador de 5xx
  *   rate_limit_blocked_total{route}              — bloqueios do rateLimit (SEC-7 telemetria)
  *   antibot_blocked_total{reason}                — bloqueios do antiBot
+ *   partner_requests_total{partner}              — requests com X-Partner-Key válido
  *   process_* / nodejs_*                         — default do prom-client
  */
 
@@ -61,6 +62,12 @@ export const antiBotBlockedTotal = new Counter({
   name: "antibot_blocked_total",
   help: "Requests bloqueados pelo antiBot",
   labelNames: ["reason"] as const,
+});
+
+export const partnerRequestsTotal = new Counter({
+  name: "partner_requests_total",
+  help: "Requests com X-Partner-Key válido, por parceiro",
+  labelNames: ["partner"] as const,
 });
 
 /** Rotas conhecidas — reduz cardinalidade (URL crua vira template). */
@@ -117,6 +124,12 @@ export function incRateLimitBlocked(route: string) {
 export function incAntiBotBlocked(reason: string) {
   try {
     antiBotBlockedTotal.inc({ reason });
+  } catch {}
+}
+
+export function incPartnerRequest(partner: string) {
+  try {
+    partnerRequestsTotal.inc({ partner });
   } catch {}
 }
 
