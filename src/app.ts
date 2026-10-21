@@ -9,6 +9,7 @@ import { reportError } from "./lib/telemetry.js";
 import { APP_VERSION } from "./lib/version.js";
 import { antiBotMiddleware } from "./middleware/antiBot.js";
 import { metricsHandler, metricsMiddleware } from "./middleware/metrics.js";
+import { partnerKey } from "./middleware/partnerKey.js";
 import { rateLimit } from "./middleware/rateLimit.js";
 // SEC-6 Fase 0: telemetria log-only por IP/min (api#127) — nunca bloqueia
 import { telemetryMiddleware } from "./middleware/telemetry.js";
@@ -110,6 +111,11 @@ export function createApp() {
   );
   // Rate limiting Token Bucket (boas práticas louvorja/api)
   app.use("*", rateLimit);
+
+  // X-Partner-Key opcional (.planning/partner-keys): sem header nada muda;
+  // token inválido/revogado = 401. Depois do rate limit para que tentativa
+  // de token também gaste a cota do IP; o limite continua por IP.
+  app.use("*", partnerKey);
 
   // Prometheus: coleta pós-next, sem derrubar a request. /metrics fica de fora.
   app.use("*", metricsMiddleware);

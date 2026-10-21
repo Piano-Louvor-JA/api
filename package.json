@@ -15,6 +15,7 @@
     "lint:fix": "biome check --write src/ test/",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "validate:pr": "biome check src/ test/ && tsc -p tsconfig.test.json --noEmit && vitest run",
+    "partners": "tsx --env-file-if-exists=.env src/cli/partners.ts",
     "import:upstream": "tsx scripts/import-upstream.ts",
     "import:sda": "tsx scripts/import-sda-hymnal.ts",
     "prepare": "[ \"$NODE_ENV\" = production ] || husky",
