@@ -25,4 +25,13 @@ describe("fileValidators", () => {
     expect(contentEtag("x.mp3", 1, 3, Buffer.from("zzz"))).toBe(a);
     expect(contentEtag("x.mp3", 2, 3, Buffer.from("zzz"))).not.toBe(a);
   });
+
+  it("cache cheio é esvaziado e o hash volta a ser calculado", () => {
+    const first = contentEtag("first.mp3", 1, 3, Buffer.from("abc"));
+    expect(contentEtag("first.mp3", 1, 3, Buffer.from("zzz"))).toBe(first);
+    for (let i = 0; i < 20_000; i++) {
+      contentEtag(`fill-${i}.mp3`, 1, 1, Buffer.from("x"));
+    }
+    expect(contentEtag("first.mp3", 1, 3, Buffer.from("zzz"))).not.toBe(first);
+  });
 });
