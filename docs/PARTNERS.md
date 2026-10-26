@@ -23,6 +23,19 @@ X-Partner-Key: plj_...
 
 Vale para `/v1/*` e `/file/...`.
 
+### Atualização de arquivos em `/file/...`
+
+Toda resposta de `/file/...` traz `ETag` (hash do conteúdo), `Last-Modified`
+e `Cache-Control: no-cache`. Guarde o `ETag` de cada arquivo e revalide:
+
+```http
+GET /file/musics/pt/90122.mp3
+If-None-Match: "<etag guardado>"
+```
+
+`304` = arquivo igual ao do cache; `200` = arquivo corrigido no mesmo
+endereço (corpo novo e `ETag` novo).
+
 ## Operação
 
 Dentro do container (o token aparece **uma única vez**; só o hash fica no
