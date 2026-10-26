@@ -10,6 +10,11 @@ import { dirname, join } from "node:path";
 import { Hono } from "hono";
 import { getDb } from "../db/connection.js";
 import { resolveBibleCacheDir } from "../lib/bibleCacheDir.js";
+import {
+  contentEtag,
+  isNotModified,
+  validatorHeaders,
+} from "../lib/fileValidators.js";
 import { importMusicById, ON_MISS_ENABLED } from "../lib/importMusicOnMiss.js";
 import {
   escapesMediaDir,
@@ -722,6 +727,21 @@ compatRoutes.get("/file/:path{.*}", async (c) => {
       } as Record<string, string>
     )[ext]!;
     const fileStat = await fsStat(localPath);
+    const content = await fsReadFile(localPath);
+    const validators = validatorHeaders(
+      contentEtag(path, fileStat.mtimeMs, fileStat.size, content),
+      fileStat.mtime,
+    );
+    if (
+      isNotModified(
+        c.req.header("if-none-match"),
+        c.req.header("if-modified-since"),
+        validators.ETag!,
+        fileStat.mtime,
+      )
+    ) {
+      return c.body(null, 304, validators);
+    }
     // Range requests (seek de audio)
     const range = c.req.header("range");
     if (range) {
@@ -729,9 +749,9 @@ compatRoutes.get("/file/:path{.*}", async (c) => {
       if (m) {
         const start = Number(m[1]);
         const end = m[2] ? Number(m[2]) : fileStat.size - 1;
-        const node = await fsReadFile(localPath);
-        const chunk = node.subarray(start, end + 1);
+        const chunk = content.subarray(start, end + 1);
         return c.body(chunk, 206, {
+          ...validators,
           "Content-Type": mime,
           "Content-Range": `bytes ${start}-${end}/${fileStat.size}`,
           "Accept-Ranges": "bytes",
@@ -739,7 +759,8 @@ compatRoutes.get("/file/:path{.*}", async (c) => {
         });
       }
     }
-    return c.body(await fsReadFile(localPath), 200, {
+    return c.body(content, 200, {
+      ...validators,
       "Content-Type": mime,
       "Content-Length": String(fileStat.size),
       "Accept-Ranges": "bytes",
@@ -769,7 +790,12 @@ compatRoutes.get("/file/:path{.*}", async (c) => {
             );
             renameSync(tmp, localPath);
             const buf = await fsReadFile(localPath);
+            const saved = await fsStat(localPath);
             return c.body(buf, 200, {
+              ...validatorHeaders(
+                contentEtag(path, saved.mtimeMs, saved.size, buf),
+                saved.mtime,
+              ),
               "Content-Type":
                 res.headers.get("content-type") ?? "application/octet-stream",
               "Content-Length": String(buf.length),
