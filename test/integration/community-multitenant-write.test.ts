@@ -165,4 +165,26 @@ describe("community multitenant write scope", () => {
     expect(missing.status).toBe(404);
     expect(await missing.json()).toEqual({ error: "Música não encontrada" });
   });
+
+  it("returns the same error body when report target is foreign or missing", async () => {
+    const violinCollection = app
+      .getDb()
+      .prepare(`SELECT id_collection FROM custom_collections WHERE name = ?`)
+      .get("Violin Write Collection") as { id_collection: number };
+    const report = (id: number) =>
+      app.router.request(`/v1/custom/collections/${id}/report`, {
+        method: "POST",
+        headers: { ...auth(), "content-type": "application/json" },
+        body: JSON.stringify({ reason: "bad" }),
+      });
+
+    const [foreign, missing] = await Promise.all([
+      report(violinCollection.id_collection),
+      report(999999),
+    ]);
+
+    expect(foreign.status).toBe(403);
+    expect(missing.status).toBe(404);
+    expect(await foreign.json()).toEqual(await missing.json());
+  });
 });

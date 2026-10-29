@@ -2534,7 +2534,7 @@ customRoutes.openapi(reportCollectionRoute, (c) => {
       .prepare(`SELECT 1 FROM custom_collections WHERE id_collection = ?`)
       .get(collectionId);
     return c.json(
-      { error: anyTenant ? "Sem permissão" : "Coletânea não encontrada" },
+      { error: "Sem permissão" },
       anyTenant ? 403 : 404,
     );
   }
