@@ -23,21 +23,34 @@ describe("OpenAPI Docs", () => {
     expect(res.headers.get("content-type")).toContain("text/html");
   });
 
-  it("documents X-Tenant for custom endpoints and tenant_id as read-only", async () => {
+  it("documents X-Tenant for every custom operation and tenant_id as read-only", async () => {
     const res = await app.request("/openapi.json");
     const body = await res.json();
+    const customOperations = Object.values(
+      body.paths as Record<string, Record<string, unknown>>,
+    )
+      .flatMap((pathItem) =>
+        Object.entries(pathItem).filter(([method]) =>
+          ["delete", "get", "patch", "post", "put"].includes(method),
+        ),
+      )
+      .filter(([, operation]) =>
+        (operation as { tags?: string[] }).tags?.includes("custom"),
+      )
+      .map(([, operation]) => operation as { parameters?: unknown[] });
     const collectionGet = body.paths["/v1/custom/collections"].get;
     const collectionSchema =
       collectionGet.responses["200"].content["application/json"].schema
         .properties.data.items;
+    const tenantSchema = body.components.schemas["X-Tenant"];
 
-    expect(collectionGet.parameters).toContainEqual(
-      expect.objectContaining({
-        in: "header",
-        name: "X-Tenant",
-        schema: expect.objectContaining({ default: "piano" }),
-      }),
-    );
+    expect(customOperations).toHaveLength(34);
+    for (const operation of customOperations) {
+      expect(operation.parameters).toContainEqual(
+        expect.objectContaining({ in: "header", name: "X-Tenant" }),
+      );
+    }
+    expect(tenantSchema).toEqual(expect.objectContaining({ default: "piano" }));
     expect(collectionSchema.properties.tenant_id).toEqual(
       expect.objectContaining({ readOnly: true }),
     );

@@ -124,13 +124,26 @@ type SessionRow = {
 };
 
 const customRoutes = new OpenAPIHono<CustomAuthEnv & TenantEnv>();
-const tenantHeader = {
-  in: "header" as const,
-  name: "X-Tenant",
-  required: false,
-  schema: z.string().default("piano"),
+const tenantHeader = z.string().default("piano").openapi("X-Tenant", {
   description: "Produto LouvorJA; padrão: piano.",
-};
+});
+
+const tenantRequest = { headers: z.object({ "X-Tenant": tenantHeader }) };
+
+function withTenantHeader<T extends { request?: Record<string, unknown> }>(
+  route: T,
+): T {
+  return {
+    ...route,
+    request: { ...route.request, ...tenantRequest },
+  };
+}
+
+const openapi = customRoutes.openapi.bind(customRoutes);
+customRoutes.openapi = ((...args: Parameters<typeof customRoutes.openapi>) => {
+  const [route, handler, hook] = args;
+  return openapi(withTenantHeader(route), handler, hook);
+}) as typeof customRoutes.openapi;
 
 // Rotas públicas (sem auth): health/register/login. Todo o resto valida sessão
 // via optionalAuth (leitura aceita anônimo) ou exige owner check na rota.
@@ -147,7 +160,7 @@ const listCollectionsRoute = createRoute({
   tags: ["custom"],
   description:
     "Lista coletâneas customizadas (públicas + minhas se autenticado)",
-  request: { headers: z.object({ "X-Tenant": tenantHeader.schema }) },
+  request: tenantRequest,
   middleware: [optionalAuth] as const,
   responses: {
     200: {
