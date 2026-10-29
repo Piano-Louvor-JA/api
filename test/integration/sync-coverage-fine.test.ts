@@ -101,6 +101,76 @@ describe("applyMusic forbidden (L309-313)", () => {
   });
 });
 
+describe("applyMusic tenant scope", () => {
+  it("does not update another tenant music with the same client_uuid", () => {
+    const db = getDb();
+    const pianoCollection = Number(
+      db
+        .prepare(
+          `INSERT INTO custom_collections (name, owner_id, client_uuid, updated_at_ms, tenant_id)
+           VALUES (?, ?, ?, ?, ?)`,
+        )
+        .run("Piano scoped", uid, "piano-scoped", 1_000, "piano")
+        .lastInsertRowid,
+    );
+    const violinCollection = Number(
+      db
+        .prepare(
+          `INSERT INTO custom_collections (name, owner_id, client_uuid, updated_at_ms, tenant_id)
+           VALUES (?, ?, ?, ?, ?)`,
+        )
+        .run("Violin scoped", uidOther, "violin-scoped", 1_000, "violin")
+        .lastInsertRowid,
+    );
+    db.prepare(
+      `INSERT INTO custom_musics (id_collection, name, owner_id, client_uuid, updated_at_ms)
+       VALUES (?, ?, ?, ?, ?)`,
+    ).run(violinCollection, "violin original", uidOther, "shared-music-uuid", 1_000);
+
+    runSync(
+      uid,
+      {
+        last_sync_at: 0,
+        collections: [
+          {
+            client_uuid: "piano-scoped",
+            name: "Piano scoped",
+            description: null,
+            author_name: null,
+            deleted_at: null,
+            updated_at: 2_000,
+            musics: [
+              {
+                client_uuid: "shared-music-uuid",
+                name: "piano replacement",
+                lyric: null,
+                auxiliary_lyric: null,
+                duration: null,
+                official_music_id: null,
+                deleted_at: null,
+                updated_at: 2_000,
+                lyrics: [],
+              },
+            ],
+          },
+        ],
+      },
+      "piano",
+    );
+
+    expect(
+      db
+        .prepare(`SELECT name FROM custom_musics WHERE id_collection = ?`)
+        .get(violinCollection),
+    ).toEqual({ name: "violin original" });
+    expect(
+      db
+        .prepare(`SELECT name FROM custom_musics WHERE id_collection = ?`)
+        .get(pianoCollection),
+    ).toEqual({ name: "piano replacement" });
+  });
+});
+
 describe("quota branches finas", () => {
   it("CUSTOM_QUOTA_MB válido altera a quota", () => {
     process.env.CUSTOM_QUOTA_MB = "10";

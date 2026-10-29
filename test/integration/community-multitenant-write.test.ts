@@ -97,22 +97,72 @@ describe("community multitenant write scope", () => {
     expect(await createMusic.json()).toEqual({ error: "Sem permissão" });
   });
 
-  it("returns 404 when reporting another tenant collection", async () => {
-    const violinCollection = app
-      .getDb()
+  it("returns 403 for every cross-tenant write while real missing resources remain 404", async () => {
+    const db = app.getDb();
+    const violinCollection = db
       .prepare(`SELECT id_collection FROM custom_collections WHERE name = ?`)
       .get("Violin Write Collection") as { id_collection: number };
-
-    const response = await app.router.request(
-      `/v1/custom/collections/${violinCollection.id_collection}/report`,
-      {
-        method: "POST",
-        headers: { ...auth(), "content-type": "application/json" },
-        body: JSON.stringify({ reason: "bad" }),
-      },
+    const violinMusic = Number(
+      db
+        .prepare(
+          `INSERT INTO custom_musics (id_collection, name, owner_id) VALUES (?, ?, ?)`,
+        )
+        .run(violinCollection.id_collection, "Violin Write Music", 2).lastInsertRowid,
+    );
+    const violinLyric = Number(
+      db
+        .prepare(`INSERT INTO custom_lyrics (id_music, lyric) VALUES (?, ?)`)
+        .run(violinMusic, "Violin lyric").lastInsertRowid,
     );
 
-    expect(response.status).toBe(404);
-    expect(await response.json()).toEqual({ error: "Coletânea não encontrada" });
+    const requests = [
+      app.router.request(
+        `/v1/custom/collections/${violinCollection.id_collection}/musics/${violinMusic}/copy`,
+        { method: "POST", headers: auth() },
+      ),
+      app.router.request(`/v1/custom/musics/${violinMusic}`, {
+        method: "PUT",
+        headers: { ...auth(), "content-type": "application/json" },
+        body: JSON.stringify({ name: "blocked" }),
+      }),
+      app.router.request(`/v1/custom/musics/${violinMusic}`, {
+        method: "DELETE",
+        headers: auth(),
+      }),
+      app.router.request(`/v1/custom/musics/${violinMusic}/lyrics`, {
+        method: "POST",
+        headers: { ...auth(), "content-type": "application/json" },
+        body: JSON.stringify({ lyric: "blocked" }),
+      }),
+      app.router.request(`/v1/custom/lyrics/${violinLyric}`, {
+        method: "PUT",
+        headers: { ...auth(), "content-type": "application/json" },
+        body: JSON.stringify({ lyric: "blocked" }),
+      }),
+      app.router.request(`/v1/custom/lyrics/${violinLyric}`, {
+        method: "DELETE",
+        headers: auth(),
+      }),
+      app.router.request(
+        `/v1/custom/collections/${violinCollection.id_collection}/report`,
+        {
+          method: "POST",
+          headers: { ...auth(), "content-type": "application/json" },
+          body: JSON.stringify({ reason: "bad" }),
+        },
+      ),
+    ];
+
+    for (const response of await Promise.all(requests)) {
+      expect(response.status).toBe(403);
+      expect(await response.json()).toEqual({ error: "Sem permissão" });
+    }
+
+    const missing = await app.router.request("/v1/custom/musics/999999", {
+      method: "DELETE",
+      headers: auth(),
+    });
+    expect(missing.status).toBe(404);
+    expect(await missing.json()).toEqual({ error: "Música não encontrada" });
   });
 });

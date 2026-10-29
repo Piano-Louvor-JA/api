@@ -277,7 +277,7 @@ function applyCollection(
     const idCol = Number(r.lastInsertRowid);
     applied.created++;
     for (const m of incoming.musics ?? []) {
-      applyMusic(db, userId, idCol, m, applied, conflicts);
+      applyMusic(db, userId, tenantId, idCol, m, applied, conflicts);
     }
     return;
   }
@@ -323,6 +323,7 @@ function applyCollection(
       applyMusic(
         db,
         userId,
+        tenantId,
         existing.id_collection,
         mIncoming,
         applied,
@@ -340,14 +341,19 @@ function applyCollection(
 function applyMusic(
   db: ReturnType<typeof getDb>,
   userId: number,
+  tenantId: string,
   collectionId: number,
   incoming: SyncMusic,
   applied: { created: number; updated: number },
   conflicts: Array<{ client_uuid: string; resolution: string }>,
 ): void {
   const existing = db
-    .prepare(`SELECT * FROM custom_musics WHERE client_uuid = ?`)
-    .get(incoming.client_uuid) as
+    .prepare(
+      `SELECT cm.* FROM custom_musics cm
+       INNER JOIN custom_collections cc ON cc.id_collection = cm.id_collection
+       WHERE cm.client_uuid = ? AND cc.tenant_id = ?`,
+    )
+    .get(incoming.client_uuid, tenantId) as
     | {
         id_music: number;
         id_collection: number;
