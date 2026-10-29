@@ -1,5 +1,6 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getDb } from "../../db/connection.js";
+import type { TenantEnv } from "../../middleware/tenant.middleware.js";
 import {
   type CustomAuthEnv,
   optionalAuth,
@@ -122,7 +123,14 @@ type SessionRow = {
   display_name: string | null;
 };
 
-const customRoutes = new OpenAPIHono<CustomAuthEnv>();
+const customRoutes = new OpenAPIHono<CustomAuthEnv & TenantEnv>();
+const tenantHeader = {
+  in: "header" as const,
+  name: "X-Tenant",
+  required: false,
+  schema: z.string().default("piano"),
+  description: "Produto LouvorJA; padrão: piano.",
+};
 
 // Rotas públicas (sem auth): health/register/login. Todo o resto valida sessão
 // via optionalAuth (leitura aceita anônimo) ou exige owner check na rota.
@@ -139,6 +147,7 @@ const listCollectionsRoute = createRoute({
   tags: ["custom"],
   description:
     "Lista coletâneas customizadas (públicas + minhas se autenticado)",
+  request: { headers: z.object({ "X-Tenant": tenantHeader.schema }) },
   middleware: [optionalAuth] as const,
   responses: {
     200: {
@@ -160,6 +169,7 @@ customRoutes.openapi(listCollectionsRoute, (c) => {
   try {
     const db = getDb();
     const user = c.get("user") as { id_user: number } | undefined;
+    const tenantId = c.get("tenantId");
 
     // api#82: privada só o dono vê. Deslogado vê apenas públicas.
     // is_owner é FLAG booleano (1/0) — NUNCA o id do usuário (bug achado por
@@ -170,17 +180,17 @@ customRoutes.openapi(listCollectionsRoute, (c) => {
              ${user ? "CASE WHEN cc.owner_id = ? THEN 1 ELSE 0 END" : "0"} as is_owner
       FROM custom_collections cc
       LEFT JOIN custom_musics cm ON cm.id_collection = cc.id_collection
-      WHERE ${user ? "(cc.visibility = 'public' OR cc.owner_id = ?)" : "cc.visibility = 'public'"}
+      WHERE cc.tenant_id = ?
+        AND ${user ? "(cc.visibility = 'public' OR cc.owner_id = ?)" : "cc.visibility = 'public'"}
         AND NOT EXISTS (
           SELECT 1 FROM collection_reports r
           WHERE r.collection_id = cc.id_collection AND r.status = 'open'
         )
       GROUP BY cc.id_collection ORDER BY cc.updated_at DESC
     `;
-    if (user) {
-      params.push(user.id_user); // is_owner
-      params.push(user.id_user); // filtro de visibilidade
-    }
+    if (user) params.push(user.id_user); // is_owner
+    params.push(tenantId);
+    if (user) params.push(user.id_user); // filtro de visibilidade
 
     const collections = db
       .prepare(query)
@@ -267,7 +277,7 @@ customRoutes.openapi(createCollectionRoute, async (c) => {
 
     const result = db
       .prepare(
-        `INSERT INTO custom_collections (name, description, owner_id, author_name, visibility) VALUES (?, ?, ?, ?, ?)`,
+        `INSERT INTO custom_collections (name, description, owner_id, author_name, visibility, tenant_id) VALUES (?, ?, ?, ?, ?, ?)`,
       )
       .run(
         body.name,
@@ -275,6 +285,7 @@ customRoutes.openapi(createCollectionRoute, async (c) => {
         user.id_user,
         body.author_name ?? null,
         body.visibility ?? "public",
+        c.get("tenantId"),
       );
 
     const collection = db

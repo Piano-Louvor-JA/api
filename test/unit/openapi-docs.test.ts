@@ -23,6 +23,26 @@ describe("OpenAPI Docs", () => {
     expect(res.headers.get("content-type")).toContain("text/html");
   });
 
+  it("documents X-Tenant for custom endpoints and tenant_id as read-only", async () => {
+    const res = await app.request("/openapi.json");
+    const body = await res.json();
+    const collectionGet = body.paths["/v1/custom/collections"].get;
+    const collectionSchema =
+      collectionGet.responses["200"].content["application/json"].schema
+        .properties.data.items;
+
+    expect(collectionGet.parameters).toContainEqual(
+      expect.objectContaining({
+        in: "header",
+        name: "X-Tenant",
+        schema: expect.objectContaining({ default: "piano" }),
+      }),
+    );
+    expect(collectionSchema.properties.tenant_id).toEqual(
+      expect.objectContaining({ readOnly: true }),
+    );
+  });
+
   it("GET /v1/health deve estar documentado com schema", async () => {
     const res = await app.request("/openapi.json");
     const body = await res.json();

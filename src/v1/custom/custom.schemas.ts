@@ -17,6 +17,7 @@ export const CustomCollectionSchema = z.object({
   updated_at_ms: z.number().nullable().optional(),
   is_owner: z.number().optional(),
   musics_count: z.number().optional(),
+  tenant_id: z.string().openapi({ readOnly: true }).optional(),
 });
 
 export const CustomCollectionsListResponseSchema = z.object({
