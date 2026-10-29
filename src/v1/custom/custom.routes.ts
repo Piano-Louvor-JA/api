@@ -996,12 +996,13 @@ customRoutes.openapi(getMusicRoute, (c) => {
                 f_img.url as image_url,
                 f_img.image_position as image_position
          FROM custom_musics cm
+         INNER JOIN custom_collections cc ON cc.id_collection = cm.id_collection
          LEFT JOIN files f_audio ON cm.id_file_audio = f_audio.id_file
          LEFT JOIN files f_inst ON cm.id_file_instrumental = f_inst.id_file
          LEFT JOIN files f_img ON cm.id_file_image = f_img.id_file
-         WHERE cm.id_music = ?`,
+         WHERE cm.id_music = ? AND cc.tenant_id = ?`,
       )
-      .get(parseInt(id, 10)) as
+      .get(parseInt(id, 10), c.get("tenantId")) as
       | (MusicRow & {
           audio_url: string | null;
           instrumental_url: string | null;
@@ -1242,6 +1243,12 @@ const listLyricsRoute = createRoute({
       },
       description: "Lista de estrofes",
     },
+    404: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Música não encontrada",
+    },
     500: {
       content: {
         "application/json": { schema: z.object({ error: z.string() }) },
@@ -1262,14 +1269,27 @@ customRoutes.openapi(listLyricsRoute, (c) => {
                 f_img.url as image_url,
                 f_img.image_position as image_position
          FROM custom_lyrics cl
+         INNER JOIN custom_musics cm ON cm.id_music = cl.id_music
+         INNER JOIN custom_collections cc ON cc.id_collection = cm.id_collection
          LEFT JOIN files f_img ON cl.id_file_image = f_img.id_file
-         WHERE cl.id_music = ?
+         WHERE cl.id_music = ? AND cc.tenant_id = ?
          ORDER BY cl."order" ASC`,
       )
-      .all(parseInt(id, 10)) as (LyricRow & {
+      .all(parseInt(id, 10), c.get("tenantId")) as (LyricRow & {
       image_url: string | null;
       image_position: number | null;
     })[];
+
+    const music = db
+      .prepare(
+        `SELECT 1
+         FROM custom_musics cm
+         INNER JOIN custom_collections cc ON cc.id_collection = cm.id_collection
+         WHERE cm.id_music = ? AND cc.tenant_id = ?`,
+      )
+      .get(parseInt(id, 10), c.get("tenantId"));
+
+    if (!music) return c.json({ error: "Música não encontrada" }, 404);
 
     return c.json({ data: lyrics }, 200);
   } catch (error) {

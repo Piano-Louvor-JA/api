@@ -77,6 +77,35 @@ describe("community multitenant read scope", () => {
     expect(await response.json()).toEqual({ error: "Coletânea não encontrada" });
   });
 
+  it("returns indistinguishable 404s for another tenant's music and lyrics", async () => {
+    const db = app.getDb();
+    const violinCollection = db
+      .prepare(`SELECT id_collection FROM custom_collections WHERE name = ?`)
+      .get("Violin Collection") as { id_collection: number };
+    const musicId = Number(
+      db
+        .prepare(
+          `INSERT INTO custom_musics (id_collection, name) VALUES (?, ?)`,
+        )
+        .run(violinCollection.id_collection, "Violin Music").lastInsertRowid,
+    );
+    db.prepare(
+      `INSERT INTO custom_lyrics (id_music, lyric, "order") VALUES (?, ?, 1)`,
+    ).run(musicId, "Violin lyric");
+
+    const music = await app.router.request(`/v1/custom/musics/${musicId}`);
+    const lyrics = await app.router.request(`/v1/custom/musics/${musicId}/lyrics`);
+    const missingMusic = await app.router.request("/v1/custom/musics/999999");
+    const missingLyrics = await app.router.request(
+      "/v1/custom/musics/999999/lyrics",
+    );
+
+    expect(music.status).toBe(404);
+    expect(lyrics.status).toBe(404);
+    expect(await music.json()).toEqual(await missingMusic.json());
+    expect(await lyrics.json()).toEqual(await missingLyrics.json());
+  });
+
   it("returns 404 when another tenant uses a collection and keeps piano ranking intact", async () => {
     const db = app.getDb();
     const violinCollection = db
