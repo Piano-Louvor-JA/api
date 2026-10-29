@@ -4,10 +4,11 @@
  * documentado em .planning/gauntlet/SYNC_API.md (B16).
  */
 import { Hono } from "hono";
+import type { TenantEnv } from "../../middleware/tenant.middleware.js";
 import type { CustomAuthEnv } from "./auth.middleware.js";
 import { requireSyncAuth, runSync, SyncRequestSchema } from "./sync.service.js";
 
-export const syncRoutes = new Hono<CustomAuthEnv>();
+export const syncRoutes = new Hono<CustomAuthEnv & TenantEnv>();
 
 syncRoutes.use("/sync", requireSyncAuth);
 
@@ -29,7 +30,7 @@ syncRoutes.post("/sync", async (c) => {
 
   try {
     const user = c.get("user") as { id_user: number };
-    const result = runSync(user.id_user, parsed.data);
+    const result = runSync(user.id_user, parsed.data, c.get("tenantId"));
     return c.json(result, 200);
   } catch (error) {
     console.error("[sync] erro:", error);

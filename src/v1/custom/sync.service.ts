@@ -146,14 +146,16 @@ function nowMs(): number {
 function loadServerCollections(
   db: ReturnType<typeof getDb>,
   userId: number,
+  tenantId: string,
 ): SyncResultCollection[] {
   const cols = db
     .prepare(
       `SELECT cc.* FROM custom_collections cc
-       WHERE cc.deleted_at IS NULL AND (cc.owner_id = ? OR cc.owner_id IS NULL)
+       WHERE cc.deleted_at IS NULL AND cc.tenant_id = ?
+         AND (cc.owner_id = ? OR cc.owner_id IS NULL)
        ORDER BY cc.id_collection`,
     )
-    .all(userId) as Array<{
+    .all(tenantId, userId) as Array<{
     id_collection: number;
     client_uuid: string;
     name: string;
@@ -227,6 +229,7 @@ function loadServerCollections(
 function applyCollection(
   db: ReturnType<typeof getDb>,
   userId: number,
+  tenantId: string,
   incoming: SyncCollection,
   applied: { created: number; updated: number },
   conflicts: Array<{ client_uuid: string; resolution: string }>,
@@ -236,9 +239,9 @@ function applyCollection(
       `SELECT cc.*, u.id_user as owner_matched
        FROM custom_collections cc
        LEFT JOIN custom_users u ON u.id_user = cc.owner_id
-       WHERE cc.client_uuid = ?`,
+       WHERE cc.client_uuid = ? AND cc.tenant_id = ?`,
     )
-    .get(incoming.client_uuid) as
+    .get(incoming.client_uuid, tenantId) as
     | {
         id_collection: number;
         client_uuid: string;
@@ -258,8 +261,8 @@ function applyCollection(
     const r = db
       .prepare(
         `INSERT INTO custom_collections
-           (name, description, author_name, owner_id, client_uuid, deleted_at, updated_at_ms)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+           (name, description, author_name, owner_id, client_uuid, deleted_at, updated_at_ms, tenant_id)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         incoming.name,
@@ -269,6 +272,7 @@ function applyCollection(
         incoming.client_uuid,
         incoming.deleted_at ?? null,
         incoming.deleted_at ?? incoming.updated_at,
+        tenantId,
       );
     const idCol = Number(r.lastInsertRowid);
     applied.created++;
@@ -446,13 +450,13 @@ function replaceLyrics(
   }
 }
 
-export function runSync(userId: number, body: SyncRequest) {
+export function runSync(userId: number, body: SyncRequest, tenantId = "piano") {
   const db = getDb();
   const applied = { created: 0, updated: 0 };
   const conflicts: Array<{ client_uuid: string; resolution: string }> = [];
 
   for (const col of body.collections) {
-    applyCollection(db, userId, col, applied, conflicts);
+    applyCollection(db, userId, tenantId, col, applied, conflicts);
   }
 
   if (body.operator_state?.length) {
@@ -463,7 +467,7 @@ export function runSync(userId: number, body: SyncRequest) {
     server_time: nowMs(),
     applied,
     conflicts,
-    collections: loadServerCollections(db, userId),
+    collections: loadServerCollections(db, userId, tenantId),
     ...(body.operator_state !== undefined
       ? { operator_state: loadServerOperatorState(db, userId) }
       : {}),
