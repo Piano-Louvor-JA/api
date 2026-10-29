@@ -815,47 +815,49 @@ customRoutes.openapi(copyMusicRoute, (c) => {
       .get(parseInt(id, 10), src.name) as MusicRow | undefined;
     if (dup) return c.json(dup, 200);
 
-    const result = db
-      .prepare(
-        `INSERT INTO custom_musics (id_collection, name, lyric, auxiliary_lyric, id_file_audio, id_file_instrumental, id_file_image, duration, official_music_id, owner_id)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      )
-      .run(
-        parseInt(id, 10),
-        src.name,
-        src.lyric,
-        src.auxiliary_lyric,
-        src.id_file_audio,
-        src.id_file_instrumental,
-        src.id_file_image,
-        src.duration,
-        src.official_music_id,
-        dest.owner_id,
-      );
-    const newId = result.lastInsertRowid as number;
-
-    // Clona as estrofes (letra + timing + bg por estrofe)
     const lyrics = db
       .prepare(
         'SELECT * FROM custom_lyrics WHERE id_music = ? ORDER BY "order", id_lyric',
       )
       .all(src.id_music) as LyricRow[];
-    const insertLyric = db.prepare(
-      `INSERT INTO custom_lyrics (id_music, lyric, aux_lyric, id_file_image, time, instrumental_time, show_slide, "order")
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    );
-    for (const l of lyrics) {
-      insertLyric.run(
-        newId,
-        l.lyric,
-        l.aux_lyric,
-        l.id_file_image,
-        l.time,
-        l.instrumental_time,
-        l.show_slide ?? 1,
-        l.order ?? 0,
+    const copyMusic = db.transaction(() => {
+      const result = db
+        .prepare(
+          `INSERT INTO custom_musics (id_collection, name, lyric, auxiliary_lyric, id_file_audio, id_file_instrumental, id_file_image, duration, official_music_id, owner_id)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        )
+        .run(
+          parseInt(id, 10),
+          src.name,
+          src.lyric,
+          src.auxiliary_lyric,
+          src.id_file_audio,
+          src.id_file_instrumental,
+          src.id_file_image,
+          src.duration,
+          src.official_music_id,
+          dest.owner_id,
+        );
+      const newId = result.lastInsertRowid as number;
+      const insertLyric = db.prepare(
+        `INSERT INTO custom_lyrics (id_music, lyric, aux_lyric, id_file_image, time, instrumental_time, show_slide, "order")
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       );
-    }
+      for (const l of lyrics) {
+        insertLyric.run(
+          newId,
+          l.lyric,
+          l.aux_lyric,
+          l.id_file_image,
+          l.time,
+          l.instrumental_time,
+          l.show_slide ?? 1,
+          l.order ?? 0,
+        );
+      }
+      return newId;
+    });
+    const newId = copyMusic();
 
     const music = db
       .prepare("SELECT * FROM custom_musics WHERE id_music = ?")
@@ -2598,7 +2600,7 @@ const promoteRoute = createRoute({
       content: {
         "application/json": { schema: z.object({ error: z.string() }) },
       },
-      description: "Sem permissão de curador",
+      description: "Sem permissão",
     },
   },
 });
@@ -2613,7 +2615,7 @@ customRoutes.openapi(promoteRoute, (c) => {
     .map((s) => Number(s.trim()))
     .filter((n) => Number.isFinite(n) && n > 0);
   if (!curators.includes(user.id_user)) {
-    return c.json({ error: "Sem permissão de curador" }, 403);
+    return c.json({ error: "Sem permissão" }, 403);
   }
 
   const db = getDb();

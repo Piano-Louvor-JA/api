@@ -55,6 +55,16 @@ it("evento sazonal inativo e ativo preserva descrição opcional", async () => {
   ).toMatchObject({ description: "Description" });
   db.prepare("UPDATE seasonal_events SET active=0").run();
 });
+it("promote rejeita não curador com o erro 403 padrão", async () => {
+  vi.stubEnv("CURATOR_USER_IDS", "999999");
+  const res = await fixture.router.request("/v1/custom/admin/promote-music", {
+    method: "POST",
+    headers: headers(),
+    body: JSON.stringify({ custom_music_id: mid, official_music_id: 1 }),
+  });
+  expect(res.status).toBe(403);
+  expect(await res.json()).toEqual({ error: "Sem permissão" });
+});
 it("curador autorizado promove faixa e credita o autor", async () => {
   vi.stubEnv("CURATOR_USER_IDS", String(user.id_user));
   const res = await fixture.router.request("/v1/custom/admin/promote-music", {
@@ -94,6 +104,39 @@ it("cópia em outra coletânea preserva letra e ordem", async () => {
       .prepare('SELECT lyric, "order" FROM custom_lyrics WHERE id_music=?')
       .all(copy.id_music),
   ).toEqual([{ lyric: "Lyric", order: 1 }]);
+});
+it("cópia reverte música se a inserção de letra falha", async () => {
+  const db = fixture.getDb();
+  const dest = Number(
+    db
+      .prepare("INSERT INTO custom_collections (name, owner_id) VALUES (?, ?)")
+      .run("Rollback destination", user.id_user).lastInsertRowid,
+  );
+  db.exec(
+    `CREATE TRIGGER fail_copy_lyric BEFORE INSERT ON custom_lyrics
+     WHEN NEW.id_music != ${mid}
+     BEGIN SELECT RAISE(FAIL, 'forced lyric failure'); END`,
+  );
+  const countBefore = Number(
+    (
+      db
+        .prepare("SELECT COUNT(*) AS count FROM custom_musics WHERE id_collection = ?")
+        .get(dest) as { count: number }
+    ).count,
+  );
+  const res = await fixture.router.request(
+    `/v1/custom/collections/${dest}/musics/${mid}/copy`,
+    { method: "POST", headers: headers(), body: "{}" },
+  );
+  expect(res.status).toBe(500);
+  expect(
+    (
+      db
+        .prepare("SELECT COUNT(*) AS count FROM custom_musics WHERE id_collection = ?")
+        .get(dest) as { count: number }
+    ).count,
+  ).toBe(countBefore);
+  db.exec("DROP TRIGGER fail_copy_lyric");
 });
 it("reset consome token válido e impede reutilização", async () => {
   const token = "reset-valid-token-123456789";
