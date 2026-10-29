@@ -651,6 +651,12 @@ const listMusicsRoute = createRoute({
       },
       description: "Lista de músicas",
     },
+    404: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Coletânea não encontrada",
+    },
     500: {
       content: {
         "application/json": { schema: z.object({ error: z.string() }) },
@@ -664,6 +670,13 @@ customRoutes.openapi(listMusicsRoute, (c) => {
   try {
     const { id } = c.req.valid("param");
     const db = getDb();
+    const collectionId = parseInt(id, 10);
+    const exists = db
+      .prepare(
+        `SELECT 1 FROM custom_collections WHERE id_collection = ? AND tenant_id = ?`,
+      )
+      .get(collectionId, c.get("tenantId"));
+    if (!exists) return c.json({ error: "Coletânea não encontrada" }, 404);
 
     const musics = db
       .prepare(
@@ -680,7 +693,7 @@ customRoutes.openapi(listMusicsRoute, (c) => {
          WHERE cm.id_collection = ? AND cc.tenant_id = ?
          ORDER BY cm.name`,
       )
-      .all(parseInt(id, 10), c.get("tenantId")) as MusicRow[];
+      .all(collectionId, c.get("tenantId")) as MusicRow[];
 
     return c.json(
       {
@@ -2106,12 +2119,18 @@ customRoutes.openapi(recordUseRoute, (c) => {
 
   const exists = db
     .prepare(
-      `SELECT 1 FROM custom_collections WHERE id_collection = ? AND visibility = 'public'`,
+      `SELECT 1 FROM custom_collections
+       WHERE id_collection = ? AND visibility = 'public' AND tenant_id = ?`,
     )
-    .get(collectionId);
+    .get(collectionId, c.get("tenantId"));
   if (!exists) return c.json({ error: "Coletânea não encontrada" }, 404);
 
-  const firstUse = recordCollectionUse(db, user.id_user, collectionId);
+  const firstUse = recordCollectionUse(
+    db,
+    user.id_user,
+    collectionId,
+    c.get("tenantId"),
+  );
   if (firstUse) {
     const owner = db
       .prepare(

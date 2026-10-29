@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { hashToken } from "../../src/v1/custom/auth.service.js";
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
 describe("community multitenant read scope", () => {
@@ -10,12 +11,16 @@ describe("community multitenant read scope", () => {
     const db = app.getDb();
     db.prepare(
       `INSERT INTO custom_users (email, password_hash, display_name, tenant_id)
-       VALUES (?, 'x', ?, ?)`,
-    ).run("piano@tenant.local", "Piano User", "piano");
+       VALUES (?, ?, ?, ?)`,
+    ).run("piano@tenant.local", "x", "Piano User", "piano");
     db.prepare(
       `INSERT INTO custom_users (email, password_hash, display_name, tenant_id)
-       VALUES (?, 'x', ?, ?)`,
-    ).run("violin@tenant.local", "Violin User", "violin");
+       VALUES (?, ?, ?, ?)`,
+    ).run("violin@tenant.local", "x", "Violin User", "violin");
+    db.prepare(
+      `INSERT INTO custom_users (email, password_hash, display_name, tenant_id)
+       VALUES (?, ?, ?, ?)`,
+    ).run("piano-reader@tenant.local", "x", "Piano Reader", "piano");
 
     const pianoUser = db
       .prepare(`SELECT id_user FROM custom_users WHERE email = ?`)
@@ -56,6 +61,54 @@ describe("community multitenant read scope", () => {
     expect(
       body.data.map((collection: { name: string }) => collection.name),
     ).not.toContain("Violin Collection");
+  });
+
+  it("returns 404 when another tenant requests a collection's musics", async () => {
+    const violinCollection = app
+      .getDb()
+      .prepare(`SELECT id_collection FROM custom_collections WHERE name = ?`)
+      .get("Violin Collection") as { id_collection: number };
+
+    const response = await app.router.request(
+      `/v1/custom/collections/${violinCollection.id_collection}/musics`,
+    );
+
+    expect(response.status).toBe(404);
+    expect(await response.json()).toEqual({ error: "Coletânea não encontrada" });
+  });
+
+  it("returns 404 when another tenant uses a collection and keeps piano ranking intact", async () => {
+    const db = app.getDb();
+    const violinCollection = db
+      .prepare(`SELECT id_collection FROM custom_collections WHERE name = ?`)
+      .get("Violin Collection") as { id_collection: number };
+    const pianoReader = db
+      .prepare(`SELECT id_user FROM custom_users WHERE email = ?`)
+      .get("piano-reader@tenant.local") as { id_user: number };
+    const token = "piano-reader-token";
+    db.prepare(`INSERT INTO custom_sessions (token_hash, id_user) VALUES (?, ?)`)
+      .run(hashToken(token), pianoReader.id_user);
+
+    const response = await app.router.request(
+      `/v1/custom/collections/${violinCollection.id_collection}/use`,
+      { method: "POST", headers: { authorization: `Bearer ${token}` } },
+    );
+
+    expect(response.status).toBe(404);
+    expect(
+      db
+        .prepare(
+          `SELECT COUNT(*) AS count FROM contrib_points WHERE reason = 'use_received'`,
+        )
+        .get(),
+    ).toEqual({ count: 0 });
+    expect(
+      db
+        .prepare(
+          `SELECT COUNT(*) AS count FROM collection_uses WHERE collection_id = ?`,
+        )
+        .get(violinCollection.id_collection),
+    ).toEqual({ count: 0 });
   });
 
   it("AC-2: ranking is separated by tenant", async () => {
