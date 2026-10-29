@@ -364,10 +364,10 @@ customRoutes.openapi(getCollectionRoute, (c) => {
         `SELECT cc.*, COUNT(cm.id_music) as musics_count
          FROM custom_collections cc
          LEFT JOIN custom_musics cm ON cm.id_collection = cc.id_collection
-         WHERE cc.id_collection = ?
+         WHERE cc.id_collection = ? AND cc.tenant_id = ?
          GROUP BY cc.id_collection`,
       )
-      .get(parseInt(id, 10)) as CollectionRow | undefined;
+      .get(parseInt(id, 10), c.get("tenantId")) as CollectionRow | undefined;
 
     if (!collection) {
       return c.json({ error: "Coletânea não encontrada" }, 404);
@@ -605,9 +605,10 @@ customRoutes.openapi(listAllMusicsRoute, (c) => {
          LEFT JOIN files f_audio ON cm.id_file_audio = f_audio.id_file
          LEFT JOIN files f_inst ON cm.id_file_instrumental = f_inst.id_file
          LEFT JOIN files f_img ON cm.id_file_image = f_img.id_file
+         WHERE cc.tenant_id = ?
          ORDER BY cm.name`,
       )
-      .all() as (MusicRow & {
+      .all(c.get("tenantId")) as (MusicRow & {
       collection_name: string;
       audio_url: string | null;
       instrumental_url: string | null;
@@ -672,13 +673,14 @@ customRoutes.openapi(listMusicsRoute, (c) => {
                 f_img.url as image_url,
                 f_img.image_position as image_position
          FROM custom_musics cm
+         INNER JOIN custom_collections cc ON cc.id_collection = cm.id_collection
          LEFT JOIN files f_audio ON cm.id_file_audio = f_audio.id_file
          LEFT JOIN files f_inst ON cm.id_file_instrumental = f_inst.id_file
          LEFT JOIN files f_img ON cm.id_file_image = f_img.id_file
-         WHERE cm.id_collection = ?
+         WHERE cm.id_collection = ? AND cc.tenant_id = ?
          ORDER BY cm.name`,
       )
-      .all(parseInt(id, 10)) as MusicRow[];
+      .all(parseInt(id, 10), c.get("tenantId")) as MusicRow[];
 
     return c.json(
       {
@@ -2156,7 +2158,7 @@ const rankingRoute = createRoute({
 customRoutes.openapi(rankingRoute, (c) => {
   const db = getDb();
   const window = c.req.valid("query").window;
-  const data = getRanking(db, window);
+  const data = getRanking(db, c.get("tenantId"), window);
   return c.json({ data }, 200);
 });
 
@@ -2196,7 +2198,7 @@ customRoutes.openapi(myPositionRoute, (c) => {
   const db = getDb();
   const user = c.get("user") as { id_user: number };
   const window = c.req.valid("query").window;
-  const pos = getUserPosition(db, user.id_user, window);
+  const pos = getUserPosition(db, user.id_user, c.get("tenantId"), window);
   return c.json(
     { position: pos?.position ?? null, total: pos?.total ?? null },
     200,
@@ -2559,10 +2561,10 @@ customRoutes.openapi(seasonalEventRoute, (c) => {
   const row = db
     .prepare(
       `SELECT name, description, multiplier FROM seasonal_events
-       WHERE active = 1 AND datetime('now') BETWEEN starts_at AND ends_at
+       WHERE active = 1 AND tenant_id = ? AND datetime('now') BETWEEN starts_at AND ends_at
        ORDER BY multiplier DESC LIMIT 1`,
     )
-    .get() as
+    .get(c.get("tenantId")) as
     | { name: string; description: string | null; multiplier: number }
     | undefined;
   if (!row) return c.json({ active: false }, 200);

@@ -150,7 +150,7 @@ describe("ranking.service (F1..F3)", () => {
 
   describe("F2 — getRanking", () => {
     it("ranking global ordena por total DESC, desempate por ponto mais antigo", () => {
-      const ranking = getRanking(db, "all");
+      const ranking = getRanking(db, "piano", "all");
       // Alice: 5 (use_received) + 10 (publish) = 15; Bob: 10 (publish pós-unfreeze)
       expect(ranking.length).toBeGreaterThanOrEqual(2);
       expect(ranking[0].display_name).toBe("Alice");
@@ -159,6 +159,21 @@ describe("ranking.service (F1..F3)", () => {
       for (const row of ranking) {
         expect(row.display_name).not.toContain("@");
       }
+    });
+
+    it("separa ranking por tenant", () => {
+      const violinUser = Number(
+        db
+          .prepare(
+            `INSERT INTO custom_users (email, password_hash, display_name, tenant_id) VALUES ('v@test.local', 'x', 'Violin', 'violin')`,
+          )
+          .run().lastInsertRowid,
+      );
+      creditPoints(db, violinUser, "publish");
+      expect(getRanking(db, "piano", "all").some((r) => r.user_id === violinUser)).toBe(false);
+      expect(getRanking(db, "violin", "all")).toEqual([
+        expect.objectContaining({ user_id: violinUser, total: 10 }),
+      ]);
     });
 
     it("congelados não aparecem no ranking", () => {
@@ -173,16 +188,16 @@ describe("ranking.service (F1..F3)", () => {
       db.prepare(
         `INSERT INTO point_freeze (user_id, reason) VALUES (?, 'mod')`,
       ).run(frozenUser);
-      const ranking = getRanking(db, "all");
+      const ranking = getRanking(db, "piano", "all");
       expect(ranking.find((r) => r.user_id === frozenUser)).toBeUndefined();
     });
 
     it("getUserPosition retorna posição e total do usuário", () => {
-      const pos = getUserPosition(db, userA, "all");
+      const pos = getUserPosition(db, userA, "piano", "all");
       expect(pos).not.toBeNull();
       expect(pos?.total).toBe(15);
       expect(pos?.position).toBe(1);
-      expect(getUserPosition(db, 999999, "all")).toBeNull();
+      expect(getUserPosition(db, 999999, "piano", "all")).toBeNull();
     });
   });
 

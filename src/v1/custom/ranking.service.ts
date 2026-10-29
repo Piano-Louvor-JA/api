@@ -123,6 +123,7 @@ export function unfreeze(db: DbLike, userId: number): void {
  */
 export function getRanking(
   db: DbLike,
+  tenantId: string,
   window: "week" | "all",
   limit = 50,
 ): Array<{
@@ -140,14 +141,14 @@ export function getRanking(
               SUM(p.points) AS total,
               MIN(p.created_at) AS first_point
        FROM contrib_points p
-       JOIN custom_users u ON u.id_user = p.user_id
+       JOIN custom_users u ON u.id_user = p.user_id AND u.tenant_id = ?
        WHERE 1=1 ${since}
          AND p.user_id NOT IN (SELECT user_id FROM point_freeze)
        GROUP BY p.user_id
        ORDER BY total DESC, first_point ASC
        LIMIT ?`,
     )
-    .all(limit);
+    .all(tenantId, limit);
   type RankRow = {
     user_id: number;
     display_name: string;
@@ -166,9 +167,10 @@ export function getRanking(
 export function getUserPosition(
   db: DbLike,
   userId: number,
+  tenantId: string,
   window: "week" | "all",
 ): { position: number; total: number } | null {
-  const full = getRanking(db, window, 1_000_000);
+  const full = getRanking(db, tenantId, window, 1_000_000);
   const found = full.find((r) => r.user_id === userId);
   return found ? { position: found.position, total: found.total } : null;
 }
