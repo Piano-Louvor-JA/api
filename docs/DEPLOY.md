@@ -17,8 +17,10 @@ o seu:
 - staging: `DB_PATH=/data/staging-catalog.db`
 - prod: `DB_PATH=/data/catalog.db`
 
-As migrations (001→023) aplicam sozinhas no boot, statement-a-statement
-(idempotentes — re-execução sem erro, lição api#88).
+As migrations (001→031) aplicam sozinhas no boot, statement-a-statement
+(idempotentes — re-execução sem erro, lição api#88). Para a nota de deploy da
+migration 027 (multitenancy da comunidade), ver
+[`DEPLOY_027_MULTITENANT.md`](./DEPLOY_027_MULTITENANT.md).
 
 ## Quota de mídia custom
 
