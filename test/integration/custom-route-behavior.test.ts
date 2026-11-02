@@ -120,7 +120,9 @@ it("cópia reverte música se a inserção de letra falha", async () => {
   const countBefore = Number(
     (
       db
-        .prepare("SELECT COUNT(*) AS count FROM custom_musics WHERE id_collection = ?")
+        .prepare(
+          "SELECT COUNT(*) AS count FROM custom_musics WHERE id_collection = ?",
+        )
         .get(dest) as { count: number }
     ).count,
   );
@@ -132,7 +134,9 @@ it("cópia reverte música se a inserção de letra falha", async () => {
   expect(
     (
       db
-        .prepare("SELECT COUNT(*) AS count FROM custom_musics WHERE id_collection = ?")
+        .prepare(
+          "SELECT COUNT(*) AS count FROM custom_musics WHERE id_collection = ?",
+        )
         .get(dest) as { count: number }
     ).count,
   ).toBe(countBefore);

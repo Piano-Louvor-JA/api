@@ -29,8 +29,9 @@ describe("community multitenant write scope", () => {
         .lastInsertRowid,
     );
     pianoToken = "write-piano-token";
-    db.prepare(`INSERT INTO custom_sessions (token_hash, id_user) VALUES (?, ?)`)
-      .run(hashToken(pianoToken), pianoUser);
+    db.prepare(
+      `INSERT INTO custom_sessions (token_hash, id_user) VALUES (?, ?)`,
+    ).run(hashToken(pianoToken), pianoUser);
     db.prepare(
       `INSERT INTO custom_collections (name, owner_id, visibility, tenant_id)
        VALUES (?, ?, 'public', ?)`,
@@ -57,7 +58,9 @@ describe("community multitenant write scope", () => {
     expect(
       app
         .getDb()
-        .prepare(`SELECT tenant_id FROM custom_collections WHERE id_collection = ?`)
+        .prepare(
+          `SELECT tenant_id FROM custom_collections WHERE id_collection = ?`,
+        )
         .get(collection.id_collection),
     ).toEqual({ tenant_id: "violin" });
   });
@@ -107,7 +110,8 @@ describe("community multitenant write scope", () => {
         .prepare(
           `INSERT INTO custom_musics (id_collection, name, owner_id) VALUES (?, ?, ?)`,
         )
-        .run(violinCollection.id_collection, "Violin Write Music", 2).lastInsertRowid,
+        .run(violinCollection.id_collection, "Violin Write Music", 2)
+        .lastInsertRowid,
     );
     const violinLyric = Number(
       db

@@ -170,7 +170,9 @@ describe("ranking.service (F1..F3)", () => {
           .run().lastInsertRowid,
       );
       creditPoints(db, violinUser, "publish");
-      expect(getRanking(db, "piano", "all").some((r) => r.user_id === violinUser)).toBe(false);
+      expect(
+        getRanking(db, "piano", "all").some((r) => r.user_id === violinUser),
+      ).toBe(false);
       expect(getRanking(db, "violin", "all")).toEqual([
         expect.objectContaining({ user_id: violinUser, total: 10 }),
       ]);

@@ -74,7 +74,9 @@ describe("community multitenant read scope", () => {
     );
 
     expect(response.status).toBe(404);
-    expect(await response.json()).toEqual({ error: "Coletânea não encontrada" });
+    expect(await response.json()).toEqual({
+      error: "Coletânea não encontrada",
+    });
   });
 
   it("returns indistinguishable 404s for another tenant's music and lyrics", async () => {
@@ -94,7 +96,9 @@ describe("community multitenant read scope", () => {
     ).run(musicId, "Violin lyric");
 
     const music = await app.router.request(`/v1/custom/musics/${musicId}`);
-    const lyrics = await app.router.request(`/v1/custom/musics/${musicId}/lyrics`);
+    const lyrics = await app.router.request(
+      `/v1/custom/musics/${musicId}/lyrics`,
+    );
     const missingMusic = await app.router.request("/v1/custom/musics/999999");
     const missingLyrics = await app.router.request(
       "/v1/custom/musics/999999/lyrics",
@@ -115,8 +119,9 @@ describe("community multitenant read scope", () => {
       .prepare(`SELECT id_user FROM custom_users WHERE email = ?`)
       .get("piano-reader@tenant.local") as { id_user: number };
     const token = "piano-reader-token";
-    db.prepare(`INSERT INTO custom_sessions (token_hash, id_user) VALUES (?, ?)`)
-      .run(hashToken(token), pianoReader.id_user);
+    db.prepare(
+      `INSERT INTO custom_sessions (token_hash, id_user) VALUES (?, ?)`,
+    ).run(hashToken(token), pianoReader.id_user);
 
     const response = await app.router.request(
       `/v1/custom/collections/${violinCollection.id_collection}/use`,

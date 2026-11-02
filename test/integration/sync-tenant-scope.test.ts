@@ -43,7 +43,9 @@ describe("sync tenant scope", () => {
     expect(piano.collections).toEqual([]);
     expect(
       getDb()
-        .prepare(`SELECT tenant_id FROM custom_collections WHERE client_uuid = ?`)
+        .prepare(
+          `SELECT tenant_id FROM custom_collections WHERE client_uuid = ?`,
+        )
         .get("shared-uuid-0001"),
     ).toEqual({ tenant_id: "violin" });
   });

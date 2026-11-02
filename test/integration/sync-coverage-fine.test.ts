@@ -125,7 +125,13 @@ describe("applyMusic tenant scope", () => {
     db.prepare(
       `INSERT INTO custom_musics (id_collection, name, owner_id, client_uuid, updated_at_ms)
        VALUES (?, ?, ?, ?, ?)`,
-    ).run(violinCollection, "violin original", uidOther, "shared-music-uuid", 1_000);
+    ).run(
+      violinCollection,
+      "violin original",
+      uidOther,
+      "shared-music-uuid",
+      1_000,
+    );
 
     runSync(
       uid,

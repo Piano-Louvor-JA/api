@@ -802,7 +802,9 @@ customRoutes.openapi(copyMusicRoute, (c) => {
         .prepare(`SELECT 1 FROM custom_collections WHERE id_collection = ?`)
         .get(parseInt(id, 10));
       return c.json(
-        { error: exists ? "Sem permissão" : "Coletânea destino não encontrada" },
+        {
+          error: exists ? "Sem permissão" : "Coletânea destino não encontrada",
+        },
         exists ? 403 : 404,
       );
     }
@@ -2535,10 +2537,7 @@ customRoutes.openapi(reportCollectionRoute, (c) => {
     const anyTenant = db
       .prepare(`SELECT 1 FROM custom_collections WHERE id_collection = ?`)
       .get(collectionId);
-    return c.json(
-      { error: "Sem permissão" },
-      anyTenant ? 403 : 404,
-    );
+    return c.json({ error: "Sem permissão" }, anyTenant ? 403 : 404);
   }
 
   db.prepare(
