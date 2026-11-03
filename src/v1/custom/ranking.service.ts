@@ -42,12 +42,14 @@ export function recordCollectionUse(
   db: DbLike,
   userId: number,
   collectionId: number,
+  tenantId = "piano",
 ): boolean {
   const owner = db
     .prepare(
-      `SELECT owner_id FROM custom_collections WHERE id_collection = ? AND visibility = 'public'`,
+      `SELECT owner_id FROM custom_collections
+       WHERE id_collection = ? AND visibility = 'public' AND tenant_id = ?`,
     )
-    .get(collectionId) as { owner_id: number | null } | undefined;
+    .get(collectionId, tenantId) as { owner_id: number | null } | undefined;
   if (!owner || owner.owner_id == null || owner.owner_id === userId) {
     // Não existe, é privada, órfã (oficial) ou o usuário usou a própria.
     return false;
@@ -123,6 +125,7 @@ export function unfreeze(db: DbLike, userId: number): void {
  */
 export function getRanking(
   db: DbLike,
+  tenantId: string,
   window: "week" | "all",
   limit = 50,
 ): Array<{
@@ -140,14 +143,14 @@ export function getRanking(
               SUM(p.points) AS total,
               MIN(p.created_at) AS first_point
        FROM contrib_points p
-       JOIN custom_users u ON u.id_user = p.user_id
+       JOIN custom_users u ON u.id_user = p.user_id AND u.tenant_id = ?
        WHERE 1=1 ${since}
          AND p.user_id NOT IN (SELECT user_id FROM point_freeze)
        GROUP BY p.user_id
        ORDER BY total DESC, first_point ASC
        LIMIT ?`,
     )
-    .all(limit);
+    .all(tenantId, limit);
   type RankRow = {
     user_id: number;
     display_name: string;
@@ -166,9 +169,10 @@ export function getRanking(
 export function getUserPosition(
   db: DbLike,
   userId: number,
+  tenantId: string,
   window: "week" | "all",
 ): { position: number; total: number } | null {
-  const full = getRanking(db, window, 1_000_000);
+  const full = getRanking(db, tenantId, window, 1_000_000);
   const found = full.find((r) => r.user_id === userId);
   return found ? { position: found.position, total: found.total } : null;
 }
