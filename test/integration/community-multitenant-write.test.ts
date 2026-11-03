@@ -170,6 +170,52 @@ describe("community multitenant write scope", () => {
     expect(await missing.json()).toEqual({ error: "Música não encontrada" });
   });
 
+  it("blocks copying into a foreign-tenant destination while a missing destination stays 404", async () => {
+    const db = app.getDb();
+    const pianoCollection = Number(
+      db
+        .prepare(
+          `INSERT INTO custom_collections (name, owner_id, visibility, tenant_id)
+           VALUES (?, ?, 'public', 'piano')`,
+        )
+        .run("Piano Copy Source", 1).lastInsertRowid,
+    );
+    const pianoMusic = Number(
+      db
+        .prepare(
+          `INSERT INTO custom_musics (id_collection, name, owner_id) VALUES (?, ?, ?)`,
+        )
+        .run(pianoCollection, "Piano Copy Music", 1).lastInsertRowid,
+    );
+    const violinCollection = db
+      .prepare(`SELECT id_collection FROM custom_collections WHERE name = ?`)
+      .get("Violin Write Collection") as { id_collection: number };
+    const copy = (destination: number) =>
+      app.router.request(
+        `/v1/custom/collections/${destination}/musics/${pianoMusic}/copy`,
+        { method: "POST", headers: auth() },
+      );
+
+    const [foreign, missing] = await Promise.all([
+      copy(violinCollection.id_collection),
+      copy(999999),
+    ]);
+
+    expect(foreign.status).toBe(403);
+    expect(await foreign.json()).toEqual({ error: "Sem permissão" });
+    expect(missing.status).toBe(404);
+    expect(await missing.json()).toEqual({
+      error: "Coletânea destino não encontrada",
+    });
+    expect(
+      db
+        .prepare(
+          `SELECT COUNT(*) AS n FROM custom_musics WHERE id_collection = ? AND name = ?`,
+        )
+        .get(violinCollection.id_collection, "Piano Copy Music"),
+    ).toEqual({ n: 0 });
+  });
+
   it("returns the same error body when report target is foreign or missing", async () => {
     const violinCollection = app
       .getDb()
