@@ -1,5 +1,6 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getDb } from "../../db/connection.js";
+import type { TenantEnv } from "../../middleware/tenant.middleware.js";
 import {
   type CustomAuthEnv,
   optionalAuth,
@@ -122,7 +123,27 @@ type SessionRow = {
   display_name: string | null;
 };
 
-const customRoutes = new OpenAPIHono<CustomAuthEnv>();
+const customRoutes = new OpenAPIHono<CustomAuthEnv & TenantEnv>();
+const tenantHeader = z.string().default("piano").openapi("X-Tenant", {
+  description: "Produto LouvorJA; padrão: piano.",
+});
+
+const tenantRequest = { headers: z.object({ "X-Tenant": tenantHeader }) };
+
+function withTenantHeader<T extends { request?: Record<string, unknown> }>(
+  route: T,
+): T {
+  return {
+    ...route,
+    request: { ...route.request, ...tenantRequest },
+  };
+}
+
+const openapi = customRoutes.openapi.bind(customRoutes);
+customRoutes.openapi = ((...args: Parameters<typeof customRoutes.openapi>) => {
+  const [route, handler, hook] = args;
+  return openapi(withTenantHeader(route), handler, hook);
+}) as typeof customRoutes.openapi;
 
 // Rotas públicas (sem auth): health/register/login. Todo o resto valida sessão
 // via optionalAuth (leitura aceita anônimo) ou exige owner check na rota.
@@ -139,6 +160,7 @@ const listCollectionsRoute = createRoute({
   tags: ["custom"],
   description:
     "Lista coletâneas customizadas (públicas + minhas se autenticado)",
+  request: tenantRequest,
   middleware: [optionalAuth] as const,
   responses: {
     200: {
@@ -160,6 +182,7 @@ customRoutes.openapi(listCollectionsRoute, (c) => {
   try {
     const db = getDb();
     const user = c.get("user") as { id_user: number } | undefined;
+    const tenantId = c.get("tenantId");
 
     // api#82: privada só o dono vê. Deslogado vê apenas públicas.
     // is_owner é FLAG booleano (1/0) — NUNCA o id do usuário (bug achado por
@@ -170,17 +193,17 @@ customRoutes.openapi(listCollectionsRoute, (c) => {
              ${user ? "CASE WHEN cc.owner_id = ? THEN 1 ELSE 0 END" : "0"} as is_owner
       FROM custom_collections cc
       LEFT JOIN custom_musics cm ON cm.id_collection = cc.id_collection
-      WHERE ${user ? "(cc.visibility = 'public' OR cc.owner_id = ?)" : "cc.visibility = 'public'"}
+      WHERE cc.tenant_id = ?
+        AND ${user ? "(cc.visibility = 'public' OR cc.owner_id = ?)" : "cc.visibility = 'public'"}
         AND NOT EXISTS (
           SELECT 1 FROM collection_reports r
           WHERE r.collection_id = cc.id_collection AND r.status = 'open'
         )
       GROUP BY cc.id_collection ORDER BY cc.updated_at DESC
     `;
-    if (user) {
-      params.push(user.id_user); // is_owner
-      params.push(user.id_user); // filtro de visibilidade
-    }
+    if (user) params.push(user.id_user); // is_owner
+    params.push(tenantId);
+    if (user) params.push(user.id_user); // filtro de visibilidade
 
     const collections = db
       .prepare(query)
@@ -267,7 +290,7 @@ customRoutes.openapi(createCollectionRoute, async (c) => {
 
     const result = db
       .prepare(
-        `INSERT INTO custom_collections (name, description, owner_id, author_name, visibility) VALUES (?, ?, ?, ?, ?)`,
+        `INSERT INTO custom_collections (name, description, owner_id, author_name, visibility, tenant_id) VALUES (?, ?, ?, ?, ?, ?)`,
       )
       .run(
         body.name,
@@ -275,6 +298,7 @@ customRoutes.openapi(createCollectionRoute, async (c) => {
         user.id_user,
         body.author_name ?? null,
         body.visibility ?? "public",
+        c.get("tenantId"),
       );
 
     const collection = db
@@ -340,10 +364,10 @@ customRoutes.openapi(getCollectionRoute, (c) => {
         `SELECT cc.*, COUNT(cm.id_music) as musics_count
          FROM custom_collections cc
          LEFT JOIN custom_musics cm ON cm.id_collection = cc.id_collection
-         WHERE cc.id_collection = ?
+         WHERE cc.id_collection = ? AND cc.tenant_id = ?
          GROUP BY cc.id_collection`,
       )
-      .get(parseInt(id, 10)) as CollectionRow | undefined;
+      .get(parseInt(id, 10), c.get("tenantId")) as CollectionRow | undefined;
 
     if (!collection) {
       return c.json({ error: "Coletânea não encontrada" }, 404);
@@ -418,16 +442,24 @@ customRoutes.openapi(updateCollectionRoute, (c) => {
     const user = c.get("user") as { id_user: number };
 
     const collection = db
-      .prepare(`SELECT * FROM custom_collections WHERE id_collection = ?`)
-      .get(parseInt(id, 10)) as CollectionRow | undefined;
+      .prepare(
+        `SELECT * FROM custom_collections WHERE id_collection = ? AND tenant_id = ?`,
+      )
+      .get(parseInt(id, 10), c.get("tenantId")) as CollectionRow | undefined;
 
     if (!collection) {
-      return c.json({ error: "Coletânea não encontrada" }, 404);
+      const exists = db
+        .prepare(`SELECT 1 FROM custom_collections WHERE id_collection = ?`)
+        .get(parseInt(id, 10));
+      return c.json(
+        { error: exists ? "Sem permissão" : "Coletânea não encontrada" },
+        exists ? 403 : 404,
+      );
     }
 
     // Apenas dono pode editar (coletâneas sem dono permanecem públicas p/ leitura, mas sem edição)
     if (collection.owner_id != null && collection.owner_id !== user.id_user) {
-      return c.json({ error: "Sem permissão para editar esta coletânea" }, 403);
+      return c.json({ error: "Sem permissão" }, 403);
     }
 
     db.prepare(
@@ -511,24 +543,29 @@ customRoutes.openapi(deleteCollectionRoute, (c) => {
     const user = c.get("user") as { id_user: number };
 
     const collection = db
-      .prepare(`SELECT * FROM custom_collections WHERE id_collection = ?`)
-      .get(parseInt(id, 10)) as CollectionRow | undefined;
+      .prepare(
+        `SELECT * FROM custom_collections WHERE id_collection = ? AND tenant_id = ?`,
+      )
+      .get(parseInt(id, 10), c.get("tenantId")) as CollectionRow | undefined;
 
     if (!collection) {
-      return c.json({ error: "Coletânea não encontrada" }, 404);
+      const exists = db
+        .prepare(`SELECT 1 FROM custom_collections WHERE id_collection = ?`)
+        .get(parseInt(id, 10));
+      return c.json(
+        { error: exists ? "Sem permissão" : "Coletânea não encontrada" },
+        exists ? 403 : 404,
+      );
     }
 
     // Apenas dono pode deletar
     if (collection.owner_id != null && collection.owner_id !== user.id_user) {
-      return c.json(
-        { error: "Sem permissão para remover esta coletânea" },
-        403,
-      );
+      return c.json({ error: "Sem permissão" }, 403);
     }
 
-    db.prepare(`DELETE FROM custom_collections WHERE id_collection = ?`).run(
-      parseInt(id, 10),
-    );
+    db.prepare(
+      `DELETE FROM custom_collections WHERE id_collection = ? AND tenant_id = ?`,
+    ).run(parseInt(id, 10), c.get("tenantId"));
 
     return c.json({ success: true }, 200);
   } catch (error) {
@@ -581,9 +618,10 @@ customRoutes.openapi(listAllMusicsRoute, (c) => {
          LEFT JOIN files f_audio ON cm.id_file_audio = f_audio.id_file
          LEFT JOIN files f_inst ON cm.id_file_instrumental = f_inst.id_file
          LEFT JOIN files f_img ON cm.id_file_image = f_img.id_file
+         WHERE cc.tenant_id = ?
          ORDER BY cm.name`,
       )
-      .all() as (MusicRow & {
+      .all(c.get("tenantId")) as (MusicRow & {
       collection_name: string;
       audio_url: string | null;
       instrumental_url: string | null;
@@ -626,6 +664,12 @@ const listMusicsRoute = createRoute({
       },
       description: "Lista de músicas",
     },
+    404: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Coletânea não encontrada",
+    },
     500: {
       content: {
         "application/json": { schema: z.object({ error: z.string() }) },
@@ -639,6 +683,13 @@ customRoutes.openapi(listMusicsRoute, (c) => {
   try {
     const { id } = c.req.valid("param");
     const db = getDb();
+    const collectionId = parseInt(id, 10);
+    const exists = db
+      .prepare(
+        `SELECT 1 FROM custom_collections WHERE id_collection = ? AND tenant_id = ?`,
+      )
+      .get(collectionId, c.get("tenantId"));
+    if (!exists) return c.json({ error: "Coletânea não encontrada" }, 404);
 
     const musics = db
       .prepare(
@@ -648,13 +699,14 @@ customRoutes.openapi(listMusicsRoute, (c) => {
                 f_img.url as image_url,
                 f_img.image_position as image_position
          FROM custom_musics cm
+         INNER JOIN custom_collections cc ON cc.id_collection = cm.id_collection
          LEFT JOIN files f_audio ON cm.id_file_audio = f_audio.id_file
          LEFT JOIN files f_inst ON cm.id_file_instrumental = f_inst.id_file
          LEFT JOIN files f_img ON cm.id_file_image = f_img.id_file
-         WHERE cm.id_collection = ?
+         WHERE cm.id_collection = ? AND cc.tenant_id = ?
          ORDER BY cm.name`,
       )
-      .all(parseInt(id, 10)) as MusicRow[];
+      .all(collectionId, c.get("tenantId")) as MusicRow[];
 
     return c.json(
       {
@@ -688,6 +740,12 @@ const copyMusicRoute = createRoute({
     }),
   },
   responses: {
+    403: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Sem permissão",
+    },
     200: {
       content: { "application/json": { schema: CustomMusicSchema } },
       description: "Música já existia na coletânea destino (idempotente)",
@@ -717,17 +775,39 @@ customRoutes.openapi(copyMusicRoute, (c) => {
     const db = getDb();
 
     const src = db
-      .prepare("SELECT * FROM custom_musics WHERE id_music = ?")
-      .get(parseInt(musicId, 10)) as MusicRow | undefined;
-    if (!src) return c.json({ error: "Música de origem não encontrada" }, 404);
+      .prepare(
+        `SELECT cm.* FROM custom_musics cm
+         INNER JOIN custom_collections cc ON cc.id_collection = cm.id_collection
+         WHERE cm.id_music = ? AND cc.tenant_id = ?`,
+      )
+      .get(parseInt(musicId, 10), c.get("tenantId")) as MusicRow | undefined;
+    if (!src) {
+      const exists = db
+        .prepare(`SELECT 1 FROM custom_musics WHERE id_music = ?`)
+        .get(parseInt(musicId, 10));
+      return c.json(
+        { error: exists ? "Sem permissão" : "Música de origem não encontrada" },
+        exists ? 403 : 404,
+      );
+    }
 
     const dest = db
       .prepare(
-        "SELECT id_collection FROM custom_collections WHERE id_collection = ?",
+        `SELECT * FROM custom_collections
+         WHERE id_collection = ? AND tenant_id = ?`,
       )
-      .get(parseInt(id, 10)) as CollectionRow | undefined;
-    if (!dest)
-      return c.json({ error: "Coletânea destino não encontrada" }, 404);
+      .get(parseInt(id, 10), c.get("tenantId")) as CollectionRow | undefined;
+    if (!dest) {
+      const exists = db
+        .prepare(`SELECT 1 FROM custom_collections WHERE id_collection = ?`)
+        .get(parseInt(id, 10));
+      return c.json(
+        {
+          error: exists ? "Sem permissão" : "Coletânea destino não encontrada",
+        },
+        exists ? 403 : 404,
+      );
+    }
 
     // Evita duplicar na mesma coletânea
     const dup = db
@@ -737,47 +817,49 @@ customRoutes.openapi(copyMusicRoute, (c) => {
       .get(parseInt(id, 10), src.name) as MusicRow | undefined;
     if (dup) return c.json(dup, 200);
 
-    const result = db
-      .prepare(
-        `INSERT INTO custom_musics (id_collection, name, lyric, auxiliary_lyric, id_file_audio, id_file_instrumental, id_file_image, duration, official_music_id, owner_id)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      )
-      .run(
-        parseInt(id, 10),
-        src.name,
-        src.lyric,
-        src.auxiliary_lyric,
-        src.id_file_audio,
-        src.id_file_instrumental,
-        src.id_file_image,
-        src.duration,
-        src.official_music_id,
-        dest.owner_id,
-      );
-    const newId = result.lastInsertRowid as number;
-
-    // Clona as estrofes (letra + timing + bg por estrofe)
     const lyrics = db
       .prepare(
         'SELECT * FROM custom_lyrics WHERE id_music = ? ORDER BY "order", id_lyric',
       )
       .all(src.id_music) as LyricRow[];
-    const insertLyric = db.prepare(
-      `INSERT INTO custom_lyrics (id_music, lyric, aux_lyric, id_file_image, time, instrumental_time, show_slide, "order")
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    );
-    for (const l of lyrics) {
-      insertLyric.run(
-        newId,
-        l.lyric,
-        l.aux_lyric,
-        l.id_file_image,
-        l.time,
-        l.instrumental_time,
-        l.show_slide ?? 1,
-        l.order ?? 0,
+    const copyMusic = db.transaction(() => {
+      const result = db
+        .prepare(
+          `INSERT INTO custom_musics (id_collection, name, lyric, auxiliary_lyric, id_file_audio, id_file_instrumental, id_file_image, duration, official_music_id, owner_id)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        )
+        .run(
+          parseInt(id, 10),
+          src.name,
+          src.lyric,
+          src.auxiliary_lyric,
+          src.id_file_audio,
+          src.id_file_instrumental,
+          src.id_file_image,
+          src.duration,
+          src.official_music_id,
+          dest.owner_id,
+        );
+      const newId = result.lastInsertRowid as number;
+      const insertLyric = db.prepare(
+        `INSERT INTO custom_lyrics (id_music, lyric, aux_lyric, id_file_image, time, instrumental_time, show_slide, "order")
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       );
-    }
+      for (const l of lyrics) {
+        insertLyric.run(
+          newId,
+          l.lyric,
+          l.aux_lyric,
+          l.id_file_image,
+          l.time,
+          l.instrumental_time,
+          l.show_slide ?? 1,
+          l.order ?? 0,
+        );
+      }
+      return newId;
+    });
+    const newId = copyMusic();
 
     const music = db
       .prepare("SELECT * FROM custom_musics WHERE id_music = ?")
@@ -818,7 +900,12 @@ const createMusicRoute = createRoute({
       },
       description: "Coletânea não encontrada",
     },
-    403: E2E_FIXTURE_BLOCKED_RESPONSE,
+    403: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Sem permissão ou fixture bloqueada",
+    },
     500: {
       content: {
         "application/json": { schema: z.object({ error: z.string() }) },
@@ -843,10 +930,16 @@ customRoutes.openapi(createMusicRoute, (c) => {
     const db = getDb();
 
     const collection = db
-      .prepare(`SELECT * FROM custom_collections WHERE id_collection = ?`)
-      .get(parseInt(id, 10)) as CollectionRow | undefined;
+      .prepare(
+        `SELECT * FROM custom_collections WHERE id_collection = ? AND tenant_id = ?`,
+      )
+      .get(parseInt(id, 10), c.get("tenantId")) as CollectionRow | undefined;
 
     if (!collection) {
+      const exists = db
+        .prepare(`SELECT 1 FROM custom_collections WHERE id_collection = ?`)
+        .get(parseInt(id, 10));
+      if (exists) return c.json({ error: "Sem permissão" }, 403);
       return c.json({ error: "Coletânea não encontrada" }, 404);
     }
 
@@ -957,12 +1050,13 @@ customRoutes.openapi(getMusicRoute, (c) => {
                 f_img.url as image_url,
                 f_img.image_position as image_position
          FROM custom_musics cm
+         INNER JOIN custom_collections cc ON cc.id_collection = cm.id_collection
          LEFT JOIN files f_audio ON cm.id_file_audio = f_audio.id_file
          LEFT JOIN files f_inst ON cm.id_file_instrumental = f_inst.id_file
          LEFT JOIN files f_img ON cm.id_file_image = f_img.id_file
-         WHERE cm.id_music = ?`,
+         WHERE cm.id_music = ? AND cc.tenant_id = ?`,
       )
-      .get(parseInt(id, 10)) as
+      .get(parseInt(id, 10), c.get("tenantId")) as
       | (MusicRow & {
           audio_url: string | null;
           instrumental_url: string | null;
@@ -1051,11 +1145,21 @@ customRoutes.openapi(updateMusicRoute, (c) => {
     const db = getDb();
 
     const music = db
-      .prepare(`SELECT * FROM custom_musics WHERE id_music = ?`)
-      .get(parseInt(id, 10)) as MusicRow | undefined;
+      .prepare(
+        `SELECT cm.* FROM custom_musics cm
+         INNER JOIN custom_collections cc ON cc.id_collection = cm.id_collection
+         WHERE cm.id_music = ? AND cc.tenant_id = ?`,
+      )
+      .get(parseInt(id, 10), c.get("tenantId")) as MusicRow | undefined;
 
     if (!music) {
-      return c.json({ error: "Música não encontrada" }, 404);
+      const exists = db
+        .prepare(`SELECT 1 FROM custom_musics WHERE id_music = ?`)
+        .get(parseInt(id, 10));
+      return c.json(
+        { error: exists ? "Sem permissão" : "Música não encontrada" },
+        exists ? 403 : 404,
+      );
     }
 
     // Permissão: dono da música OU dono da coletânea pai
@@ -1160,11 +1264,21 @@ customRoutes.openapi(deleteMusicRoute, (c) => {
     const user = c.get("user") as { id_user: number };
 
     const music = db
-      .prepare(`SELECT * FROM custom_musics WHERE id_music = ?`)
-      .get(parseInt(id, 10)) as MusicRow | undefined;
+      .prepare(
+        `SELECT cm.* FROM custom_musics cm
+         INNER JOIN custom_collections cc ON cc.id_collection = cm.id_collection
+         WHERE cm.id_music = ? AND cc.tenant_id = ?`,
+      )
+      .get(parseInt(id, 10), c.get("tenantId")) as MusicRow | undefined;
 
     if (!music) {
-      return c.json({ error: "Música não encontrada" }, 404);
+      const exists = db
+        .prepare(`SELECT 1 FROM custom_musics WHERE id_music = ?`)
+        .get(parseInt(id, 10));
+      return c.json(
+        { error: exists ? "Sem permissão" : "Música não encontrada" },
+        exists ? 403 : 404,
+      );
     }
 
     if (music.owner_id != null && music.owner_id !== user.id_user) {
@@ -1203,6 +1317,12 @@ const listLyricsRoute = createRoute({
       },
       description: "Lista de estrofes",
     },
+    404: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Música não encontrada",
+    },
     500: {
       content: {
         "application/json": { schema: z.object({ error: z.string() }) },
@@ -1223,14 +1343,27 @@ customRoutes.openapi(listLyricsRoute, (c) => {
                 f_img.url as image_url,
                 f_img.image_position as image_position
          FROM custom_lyrics cl
+         INNER JOIN custom_musics cm ON cm.id_music = cl.id_music
+         INNER JOIN custom_collections cc ON cc.id_collection = cm.id_collection
          LEFT JOIN files f_img ON cl.id_file_image = f_img.id_file
-         WHERE cl.id_music = ?
+         WHERE cl.id_music = ? AND cc.tenant_id = ?
          ORDER BY cl."order" ASC`,
       )
-      .all(parseInt(id, 10)) as (LyricRow & {
+      .all(parseInt(id, 10), c.get("tenantId")) as (LyricRow & {
       image_url: string | null;
       image_position: number | null;
     })[];
+
+    const music = db
+      .prepare(
+        `SELECT 1
+         FROM custom_musics cm
+         INNER JOIN custom_collections cc ON cc.id_collection = cm.id_collection
+         WHERE cm.id_music = ? AND cc.tenant_id = ?`,
+      )
+      .get(parseInt(id, 10), c.get("tenantId"));
+
+    if (!music) return c.json({ error: "Música não encontrada" }, 404);
 
     return c.json({ data: lyrics }, 200);
   } catch (error) {
@@ -1253,6 +1386,12 @@ const createLyricRoute = createRoute({
     },
   },
   responses: {
+    403: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Sem permissão",
+    },
     201: {
       content: { "application/json": { schema: CustomLyricSchema } },
       description: "Estrofe criada",
@@ -1279,11 +1418,21 @@ customRoutes.openapi(createLyricRoute, (c) => {
     const db = getDb();
 
     const music = db
-      .prepare(`SELECT * FROM custom_musics WHERE id_music = ?`)
-      .get(parseInt(id, 10)) as MusicRow | undefined;
+      .prepare(
+        `SELECT cm.* FROM custom_musics cm
+         INNER JOIN custom_collections cc ON cc.id_collection = cm.id_collection
+         WHERE cm.id_music = ? AND cc.tenant_id = ?`,
+      )
+      .get(parseInt(id, 10), c.get("tenantId")) as MusicRow | undefined;
 
     if (!music) {
-      return c.json({ error: "Música não encontrada" }, 404);
+      const exists = db
+        .prepare(`SELECT 1 FROM custom_musics WHERE id_music = ?`)
+        .get(parseInt(id, 10));
+      return c.json(
+        { error: exists ? "Sem permissão" : "Música não encontrada" },
+        exists ? 403 : 404,
+      );
     }
 
     // Se order não fornecida, pegar próxima
@@ -1338,6 +1487,12 @@ const updateLyricRoute = createRoute({
     },
   },
   responses: {
+    403: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Sem permissão",
+    },
     200: {
       content: { "application/json": { schema: CustomLyricSchema } },
       description: "Estrofe atualizada",
@@ -1364,11 +1519,22 @@ customRoutes.openapi(updateLyricRoute, (c) => {
     const db = getDb();
 
     const lyric = db
-      .prepare(`SELECT * FROM custom_lyrics WHERE id_lyric = ?`)
-      .get(parseInt(id, 10)) as LyricRow | undefined;
+      .prepare(
+        `SELECT cl.* FROM custom_lyrics cl
+         INNER JOIN custom_musics cm ON cm.id_music = cl.id_music
+         INNER JOIN custom_collections cc ON cc.id_collection = cm.id_collection
+         WHERE cl.id_lyric = ? AND cc.tenant_id = ?`,
+      )
+      .get(parseInt(id, 10), c.get("tenantId")) as LyricRow | undefined;
 
     if (!lyric) {
-      return c.json({ error: "Estrofe não encontrada" }, 404);
+      const exists = db
+        .prepare(`SELECT 1 FROM custom_lyrics WHERE id_lyric = ?`)
+        .get(parseInt(id, 10));
+      return c.json(
+        { error: exists ? "Sem permissão" : "Estrofe não encontrada" },
+        exists ? 403 : 404,
+      );
     }
 
     db.prepare(
@@ -1408,6 +1574,12 @@ const deleteLyricRoute = createRoute({
     }),
   },
   responses: {
+    403: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Sem permissão",
+    },
     200: {
       content: {
         "application/json": { schema: z.object({ success: z.boolean() }) },
@@ -1435,11 +1607,22 @@ customRoutes.openapi(deleteLyricRoute, (c) => {
     const db = getDb();
 
     const lyric = db
-      .prepare(`SELECT * FROM custom_lyrics WHERE id_lyric = ?`)
-      .get(parseInt(id, 10)) as LyricRow | undefined;
+      .prepare(
+        `SELECT cl.* FROM custom_lyrics cl
+         INNER JOIN custom_musics cm ON cm.id_music = cl.id_music
+         INNER JOIN custom_collections cc ON cc.id_collection = cm.id_collection
+         WHERE cl.id_lyric = ? AND cc.tenant_id = ?`,
+      )
+      .get(parseInt(id, 10), c.get("tenantId")) as LyricRow | undefined;
 
     if (!lyric) {
-      return c.json({ error: "Estrofe não encontrada" }, 404);
+      const exists = db
+        .prepare(`SELECT 1 FROM custom_lyrics WHERE id_lyric = ?`)
+        .get(parseInt(id, 10));
+      return c.json(
+        { error: exists ? "Sem permissão" : "Estrofe não encontrada" },
+        exists ? 403 : 404,
+      );
     }
 
     db.prepare(`DELETE FROM custom_lyrics WHERE id_lyric = ?`).run(
@@ -2080,12 +2263,18 @@ customRoutes.openapi(recordUseRoute, (c) => {
 
   const exists = db
     .prepare(
-      `SELECT 1 FROM custom_collections WHERE id_collection = ? AND visibility = 'public'`,
+      `SELECT 1 FROM custom_collections
+       WHERE id_collection = ? AND visibility = 'public' AND tenant_id = ?`,
     )
-    .get(collectionId);
+    .get(collectionId, c.get("tenantId"));
   if (!exists) return c.json({ error: "Coletânea não encontrada" }, 404);
 
-  const firstUse = recordCollectionUse(db, user.id_user, collectionId);
+  const firstUse = recordCollectionUse(
+    db,
+    user.id_user,
+    collectionId,
+    c.get("tenantId"),
+  );
   if (firstUse) {
     const owner = db
       .prepare(
@@ -2132,7 +2321,7 @@ const rankingRoute = createRoute({
 customRoutes.openapi(rankingRoute, (c) => {
   const db = getDb();
   const window = c.req.valid("query").window;
-  const data = getRanking(db, window);
+  const data = getRanking(db, c.get("tenantId"), window);
   return c.json({ data }, 200);
 });
 
@@ -2172,7 +2361,7 @@ customRoutes.openapi(myPositionRoute, (c) => {
   const db = getDb();
   const user = c.get("user") as { id_user: number };
   const window = c.req.valid("query").window;
-  const pos = getUserPosition(db, user.id_user, window);
+  const pos = getUserPosition(db, user.id_user, c.get("tenantId"), window);
   return c.json(
     { position: pos?.position ?? null, total: pos?.total ?? null },
     200,
@@ -2318,6 +2507,12 @@ const reportCollectionRoute = createRoute({
       },
       description: "Não autenticado",
     },
+    403: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Sem permissão",
+    },
     404: {
       content: {
         "application/json": { schema: z.object({ error: z.string() }) },
@@ -2334,9 +2529,16 @@ customRoutes.openapi(reportCollectionRoute, (c) => {
   const { reason } = c.req.valid("json");
 
   const exists = db
-    .prepare(`SELECT 1 FROM custom_collections WHERE id_collection = ?`)
-    .get(collectionId);
-  if (!exists) return c.json({ error: "Coletânea não encontrada" }, 404);
+    .prepare(
+      `SELECT 1 FROM custom_collections WHERE id_collection = ? AND tenant_id = ?`,
+    )
+    .get(collectionId, c.get("tenantId"));
+  if (!exists) {
+    const anyTenant = db
+      .prepare(`SELECT 1 FROM custom_collections WHERE id_collection = ?`)
+      .get(collectionId);
+    return c.json({ error: "Sem permissão" }, anyTenant ? 403 : 404);
+  }
 
   db.prepare(
     `INSERT OR IGNORE INTO collection_reports (collection_id, reporter_id, reason) VALUES (?, ?, ?)`,
@@ -2397,7 +2599,7 @@ const promoteRoute = createRoute({
       content: {
         "application/json": { schema: z.object({ error: z.string() }) },
       },
-      description: "Sem permissão de curador",
+      description: "Sem permissão",
     },
   },
 });
@@ -2412,7 +2614,7 @@ customRoutes.openapi(promoteRoute, (c) => {
     .map((s) => Number(s.trim()))
     .filter((n) => Number.isFinite(n) && n > 0);
   if (!curators.includes(user.id_user)) {
-    return c.json({ error: "Sem permissão de curador" }, 403);
+    return c.json({ error: "Sem permissão" }, 403);
   }
 
   const db = getDb();
@@ -2535,10 +2737,10 @@ customRoutes.openapi(seasonalEventRoute, (c) => {
   const row = db
     .prepare(
       `SELECT name, description, multiplier FROM seasonal_events
-       WHERE active = 1 AND datetime('now') BETWEEN starts_at AND ends_at
+       WHERE active = 1 AND tenant_id = ? AND datetime('now') BETWEEN starts_at AND ends_at
        ORDER BY multiplier DESC LIMIT 1`,
     )
-    .get() as
+    .get(c.get("tenantId")) as
     | { name: string; description: string | null; multiplier: number }
     | undefined;
   if (!row) return c.json({ active: false }, 200);

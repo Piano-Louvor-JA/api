@@ -13,6 +13,7 @@ import { partnerKey } from "./middleware/partnerKey.js";
 import { rateLimit } from "./middleware/rateLimit.js";
 // SEC-6 Fase 0: telemetria log-only por IP/min (api#127) — nunca bloqueia
 import { telemetryMiddleware } from "./middleware/telemetry.js";
+import { tenantMiddleware } from "./middleware/tenant.middleware.js";
 import { compatRoutes } from "./routes/compat.js";
 import { albumsRoutes } from "./v1/albums/albums.routes.js";
 import { bibleRoutes } from "./v1/bible/bible.routes.js";
@@ -188,6 +189,7 @@ export function createApp() {
   app.route("/v1/bible", bibleRoutes);
   app.route("/v1/liturgy", liturgyRoutes);
   app.route("/v1/remote", remoteRoutes);
+  app.use("/v1/custom/*", tenantMiddleware);
   app.route("/v1/custom", customRoutes);
   app.route("/v1/custom", syncRoutes);
   app.route("/v1/palco", palcoRoutes);
