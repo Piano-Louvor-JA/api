@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { resetTenantCacheForTests } from "../../src/middleware/tenant.middleware.js";
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
 describe("tenant middleware", () => {
@@ -48,5 +49,25 @@ describe("tenant middleware", () => {
     expect((await flute.json()).data).toEqual(
       expect.arrayContaining([expect.objectContaining({ name: "Flute only" })]),
     );
+  });
+
+  it("caches valid tenants until the cache is reset", async () => {
+    const request = () =>
+      app.router.request("/v1/custom/collections", {
+        headers: { "x-tenant": "organ" },
+      });
+    await app.router.request("/v1/custom/collections");
+    app
+      .getDb()
+      .prepare("INSERT INTO tenants (id, name) VALUES (?, ?)")
+      .run("organ", "LouvorJA Organ");
+
+    expect((await request()).status).toBe(400);
+
+    resetTenantCacheForTests();
+    const response = await request();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-tenant")).toBe("organ");
   });
 });
