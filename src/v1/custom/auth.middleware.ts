@@ -50,6 +50,11 @@ export const optionalAuth: MiddlewareHandler<CustomAuthEnv> =
  */
 export const requireAuth: MiddlewareHandler<CustomAuthEnv> =
   createMiddleware<CustomAuthEnv>(async (c, next) => {
+    // piano-unified-auth RF-01: usuário já resolvido pelos middlewares globais
+    // (optionalAuth com token opaco OU firebaseAuth com Firebase ID token) —
+    // não revalidar contra custom_sessions, senão todo token Firebase vira 401.
+    if (c.get("user")) return next();
+
     const raw = c.req.header("authorization") ?? "";
     const token = raw.startsWith("Bearer ") ? raw.slice(7) : "";
     if (!token) return c.json({ error: "Não autenticado" }, 401);
