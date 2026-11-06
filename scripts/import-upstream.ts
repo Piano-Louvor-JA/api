@@ -14,6 +14,8 @@ import Database from "better-sqlite3";
 
 const UPSTREAM = process.env.UPSTREAM_API ?? "https://api.louvorja.workers.dev";
 const DB_PATH = process.env.DB_PATH ?? "./data/catalog.db";
+const LOCAL_JSON_DIR = process.env.LOCAL_JSON_DIR;
+const IMPORT_SKIP_BIBLE = process.env.IMPORT_SKIP_BIBLE === "1";
 
 mkdirSync(dirname(DB_PATH), { recursive: true });
 
@@ -42,6 +44,19 @@ if (existsSync(migrationsDir)) {
 // ==============================================
 
 async function fetchJson(path: string): Promise<any> {
+  if (LOCAL_JSON_DIR) {
+    const name = path.replace(/^\/json_db\//, "");
+    if (name === path || !/^[a-z0-9_]+$/i.test(name)) {
+      throw new Error(`Invalid local JSON path: ${path}`);
+    }
+    const file = join(LOCAL_JSON_DIR, `${name}.json`);
+    if (!existsSync(file)) {
+      console.error(`  FAIL missing local bundle entry: ${file}`);
+      return null;
+    }
+    return JSON.parse(readFileSync(file, "utf-8"));
+  }
+
   const url = `${UPSTREAM}${path}`;
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
@@ -694,7 +709,7 @@ async function main() {
   const startTime = Date.now();
   console.log("=========================================");
   console.log("IMPORTACAO DO CATALOGO louvorja.com.br");
-  console.log(`Upstream: ${UPSTREAM}`);
+  console.log(`Source: ${LOCAL_JSON_DIR ?? UPSTREAM}`);
   console.log(`DB: ${DB_PATH}`);
   console.log("=========================================");
 
@@ -720,8 +735,8 @@ async function main() {
   // 5. Detalhes de cada musica (audio, imagem, estrofes com timing)
   await importMusicDetails(lang);
 
-  // 6. Biblia (somente uma vez, pt)
-  if (lang === "pt") {
+  // 6. Biblia (somente uma vez, pt). backup-bible.sh já aplica o bundle.
+  if (lang === "pt" && !IMPORT_SKIP_BIBLE) {
     await importBible();
     await importBibleEs();
   }
