@@ -78,24 +78,7 @@ export const firebaseAuth: MiddlewareHandler<CustomAuthEnv> =
           )
           .get(email) as DbUser | undefined;
 
-        if (existing && !existing.firebase_uid) {
-          db.prepare(
-            `UPDATE custom_users SET firebase_uid = ? WHERE id_user = ?`,
-          ).run(decoded.uid, existing.id_user);
-          user = {
-            id_user: existing.id_user,
-            email: existing.email,
-            display_name: existing.display_name,
-          };
-        } else if (existing && existing.firebase_uid !== decoded.uid) {
-          // piano-unified-auth RF-05: e-mail legacy já vinculado a outro Firebase
-          // UID — nunca sobrescrever/vincular por suposição. Segue anônimo.
-          console.warn(
-            "[firebaseAuth] conflito firebase_uid/e-mail — sem vinculação (id_user:",
-            existing.id_user,
-            ")",
-          );
-        } else if (!existing) {
+        if (!existing) {
           const result = db
             .prepare(
               `INSERT INTO custom_users (email, password_hash, display_name, firebase_uid)
@@ -107,6 +90,24 @@ export const firebaseAuth: MiddlewareHandler<CustomAuthEnv> =
             email,
             display_name: displayName,
           };
+        } else if (!existing.firebase_uid) {
+          db.prepare(
+            `UPDATE custom_users SET firebase_uid = ? WHERE id_user = ?`,
+          ).run(decoded.uid, existing.id_user);
+          user = {
+            id_user: existing.id_user,
+            email: existing.email,
+            display_name: existing.display_name,
+          };
+        } else {
+          // piano-unified-auth RF-05: e-mail legacy já vinculado a outro Firebase
+          // UID (o mesmo UID já teria sido achado acima) — nunca sobrescrever/
+          // vincular por suposição. Segue anônimo.
+          console.warn(
+            "[firebaseAuth] conflito firebase_uid/e-mail — sem vinculação (id_user:",
+            existing.id_user,
+            ")",
+          );
         }
       }
 
