@@ -66,14 +66,19 @@ export const firebaseAuth: MiddlewareHandler<CustomAuthEnv> =
         // (evita UNIQUE violation e preserva owner_id de coleções antigas)
         const email = decoded.email ?? `${decoded.uid}@firebase.local`;
         const displayName = decoded.name ?? email.split("@")[0];
-        type DbUser = { id_user: number; email: string; display_name: string };
+        type DbUser = {
+          id_user: number;
+          email: string;
+          display_name: string;
+          firebase_uid: string | null;
+        };
         const existing = db
           .prepare(
-            `SELECT id_user, email, display_name FROM custom_users WHERE email = ?`,
+            `SELECT id_user, email, display_name, firebase_uid FROM custom_users WHERE email = ?`,
           )
           .get(email) as DbUser | undefined;
 
-        if (existing) {
+        if (existing && !existing.firebase_uid) {
           db.prepare(
             `UPDATE custom_users SET firebase_uid = ? WHERE id_user = ?`,
           ).run(decoded.uid, existing.id_user);
@@ -82,7 +87,15 @@ export const firebaseAuth: MiddlewareHandler<CustomAuthEnv> =
             email: existing.email,
             display_name: existing.display_name,
           };
-        } else {
+        } else if (existing && existing.firebase_uid !== decoded.uid) {
+          // piano-unified-auth RF-05: e-mail legacy já vinculado a outro Firebase
+          // UID — nunca sobrescrever/vincular por suposição. Segue anônimo.
+          console.warn(
+            "[firebaseAuth] conflito firebase_uid/e-mail — sem vinculação (id_user:",
+            existing.id_user,
+            ")",
+          );
+        } else if (!existing) {
           const result = db
             .prepare(
               `INSERT INTO custom_users (email, password_hash, display_name, firebase_uid)
@@ -97,11 +110,13 @@ export const firebaseAuth: MiddlewareHandler<CustomAuthEnv> =
         }
       }
 
-      c.set("user", {
-        id_user: user.id_user,
-        email: user.email,
-        display_name: user.display_name,
-      });
+      if (user) {
+        c.set("user", {
+          id_user: user.id_user,
+          email: user.email,
+          display_name: user.display_name,
+        });
+      }
     } catch (e) {
       // Token Firebase inválido/expirado → segue anônimo (mesma semântica do optionalAuth)
       console.warn(
