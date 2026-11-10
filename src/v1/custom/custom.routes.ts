@@ -2756,7 +2756,12 @@ customRoutes.openapi(seasonalEventRoute, (c) => {
 });
 
 import {
-  appliedEdits, decideEdit, editHistory, isConcilioMember, publishEdit, type EditStatus,
+  appliedEdits,
+  decideEdit,
+  type EditStatus,
+  editHistory,
+  isConcilioMember,
+  publishEdit,
 } from "./edits.service.js";
 
 // ── Editas da Comunidade (SPEC piano-community-edits v1.0) ──────────────────
@@ -2764,7 +2769,8 @@ const editsPublishRoute = createRoute({
   method: "post",
   path: "/edits",
   tags: ["custom"],
-  description: "Publica correção de letra/timing sobre música oficial (fila do concilio)",
+  description:
+    "Publica correção de letra/timing sobre música oficial (fila do concilio)",
   middleware: [requireAuth] as const,
   request: {
     body: {
@@ -2782,18 +2788,33 @@ const editsPublishRoute = createRoute({
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.object({ id: z.number(), status: z.string() }) } },
+      content: {
+        "application/json": {
+          schema: z.object({ id: z.number(), status: z.string() }),
+        },
+      },
       description: "Publicado na fila",
     },
-    401: { content: { "application/json": { schema: z.object({ error: z.string() }) } }, description: "Não autenticado" },
-    422: { content: { "application/json": { schema: z.object({ error: z.string() }) } }, description: "Sem lyrics nem timing" },
+    401: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Não autenticado",
+    },
+    422: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Sem lyrics nem timing",
+    },
   },
 });
 
 customRoutes.openapi(editsPublishRoute, (c) => {
   const user = c.get("user") as { id_user: number };
   const { clientUuid, musicId, lyrics, timing } = c.req.valid("json");
-  if (!lyrics && !timing) return c.json({ error: "edit must change lyrics or timing" }, 422);
+  if (!lyrics && !timing)
+    return c.json({ error: "edit must change lyrics or timing" }, 422);
   const db = getDb();
   const result = publishEdit(db, {
     clientUuid,
@@ -2812,26 +2833,73 @@ const editsQueueRoute = createRoute({
   tags: ["custom"],
   description: "Fila do concilio (GM role obrigatório)",
   middleware: [requireAuth] as const,
-  request: { query: z.object({ status: z.enum(["published", "approved", "rejected"]).optional() }) },
+  request: {
+    query: z.object({
+      status: z.enum(["published", "approved", "rejected"]).optional(),
+    }),
+  },
   responses: {
-    200: { content: { "application/json": { schema: z.object({ edits: z.array(z.object({ id: z.number(), musicId: z.number(), authorId: z.number(), status: z.string(), lyrics: z.string().optional(), timing: z.string().optional(), createdAt: z.string() })) }) } }, description: "Fila" },
-    401: { content: { "application/json": { schema: z.object({ error: z.string() }) } }, description: "Não autenticado" },
-    403: { content: { "application/json": { schema: z.object({ error: z.string() }) } }, description: "Sem GM role" },
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            edits: z.array(
+              z.object({
+                id: z.number(),
+                musicId: z.number(),
+                authorId: z.number(),
+                status: z.string(),
+                lyrics: z.string().optional(),
+                timing: z.string().optional(),
+                createdAt: z.string(),
+              }),
+            ),
+          }),
+        },
+      },
+      description: "Fila",
+    },
+    401: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Não autenticado",
+    },
+    403: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Sem GM role",
+    },
   },
 });
 
 customRoutes.openapi(editsQueueRoute, (c) => {
   const user = c.get("user") as { id_user: number };
   const db = getDb();
-  if (!isConcilioMember(db, user.id_user)) return c.json({ error: "concilio membership required" }, 403);
-  const status = (c.req.query("status") ?? "published") as "published" | "approved" | "rejected";
-  type QueueRow = { id: number; musicId: number; authorId: number; status: string; lyrics: string | null; timing: string | null; createdAt: string };
-  const rows = (db
-    .prepare(
-      `SELECT e.id, e.music_id AS musicId, e.author_user_id AS authorId, e.status, e.lyrics, e.timing, e.created_at AS createdAt
+  if (!isConcilioMember(db, user.id_user))
+    return c.json({ error: "concilio membership required" }, 403);
+  const status = (c.req.query("status") ?? "published") as
+    | "published"
+    | "approved"
+    | "rejected";
+  type QueueRow = {
+    id: number;
+    musicId: number;
+    authorId: number;
+    status: string;
+    lyrics: string | null;
+    timing: string | null;
+    createdAt: string;
+  };
+  const rows = (
+    db
+      .prepare(
+        `SELECT e.id, e.music_id AS musicId, e.author_user_id AS authorId, e.status, e.lyrics, e.timing, e.created_at AS createdAt
        FROM custom_edits e WHERE e.tenant_id = ? AND e.status = ? ORDER BY e.updated_at_ms ASC`,
-    )
-    .all(c.get("tenantId"), status) as QueueRow[]).map((r) => ({
+      )
+      .all(c.get("tenantId"), status) as QueueRow[]
+  ).map((r) => ({
     id: r.id,
     musicId: r.musicId,
     authorId: r.authorId,
@@ -2850,8 +2918,30 @@ const editsMineRoute = createRoute({
   description: "Edits do autor autenticado",
   middleware: [requireAuth] as const,
   responses: {
-    200: { content: { "application/json": { schema: z.object({ edits: z.array(z.object({ id: z.number(), musicId: z.number(), status: z.string(), reason: z.string().optional(), createdAt: z.string() })) }) } }, description: "Meus edits" },
-    401: { content: { "application/json": { schema: z.object({ error: z.string() }) } }, description: "Não autenticado" },
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            edits: z.array(
+              z.object({
+                id: z.number(),
+                musicId: z.number(),
+                status: z.string(),
+                reason: z.string().optional(),
+                createdAt: z.string(),
+              }),
+            ),
+          }),
+        },
+      },
+      description: "Meus edits",
+    },
+    401: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Não autenticado",
+    },
   },
 });
 
@@ -2863,7 +2953,13 @@ customRoutes.openapi(editsMineRoute, (c) => {
       `SELECT id, music_id AS musicId, status, reason, created_at AS createdAt FROM custom_edits
        WHERE author_user_id = ? AND tenant_id = ? ORDER BY updated_at_ms DESC`,
     )
-    .all(user.id_user, c.get("tenantId")) as { id: number; musicId: number; status: string; reason: string | null; createdAt: string }[];
+    .all(user.id_user, c.get("tenantId")) as {
+    id: number;
+    musicId: number;
+    status: string;
+    reason: string | null;
+    createdAt: string;
+  }[];
   return c.json(
     { edits: rows.map((r) => ({ ...r, reason: r.reason ?? undefined })) },
     200,
@@ -2874,7 +2970,8 @@ const editsDecideRoute = createRoute({
   method: "post",
   path: "/edits/:id/decide",
   tags: ["custom"],
-  description: "Decisão do concilio: approve/reject (reject exige reason público)",
+  description:
+    "Decisão do concilio: approve/reject (reject exige reason público)",
   middleware: [requireAuth] as const,
   request: {
     params: z.object({ id: z.string() }),
@@ -2890,24 +2987,62 @@ const editsDecideRoute = createRoute({
     },
   },
   responses: {
-    200: { content: { "application/json": { schema: z.object({ ok: z.boolean() }) } }, description: "Decidido" },
-    401: { content: { "application/json": { schema: z.object({ error: z.string() }) } }, description: "Não autenticado" },
-    403: { content: { "application/json": { schema: z.object({ error: z.string() }) } }, description: "Sem GM role" },
-    404: { content: { "application/json": { schema: z.object({ error: z.string() }) } }, description: "Edit inexistente/já decidido" },
-    422: { content: { "application/json": { schema: z.object({ error: z.string() }) } }, description: "Reject sem reason" },
-    500: { content: { "application/json": { schema: z.object({ error: z.string() }) } }, description: "Erro interno" },
+    200: {
+      content: {
+        "application/json": { schema: z.object({ ok: z.boolean() }) },
+      },
+      description: "Decidido",
+    },
+    401: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Não autenticado",
+    },
+    403: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Sem GM role",
+    },
+    404: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Edit inexistente/já decidido",
+    },
+    422: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Reject sem reason",
+    },
+    500: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Erro interno",
+    },
   },
 });
 
 customRoutes.openapi(editsDecideRoute, (c) => {
   const user = c.get("user") as { id_user: number };
   const db = getDb();
-  if (!isConcilioMember(db, user.id_user)) return c.json({ error: "concilio membership required" }, 403);
+  if (!isConcilioMember(db, user.id_user))
+    return c.json({ error: "concilio membership required" }, 403);
   const editId = Number(c.req.valid("param").id);
   const { decision, reason } = c.req.valid("json");
   try {
-    const row = decideEdit(db, { editId, gmId: user.id_user, tenantId: c.get("tenantId"), decision, reason });
-    if (!row) return c.json({ error: "edit not found or already decided" }, 404);
+    const row = decideEdit(db, {
+      editId,
+      gmId: user.id_user,
+      tenantId: c.get("tenantId"),
+      decision,
+      reason,
+    });
+    if (!row)
+      return c.json({ error: "edit not found or already decided" }, 404);
     return c.json({ ok: true }, 200);
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
@@ -2926,12 +3061,25 @@ const editsHistoryRoute = createRoute({
     200: {
       content: {
         "application/json": {
-          schema: z.object({ history: z.array(z.object({ status: z.string(), at: z.string(), by: z.number().nullable() })) }),
+          schema: z.object({
+            history: z.array(
+              z.object({
+                status: z.string(),
+                at: z.string(),
+                by: z.number().nullable(),
+              }),
+            ),
+          }),
         },
       },
       description: "Histórico",
     },
-    404: { content: { "application/json": { schema: z.object({ error: z.string() }) } }, description: "Inexistente" },
+    404: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Inexistente",
+    },
   },
 });
 
@@ -2947,13 +3095,22 @@ const editsAppliedRoute = createRoute({
   method: "get",
   path: "/edits/applied",
   tags: ["custom"],
-  description: "Edits aprovados aplicáveis por cima do catálogo oficial (RF-08)",
+  description:
+    "Edits aprovados aplicáveis por cima do catálogo oficial (RF-08)",
   request: { query: z.object({ musicIds: z.string().optional() }) },
   responses: {
     200: {
       content: {
         "application/json": {
-          schema: z.object({ applied: z.array(z.object({ musicId: z.number(), lyrics: z.string().nullable(), timing: z.string().nullable() })) }),
+          schema: z.object({
+            applied: z.array(
+              z.object({
+                musicId: z.number(),
+                lyrics: z.string().nullable(),
+                timing: z.string().nullable(),
+              }),
+            ),
+          }),
         },
       },
       description: "Applied",
@@ -2964,7 +3121,10 @@ const editsAppliedRoute = createRoute({
 customRoutes.openapi(editsAppliedRoute, (c) => {
   const db = getDb();
   const raw = c.req.query("musicIds") ?? "";
-  const ids = raw.split(",").map((s) => Number(s.trim())).filter((n) => Number.isInteger(n) && n > 0);
+  const ids = raw
+    .split(",")
+    .map((s) => Number(s.trim()))
+    .filter((n) => Number.isInteger(n) && n > 0);
   return c.json({ applied: appliedEdits(db, c.get("tenantId"), ids) }, 200);
 });
 
