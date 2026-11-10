@@ -2799,6 +2799,7 @@ customRoutes.openapi(editsPublishRoute, (c) => {
     clientUuid,
     musicId,
     authorId: user.id_user,
+    tenantId: c.get("tenantId"),
     lyrics: lyrics ?? null,
     timing: timing ?? null,
   });
@@ -2828,9 +2829,9 @@ customRoutes.openapi(editsQueueRoute, (c) => {
   const rows = (db
     .prepare(
       `SELECT e.id, e.music_id AS musicId, e.author_user_id AS authorId, e.status, e.lyrics, e.timing, e.created_at AS createdAt
-       FROM custom_edits e WHERE e.status = ? ORDER BY e.updated_at_ms ASC`,
+       FROM custom_edits e WHERE e.tenant_id = ? AND e.status = ? ORDER BY e.updated_at_ms ASC`,
     )
-    .all(status) as QueueRow[]).map((r) => ({
+    .all(c.get("tenantId"), status) as QueueRow[]).map((r) => ({
     id: r.id,
     musicId: r.musicId,
     authorId: r.authorId,
@@ -2860,9 +2861,9 @@ customRoutes.openapi(editsMineRoute, (c) => {
   const rows = db
     .prepare(
       `SELECT id, music_id AS musicId, status, reason, created_at AS createdAt FROM custom_edits
-       WHERE author_user_id = ? ORDER BY updated_at_ms DESC`,
+       WHERE author_user_id = ? AND tenant_id = ? ORDER BY updated_at_ms DESC`,
     )
-    .all(user.id_user) as { id: number; musicId: number; status: string; reason: string | null; createdAt: string }[];
+    .all(user.id_user, c.get("tenantId")) as { id: number; musicId: number; status: string; reason: string | null; createdAt: string }[];
   return c.json(
     { edits: rows.map((r) => ({ ...r, reason: r.reason ?? undefined })) },
     200,
@@ -2905,7 +2906,7 @@ customRoutes.openapi(editsDecideRoute, (c) => {
   const editId = Number(c.req.valid("param").id);
   const { decision, reason } = c.req.valid("json");
   try {
-    const row = decideEdit(db, { editId, gmId: user.id_user, decision, reason });
+    const row = decideEdit(db, { editId, gmId: user.id_user, tenantId: c.get("tenantId"), decision, reason });
     if (!row) return c.json({ error: "edit not found or already decided" }, 404);
     return c.json({ ok: true }, 200);
   } catch (e) {
@@ -2964,7 +2965,7 @@ customRoutes.openapi(editsAppliedRoute, (c) => {
   const db = getDb();
   const raw = c.req.query("musicIds") ?? "";
   const ids = raw.split(",").map((s) => Number(s.trim())).filter((n) => Number.isInteger(n) && n > 0);
-  return c.json({ applied: appliedEdits(db, ids) }, 200);
+  return c.json({ applied: appliedEdits(db, c.get("tenantId"), ids) }, 200);
 });
 
 export { customRoutes };

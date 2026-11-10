@@ -32,16 +32,16 @@ export interface EditRow {
 
 export function publishEdit(
   db: Database,
-  params: { clientUuid: string; musicId: number; authorId: number; lyrics?: string | null; timing?: string | null },
+  params: { clientUuid: string; musicId: number; authorId: number; tenantId: string; lyrics?: string | null; timing?: string | null },
 ): { id: number; status: EditStatus } {
   const now = Date.now();
   const nowIso = new Date().toISOString();
   const existing = db
-    .prepare(`SELECT id, client_uuid FROM custom_edits WHERE music_id = ? AND author_user_id = ? AND status = 'published'`)
-    .get(params.musicId, params.authorId) as { id: number; client_uuid: string } | undefined;
+    .prepare(`SELECT id, client_uuid FROM custom_edits WHERE music_id = ? AND author_user_id = ? AND tenant_id = ? AND status = 'published'`)
+    .get(params.musicId, params.authorId, params.tenantId) as { id: number; client_uuid: string } | undefined;
 
-  // Idempotência por client_uuid: mesmo conteúdo re-publicado não duplica nem substitui.
-  const byUuid = db.prepare(`SELECT id, status FROM custom_edits WHERE client_uuid = ?`).get(params.clientUuid) as
+  // Idempotência por client_uuid (escopo do tenant): mesmo conteúdo re-publicado não duplica nem substitui.
+  const byUuid = db.prepare(`SELECT id, status FROM custom_edits WHERE client_uuid = ? AND tenant_id = ?`).get(params.clientUuid, params.tenantId) as
     | { id: number; status: EditStatus }
     | undefined;
   if (byUuid) return { id: byUuid.id, status: byUuid.status };
@@ -56,16 +56,16 @@ export function publishEdit(
 
   const res = db
     .prepare(
-      `INSERT INTO custom_edits (client_uuid, music_id, author_user_id, status, lyrics, timing, created_at, updated_at_ms)
-       VALUES (?, ?, ?, 'published', ?, ?, ?, ?)`,
+      `INSERT INTO custom_edits (client_uuid, music_id, author_user_id, tenant_id, status, lyrics, timing, created_at, updated_at_ms)
+       VALUES (?, ?, ?, ?, 'published', ?, ?, ?, ?)`,
     )
-    .run(params.clientUuid, params.musicId, params.authorId, params.lyrics ?? null, params.timing ?? null, nowIso, now);
+    .run(params.clientUuid, params.musicId, params.authorId, params.tenantId, params.lyrics ?? null, params.timing ?? null, nowIso, now);
   return { id: Number(res.lastInsertRowid), status: "published" };
 }
 
 export function decideEdit(
   db: Database,
-  params: { editId: number; gmId: number; decision: "approved" | "rejected"; reason?: string },
+  params: { editId: number; gmId: number; tenantId: string; decision: "approved" | "rejected"; reason?: string },
 ): EditRow | null {
   if (params.decision === "rejected" && !params.reason?.trim()) {
     throw new Error("reject requires a public reason");
@@ -74,9 +74,9 @@ export function decideEdit(
   const res = db
     .prepare(
       `UPDATE custom_edits SET status = ?, reason = ?, decided_by = ?, decided_at = ?, updated_at_ms = ?
-       WHERE id = ? AND status = 'published'`,
+       WHERE id = ? AND tenant_id = ? AND status = 'published'`,
     )
-    .run(params.decision, params.reason ?? null, params.gmId, nowIso, Date.now(), params.editId);
+    .run(params.decision, params.reason ?? null, params.gmId, nowIso, Date.now(), params.editId, params.tenantId);
   if (!res.changes) return null;
   return db.prepare(`SELECT * FROM custom_edits WHERE id = ?`).get(params.editId) as EditRow;
 }
@@ -95,16 +95,16 @@ export function editHistory(db: Database, editId: number): { status: string; at:
 }
 
 /** RF-08: edits aprovados aplicáveis por cima do catálogo oficial. */
-export function appliedEdits(db: Database, musicIds: number[]): { musicId: number; lyrics: string | null; timing: string | null }[] {
+export function appliedEdits(db: Database, tenantId: string, musicIds: number[]): { musicId: number; lyrics: string | null; timing: string | null }[] {
   if (musicIds.length === 0) return [];
   const placeholders = musicIds.map(() => "?").join(",");
   const rows = db
     .prepare(
       `SELECT music_id, lyrics, timing FROM custom_edits
-       WHERE status = 'approved' AND music_id IN (${placeholders})
+       WHERE tenant_id = ? AND status = 'approved' AND music_id IN (${placeholders})
        ORDER BY updated_at_ms DESC`,
     )
-    .all(...musicIds) as { music_id: number; lyrics: string | null; timing: string | null }[];
+    .all(tenantId, ...musicIds) as { music_id: number; lyrics: string | null; timing: string | null }[];
   // Um edit aplicado por música (o mais recente aprovado vence).
   const seen = new Set<number>();
   return rows

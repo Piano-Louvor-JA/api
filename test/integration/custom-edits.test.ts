@@ -91,6 +91,36 @@ describe("custom edits — concilio", () => {
     expect(r.status).toBe(422);
   });
 
+  it("MULTI-TENANT: GM do violin não vê fila do piano; decide cross-tenant → 404", async () => {
+    const db = app.getDb();
+    // GM no tenant violin
+    const gmViolinId = Number(
+      db.prepare(`INSERT INTO custom_users (email, password_hash, display_name, tenant_id, is_gm) VALUES ('gm-violin@t.local','x','GMV','violin',1)`).run().lastInsertRowid,
+    );
+    const gmViolinToken = "gm-violin-token";
+    db.prepare(`INSERT INTO custom_sessions (token_hash, id_user) VALUES (?, ?)`).run(hashToken(gmViolinToken), gmViolinId);
+
+    // GM do autor publicou no piano (edit 1 já existe dos testes anteriores)
+    const queue = await app.router.request("/v1/custom/edits?status=published", {
+      headers: { authorization: `Bearer ${gmViolinToken}`, "x-tenant": "violin" },
+    });
+    expect(queue.status).toBe(200);
+    const body = (await queue.json()) as { edits: unknown[] };
+    expect(body.edits).toHaveLength(0); // violin não vê nada do piano
+
+    // decisão cross-tenant: GM violin tenta decidir edit do piano → 404
+    const rows = db.prepare(`SELECT id FROM custom_edits WHERE tenant_id = 'piano' AND status = 'published'`).all() as { id: number }[];
+    expect(rows.length).toBeGreaterThan(0);
+    const cross = await app.router.request(`/v1/custom/edits/${rows[0].id}/decide`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${gmViolinToken}`, "x-tenant": "violin", "content-type": "application/json" },
+      body: JSON.stringify({ decision: "approved" }),
+    });
+    expect(cross.status).toBe(404); // não existe no tenant dele
+    const still = db.prepare(`SELECT status FROM custom_edits WHERE id = ?`).get(rows[0].id) as { status: string };
+    expect(still.status).toBe("published"); // intocado
+  });
+
   it("RF-06: GET fila sem GM → 403", async () => {
     const r = await app.router.request("/v1/custom/edits?status=published", {
       headers: { authorization: `Bearer ${plainToken}` },
