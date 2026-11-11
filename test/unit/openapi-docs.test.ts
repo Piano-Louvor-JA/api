@@ -44,7 +44,7 @@ describe("OpenAPI Docs", () => {
         .properties.data.items;
     const tenantSchema = body.components.schemas["X-Tenant"];
 
-    expect(customOperations).toHaveLength(34);
+    expect(customOperations).toHaveLength(40);
     for (const operation of customOperations) {
       expect(operation.parameters).toContainEqual(
         expect.objectContaining({ in: "header", name: "X-Tenant" }),
