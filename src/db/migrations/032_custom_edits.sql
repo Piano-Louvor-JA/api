@@ -2,7 +2,7 @@
 -- Editas da Comunidade: correções de letra/timing sobre músicas oficiais (SPEC piano-community-edits v1.0).
 CREATE TABLE IF NOT EXISTS custom_edits (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  client_uuid TEXT NOT NULL UNIQUE,        -- idempotência (sha256 do conteúdo, mesmo padrão custom)
+  client_uuid TEXT NOT NULL,               -- hash do conteúdo pode coincidir entre autores/tenants
   music_id INTEGER NOT NULL,               -- id oficial do catálogo
   author_user_id INTEGER NOT NULL REFERENCES custom_users(id_user) ON DELETE CASCADE,
   status TEXT NOT NULL DEFAULT 'published' CHECK (status IN ('published','approved','rejected')),
@@ -16,7 +16,9 @@ CREATE TABLE IF NOT EXISTS custom_edits (
   updated_at_ms INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_custom_edits_music ON custom_edits(music_id, status);
-CREATE UNIQUE INDEX IF NOT EXISTS idx_custom_edits_pending ON custom_edits(music_id, author_user_id)
+CREATE UNIQUE INDEX IF NOT EXISTS idx_custom_edits_owner_client_uuid
+  ON custom_edits(tenant_id, author_user_id, client_uuid);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_custom_edits_pending ON custom_edits(tenant_id, music_id, author_user_id)
   WHERE status = 'published';
 
 -- GM role v1: concessão manual via SQL (RF-07 automatizado entra em fase 2)

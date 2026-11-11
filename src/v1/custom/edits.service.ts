@@ -51,12 +51,13 @@ export function publishEdit(
     | { id: number; client_uuid: string }
     | undefined;
 
-  // Idempotência por client_uuid (escopo do tenant): mesmo conteúdo re-publicado não duplica nem substitui.
+  // O hash de conteúdo pode ser igual para autores distintos. Só o retry do
+  // mesmo autor no mesmo tenant reutiliza a contribuição já publicada.
   const byUuid = db
     .prepare(
-      `SELECT id, status FROM custom_edits WHERE client_uuid = ? AND tenant_id = ?`,
+      `SELECT id, status FROM custom_edits WHERE client_uuid = ? AND tenant_id = ? AND author_user_id = ?`,
     )
-    .get(params.clientUuid, params.tenantId) as
+    .get(params.clientUuid, params.tenantId, params.authorId) as
     | { id: number; status: EditStatus }
     | undefined;
   if (byUuid) return { id: byUuid.id, status: byUuid.status };
