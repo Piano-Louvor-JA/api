@@ -35,6 +35,12 @@
           }
         }
       }
+    },
+    {
+      "includes": ["test/fixtures/**"],
+      "linter": { "enabled": false },
+      "formatter": { "enabled": false },
+      "assist": { "actions": { "source": { "organizeImports": "off" } } }
     }
   ]
 }
