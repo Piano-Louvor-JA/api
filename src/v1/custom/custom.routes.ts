@@ -1173,7 +1173,9 @@ customRoutes.openapi(updateMusicRoute, (c) => {
     const pickFileRef = (
       key: "id_file_audio" | "id_file_instrumental" | "id_file_image",
     ): number | null =>
-      key in body ? (body[key] ?? null) : ((music[key] ?? null) as number | null);
+      key in body
+        ? (body[key] ?? null)
+        : ((music[key] ?? null) as number | null);
 
     db.prepare(
       `UPDATE custom_musics

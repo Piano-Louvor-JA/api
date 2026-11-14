@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -121,7 +121,9 @@ describe("SPEC-audio-removal: PUT musics null-safe + upload allowlist", () => {
     const fd = new FormData();
     fd.append(
       "file",
-      new File([Buffer.from("x")], "malware.exe", { type: "application/octet-stream" }),
+      new File([Buffer.from("x")], "malware.exe", {
+        type: "application/octet-stream",
+      }),
     );
     fd.append("kind", "audio");
     const res = await router.request("/v1/custom/files", {
@@ -140,7 +142,10 @@ describe("SPEC-audio-removal: PUT musics null-safe + upload allowlist", () => {
       ["hino.aac", "audio/aac"],
     ] as const) {
       const fd = new FormData();
-      fd.append("file", new File([Buffer.from("fakeaudio")], name, { type: mime }));
+      fd.append(
+        "file",
+        new File([Buffer.from("fakeaudio")], name, { type: mime }),
+      );
       fd.append("kind", "audio");
       const res = await router.request("/v1/custom/files", {
         method: "POST",
