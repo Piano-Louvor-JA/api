@@ -1168,6 +1168,15 @@ customRoutes.openapi(updateMusicRoute, (c) => {
       return c.json({ error: "Sem permissão para editar esta música" }, 403);
     }
 
+    // SPEC-audio-removal v1.1.0 (RF-02): campo ausente mantém valor atual;
+    // campo presente com null LIMPA o vínculo (remoção de áudio/fundo/capa).
+    const pickFileRef = (
+      key: "id_file_audio" | "id_file_instrumental" | "id_file_image",
+    ): number | null =>
+      key in body
+        ? (body[key] ?? null)
+        : ((music[key] ?? null) as number | null);
+
     db.prepare(
       `UPDATE custom_musics
        SET name = ?, lyric = ?, auxiliary_lyric = ?, id_file_audio = ?, id_file_instrumental = ?, id_file_image = ?, duration = ?, updated_at = CURRENT_TIMESTAMP
@@ -1176,9 +1185,9 @@ customRoutes.openapi(updateMusicRoute, (c) => {
       body.name ?? music.name,
       body.lyric ?? music.lyric,
       body.auxiliary_lyric ?? music.auxiliary_lyric,
-      body.id_file_audio ?? music.id_file_audio,
-      body.id_file_instrumental ?? music.id_file_instrumental,
-      body.id_file_image ?? music.id_file_image,
+      pickFileRef("id_file_audio"),
+      pickFileRef("id_file_instrumental"),
+      pickFileRef("id_file_image"),
       body.duration ?? music.duration,
       parseInt(id, 10),
     );
@@ -1711,6 +1720,32 @@ customRoutes.openapi(uploadCustomFileRoute, async (c: any) => {
     }
 
     const user = c.get("user") as { id_user: number };
+
+    // SPEC-audio-removal v1.1.0 (RF-03): allowlist de extensão para kind=audio
+    // — mesmos formatos do modo offline (mp3/ogg/m4a/wav/flac/aac).
+    const AUDIO_EXT_ALLOWED = new Set([
+      "mp3",
+      "ogg",
+      "m4a",
+      "wav",
+      "flac",
+      "aac",
+    ]);
+    if (kind === "audio") {
+      const rawName = file.name.split(/[/\\]/).pop() ?? "";
+      const dot = rawName.lastIndexOf(".");
+      const ext = dot > 0 ? rawName.slice(dot + 1).toLowerCase() : "";
+      if (!AUDIO_EXT_ALLOWED.has(ext)) {
+        return c.json(
+          {
+            error: "unsupported_audio_format",
+            message: `Formato de áudio não suportado. Aceitos: mp3, ogg, m4a, wav, flac, aac.`,
+          },
+          400,
+        );
+      }
+    }
+
     const { quotaCheck } = await import("./quota.service.js");
     const quota = quotaCheck(user.id_user, file.size);
     if (!quota.ok) {
