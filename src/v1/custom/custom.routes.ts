@@ -3132,6 +3132,7 @@ customRoutes.openapi(editsAppliedRoute, (c) => {
 // dentro do mesmo router (herdam optionalAuth + tenant via * middlewares).
 // Registro explícito no fim — evita import circular.
 import { registerAdminRoutes } from "./admin.routes.js";
+
 registerAdminRoutes(
   customRoutes as unknown as Parameters<typeof registerAdminRoutes>[0],
 );

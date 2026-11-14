@@ -37,7 +37,9 @@ describe("Painel Admin API (seasonal-events + weekly-tasks)", () => {
       "/v1/custom/admin/weekly-tasks",
     ];
     for (const p of paths) {
-      const anon = await router.request(p, { headers: { "X-Tenant": "piano" } });
+      const anon = await router.request(p, {
+        headers: { "X-Tenant": "piano" },
+      });
       expect(anon.status, `anon ${p}`).toBe(401);
       const nonAdmin = await router.request(p, {
         headers: { ...auth(userToken), "X-Tenant": "piano" },
@@ -49,7 +51,11 @@ describe("Painel Admin API (seasonal-events + weekly-tasks)", () => {
   it("AC-1: admin cria evento e ele aparece no /seasonal-event público", async () => {
     const create = await router.request("/v1/custom/admin/seasonal-events", {
       method: "POST",
-      headers: { ...auth(adminToken), "X-Tenant": "piano", "content-type": "application/json" },
+      headers: {
+        ...auth(adminToken),
+        "X-Tenant": "piano",
+        "content-type": "application/json",
+      },
       body: JSON.stringify({
         name: "Páscoa",
         description: "Multiplicador de Páscoa",
@@ -74,7 +80,11 @@ describe("Painel Admin API (seasonal-events + weekly-tasks)", () => {
   it("AC-4: datas invertidas → 400; multiplicador < 1 → 400", async () => {
     const badDates = await router.request("/v1/custom/admin/seasonal-events", {
       method: "POST",
-      headers: { ...auth(adminToken), "X-Tenant": "piano", "content-type": "application/json" },
+      headers: {
+        ...auth(adminToken),
+        "X-Tenant": "piano",
+        "content-type": "application/json",
+      },
       body: JSON.stringify({
         name: "X",
         multiplier: 2,
@@ -86,7 +96,11 @@ describe("Painel Admin API (seasonal-events + weekly-tasks)", () => {
 
     const badMult = await router.request("/v1/custom/admin/seasonal-events", {
       method: "POST",
-      headers: { ...auth(adminToken), "X-Tenant": "piano", "content-type": "application/json" },
+      headers: {
+        ...auth(adminToken),
+        "X-Tenant": "piano",
+        "content-type": "application/json",
+      },
       body: JSON.stringify({
         name: "X",
         multiplier: 0.5,
@@ -100,7 +114,11 @@ describe("Painel Admin API (seasonal-events + weekly-tasks)", () => {
   it("PUT atualiza evento; DELETE desativa (soft)", async () => {
     const create = await router.request("/v1/custom/admin/seasonal-events", {
       method: "POST",
-      headers: { ...auth(adminToken), "X-Tenant": "piano", "content-type": "application/json" },
+      headers: {
+        ...auth(adminToken),
+        "X-Tenant": "piano",
+        "content-type": "application/json",
+      },
       body: JSON.stringify({
         name: "Natal",
         multiplier: 3,
@@ -112,7 +130,11 @@ describe("Painel Admin API (seasonal-events + weekly-tasks)", () => {
 
     const put = await router.request(`/v1/custom/admin/seasonal-events/${id}`, {
       method: "PUT",
-      headers: { ...auth(adminToken), "X-Tenant": "piano", "content-type": "application/json" },
+      headers: {
+        ...auth(adminToken),
+        "X-Tenant": "piano",
+        "content-type": "application/json",
+      },
       body: JSON.stringify({
         name: "Natal",
         multiplier: 4,
@@ -141,7 +163,11 @@ describe("Painel Admin API (seasonal-events + weekly-tasks)", () => {
     ];
     const put = await router.request("/v1/custom/admin/weekly-tasks", {
       method: "PUT",
-      headers: { ...auth(adminToken), "X-Tenant": "piano", "content-type": "application/json" },
+      headers: {
+        ...auth(adminToken),
+        "X-Tenant": "piano",
+        "content-type": "application/json",
+      },
       body: JSON.stringify({ tasks: pool }),
     });
     expect(put.status).toBe(200);

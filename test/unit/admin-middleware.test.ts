@@ -1,4 +1,4 @@
-import { describe, beforeEach, it, expect, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
  * SPEC piano-admin-panel v1.1.0 (RF-01): middleware admin fail-closed.
@@ -25,8 +25,8 @@ import { adminAuth } from "../../src/v1/custom/admin.middleware.js";
 function makeCtx(email: string | undefined) {
   const json = vi.fn();
   return {
-    req: { header: () => email ? `Bearer tok` : undefined },
-    get: () => email ? { id_user: 1, email } : undefined,
+    req: { header: () => (email ? `Bearer tok` : undefined) },
+    get: () => (email ? { id_user: 1, email } : undefined),
     set: vi.fn(),
     json,
     status: undefined as number | undefined,

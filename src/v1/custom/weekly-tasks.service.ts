@@ -44,12 +44,8 @@ export function isoWeekKey(now: Date = new Date()): string {
 }
 
 /** As 3 tarefas da semana (rotação determinística). */
-export function weeklyTasksFor(
-  weekKey: string,
-  db?: DbLike,
-): WeeklyTaskDef[] {
-  const pool =
-    db != null ? activeTaskDefs(db) : WEEKLY_TASKS;
+export function weeklyTasksFor(weekKey: string, db?: DbLike): WeeklyTaskDef[] {
+  const pool = db != null ? activeTaskDefs(db) : WEEKLY_TASKS;
   const defs = pool.length >= 3 ? pool : WEEKLY_TASKS;
   const start = weekKey.split("-W")[1];
   const offset = Number(start) % defs.length;

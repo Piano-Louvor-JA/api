@@ -12,12 +12,12 @@
  * Exporta registerAdminRoutes(router) — chamado pelo custom.routes no fim
  * (evita import circular com o router privado).
  */
-import { createRoute } from "@hono/zod-openapi";
-import { z } from "@hono/zod-openapi";
+
 import type { OpenAPIHono } from "@hono/zod-openapi";
+import { createRoute, z } from "@hono/zod-openapi";
 
 import { getDb } from "../../db/connection.js";
-import { adminAuth, type AdminEnv } from "./admin.middleware.js";
+import { type AdminEnv, adminAuth } from "./admin.middleware.js";
 import { activeTaskDefs, type WeeklyTaskDef } from "./weekly-tasks.service.js";
 
 // ============================================
@@ -134,7 +134,9 @@ export function registerAdminRoutes(
   });
 
   customRoutes.openapi(createEventRoute, (c) => {
-    const body = c.req.valid("json") as z.infer<typeof SeasonalEventInputSchema>;
+    const body = c.req.valid("json") as z.infer<
+      typeof SeasonalEventInputSchema
+    >;
     if (new Date(body.ends_at) <= new Date(body.starts_at)) {
       return c.json({ error: "ends_at deve ser posterior a starts_at" }, 400);
     }
@@ -187,7 +189,9 @@ export function registerAdminRoutes(
 
   customRoutes.openapi(updateEventRoute, (c) => {
     const { id } = c.req.valid("param");
-    const body = c.req.valid("json") as z.infer<typeof SeasonalEventInputSchema>;
+    const body = c.req.valid("json") as z.infer<
+      typeof SeasonalEventInputSchema
+    >;
     if (new Date(body.ends_at) <= new Date(body.starts_at)) {
       return c.json({ error: "ends_at deve ser posterior a starts_at" }, 400);
     }
