@@ -44,10 +44,34 @@ export function isoWeekKey(now: Date = new Date()): string {
 }
 
 /** As 3 tarefas da semana (rotação determinística). */
-export function weeklyTasksFor(weekKey: string): WeeklyTaskDef[] {
+export function weeklyTasksFor(
+  weekKey: string,
+  db?: DbLike,
+): WeeklyTaskDef[] {
+  const pool =
+    db != null ? activeTaskDefs(db) : WEEKLY_TASKS;
+  const defs = pool.length >= 3 ? pool : WEEKLY_TASKS;
   const start = weekKey.split("-W")[1];
-  const offset = Number(start) % WEEKLY_TASKS.length;
-  return [0, 1, 2].map((i) => WEEKLY_TASKS[(offset + i) % WEEKLY_TASKS.length]);
+  const offset = Number(start) % defs.length;
+  return [0, 1, 2].map((i) => defs[(offset + i) % defs.length]);
+}
+
+/**
+ * SPEC piano-admin-panel v1.1.0 (RF-02): pool ativo vem da tabela
+ * weekly_task_defs (gestão via UI). Tabela vazia/sem db → pool default
+ * do código (fallback retrocompatível).
+ */
+export function activeTaskDefs(db: DbLike): WeeklyTaskDef[] {
+  try {
+    const rows = db
+      .prepare(
+        `SELECT id, description FROM weekly_task_defs WHERE active = 1 ORDER BY sort_order, id`,
+      )
+      .all() as WeeklyTaskDef[];
+    return rows.length > 0 ? rows : WEEKLY_TASKS;
+  } catch {
+    return WEEKLY_TASKS;
+  }
 }
 
 /** Marca tarefa como concluída pelo usuário na semana (idempotente). */
@@ -80,7 +104,7 @@ export function getWeeklyTasksForUser(
         .all(userId, weekKey) as Array<{ task_id: string }>
     ).map((r) => r.task_id),
   );
-  return weeklyTasksFor(weekKey).map((t) => ({
+  return weeklyTasksFor(weekKey, db).map((t) => ({
     ...t,
     done: done.has(t.id),
   }));

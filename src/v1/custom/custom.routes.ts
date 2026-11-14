@@ -3128,4 +3128,12 @@ customRoutes.openapi(editsAppliedRoute, (c) => {
   return c.json({ applied: appliedEdits(db, c.get("tenantId"), ids) }, 200);
 });
 
+// Painel admin (SPEC piano-admin-panel v1.1.0): rotas de gestão montadas
+// dentro do mesmo router (herdam optionalAuth + tenant via * middlewares).
+// Registro explícito no fim — evita import circular.
+import { registerAdminRoutes } from "./admin.routes.js";
+registerAdminRoutes(
+  customRoutes as unknown as Parameters<typeof registerAdminRoutes>[0],
+);
+
 export { customRoutes };
