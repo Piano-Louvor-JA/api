@@ -110,9 +110,10 @@ export const UpdateCustomMusicSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   lyric: z.string().optional(),
   auxiliary_lyric: z.string().optional(),
-  id_file_audio: z.number().optional(),
-  id_file_instrumental: z.number().optional(),
-  id_file_image: z.number().optional(),
+  // SPEC-audio-removal v1.1.0: null explícito REMOVE o vínculo (field ausente mantém).
+  id_file_audio: z.number().nullable().optional(),
+  id_file_instrumental: z.number().nullable().optional(),
+  id_file_image: z.number().nullable().optional(),
   duration: z.number().optional(),
 });
 
