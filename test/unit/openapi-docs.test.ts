@@ -44,7 +44,9 @@ describe("OpenAPI Docs", () => {
         .properties.data.items;
     const tenantSchema = body.components.schemas["X-Tenant"];
 
-    expect(customOperations).toHaveLength(34);
+    // SPEC piano-admin-panel v1.1.0: +6 rotas admin (GET/POST/PUT/DELETE
+    // seasonal-events + GET/PUT weekly-tasks)
+    expect(customOperations).toHaveLength(46);
     for (const operation of customOperations) {
       expect(operation.parameters).toContainEqual(
         expect.objectContaining({ in: "header", name: "X-Tenant" }),
