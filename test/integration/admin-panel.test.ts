@@ -189,4 +189,134 @@ describe("Painel Admin API (seasonal-events + weekly-tasks)", () => {
     );
     expect(ids).toContain("qa_pool_a");
   });
+
+  it("GET lista eventos e weekly-tasks como admin; 404/400 nos mutadores", async () => {
+    const listEv = await router.request("/v1/custom/admin/seasonal-events", {
+      headers: { ...auth(adminToken), "X-Tenant": "piano" },
+    });
+    expect(listEv.status).toBe(200);
+    const evBody = await listEv.json();
+    expect(Array.isArray(evBody.data)).toBe(true);
+    expect(evBody.data.length).toBeGreaterThan(0);
+
+    const listTasks = await router.request("/v1/custom/admin/weekly-tasks", {
+      headers: { ...auth(adminToken), "X-Tenant": "piano" },
+    });
+    expect(listTasks.status).toBe(200);
+    const tasksBody = await listTasks.json();
+    expect(Array.isArray(tasksBody.data)).toBe(true);
+
+    const createInactive = await router.request(
+      "/v1/custom/admin/seasonal-events",
+      {
+        method: "POST",
+        headers: {
+          ...auth(adminToken),
+          "X-Tenant": "piano",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          name: "Inativo",
+          multiplier: 1.5,
+          starts_at: "2026-06-01T00:00:00",
+          ends_at: "2026-06-30T00:00:00",
+          active: false,
+        }),
+      },
+    );
+    expect(createInactive.status).toBe(201);
+    const { id } = await createInactive.json();
+
+    const putBadDates = await router.request(
+      `/v1/custom/admin/seasonal-events/${id}`,
+      {
+        method: "PUT",
+        headers: {
+          ...auth(adminToken),
+          "X-Tenant": "piano",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          name: "Inativo",
+          multiplier: 1.5,
+          starts_at: "2026-07-01T00:00:00",
+          ends_at: "2026-06-01T00:00:00",
+        }),
+      },
+    );
+    expect(putBadDates.status).toBe(400);
+
+    const putActive = await router.request(
+      `/v1/custom/admin/seasonal-events/${id}`,
+      {
+        method: "PUT",
+        headers: {
+          ...auth(adminToken),
+          "X-Tenant": "piano",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          name: "Inativo",
+          multiplier: 1.5,
+          starts_at: "2026-06-01T00:00:00",
+          ends_at: "2026-06-30T00:00:00",
+          active: true,
+        }),
+      },
+    );
+    expect(putActive.status).toBe(200);
+    expect((await putActive.json()).active).toBe(true);
+
+    const put404 = await router.request(
+      "/v1/custom/admin/seasonal-events/999999",
+      {
+        method: "PUT",
+        headers: {
+          ...auth(adminToken),
+          "X-Tenant": "piano",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          name: "X",
+          multiplier: 2,
+          starts_at: "2026-01-01T00:00:00",
+          ends_at: "2026-02-01T00:00:00",
+        }),
+      },
+    );
+    expect(put404.status).toBe(404);
+
+    const del404 = await router.request(
+      "/v1/custom/admin/seasonal-events/999999",
+      {
+        method: "DELETE",
+        headers: { ...auth(adminToken), "X-Tenant": "piano" },
+      },
+    );
+    expect(del404.status).toBe(404);
+
+    const putPoolInactive = await router.request(
+      "/v1/custom/admin/weekly-tasks",
+      {
+        method: "PUT",
+        headers: {
+          ...auth(adminToken),
+          "X-Tenant": "piano",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          tasks: [
+            { id: "qa_on", description: "Ativa", active: true },
+            { id: "qa_off", description: "Inativa", active: false },
+            { id: "qa_on2", description: "Ativa 2" },
+          ],
+        }),
+      },
+    );
+    expect(putPoolInactive.status).toBe(200);
+    const poolBody = await putPoolInactive.json();
+    expect(poolBody.data.map((t: { id: string }) => t.id)).not.toContain(
+      "qa_off",
+    );
+  });
 });

@@ -315,4 +315,88 @@ describe("custom edits — concilio", () => {
     expect(isConcilioMember(db, gmId)).toBe(true);
     expect(isConcilioMember(db, plainId)).toBe(false);
   });
+
+  it("cobertura: fila sem status, decide 403, history 404, applied vazio/duplicado", async () => {
+    const { appliedEdits, editHistory, publishEdit } = await import(
+      "../../src/v1/custom/edits.service.js"
+    );
+    const db = app.getDb();
+
+    const queueDefault = await app.router.request("/v1/custom/edits", {
+      headers: { authorization: `Bearer ${gmToken}` },
+    });
+    expect(queueDefault.status).toBe(200);
+
+    const deny = await app.router.request(`/v1/custom/edits/1/decide`, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${plainToken}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ decision: "approved" }),
+    });
+    expect(deny.status).toBe(403);
+
+    const hist404 = await app.router.request("/v1/custom/edits/999999/history");
+    expect(hist404.status).toBe(404);
+    expect(editHistory(db, 999999)).toEqual([]);
+
+    const appliedEmpty = await app.router.request("/v1/custom/edits/applied");
+    expect(appliedEmpty.status).toBe(200);
+    expect((await appliedEmpty.json()).applied).toEqual([]);
+    expect(appliedEdits(db, "piano", [])).toEqual([]);
+
+    // history de edit ainda published (sem decisão) não acrescenta ramo decided
+    const pending = await publish(authorToken, {
+      clientUuid: "e".repeat(40),
+      musicId: 3,
+      lyrics: LYRICS,
+    });
+    expect(pending.status).toBe(201);
+    const pendingId = ((await pending.json()) as { id: number }).id;
+    const histPending = await app.router.request(
+      `/v1/custom/edits/${pendingId}/history`,
+    );
+    expect(histPending.status).toBe(200);
+    const histBody = (await histPending.json()) as {
+      history: { status: string }[];
+    };
+    expect(histBody.history).toHaveLength(1);
+    expect(histBody.history[0].status).toBe("published");
+
+    // upsert RF-04 só com timing (lyrics undefined → ?? null)
+    const upsertTiming = publishEdit(db, {
+      clientUuid: "f".repeat(40),
+      musicId: 3,
+      authorId,
+      tenantId: "piano",
+      timing: JSON.stringify([0, 1000]),
+    });
+    expect(upsertTiming.status).toBe("published");
+
+    // dois approved do mesmo musicId → applied deduplica (mais recente vence)
+    const first = publishEdit(db, {
+      clientUuid: "g".repeat(40),
+      musicId: 4,
+      authorId,
+      tenantId: "piano",
+      lyrics: LYRICS,
+    });
+    db.prepare(
+      `UPDATE custom_edits SET status = 'approved', decided_by = ?, decided_at = ?, updated_at_ms = 1 WHERE id = ?`,
+    ).run(gmId, new Date().toISOString(), first.id);
+    const second = publishEdit(db, {
+      clientUuid: "h".repeat(40),
+      musicId: 4,
+      authorId: plainId,
+      tenantId: "piano",
+      lyrics: LYRICS_2,
+    });
+    db.prepare(
+      `UPDATE custom_edits SET status = 'approved', decided_by = ?, decided_at = ?, updated_at_ms = 2 WHERE id = ?`,
+    ).run(gmId, new Date().toISOString(), second.id);
+    const appliedDup = appliedEdits(db, "piano", [4]);
+    expect(appliedDup).toHaveLength(1);
+    expect(appliedDup[0].lyrics).toBe(LYRICS_2);
+  });
 });

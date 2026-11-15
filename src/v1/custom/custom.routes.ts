@@ -1732,7 +1732,8 @@ customRoutes.openapi(uploadCustomFileRoute, async (c: any) => {
       "aac",
     ]);
     if (kind === "audio") {
-      const rawName = file.name.split(/[/\\]/).pop() ?? "";
+      // split() nunca devolve array vazio para string; evita `??` inalcançável.
+      const rawName = file.name.replace(/^.*[/\\]/, "");
       const dot = rawName.lastIndexOf(".");
       const ext = dot > 0 ? rawName.slice(dot + 1).toLowerCase() : "";
       if (!AUDIO_EXT_ALLOWED.has(ext)) {

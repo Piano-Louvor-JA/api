@@ -134,6 +134,23 @@ describe("SPEC-audio-removal: PUT musics null-safe + upload allowlist", () => {
     expect(res.status).toBe(400);
   });
 
+  it("AC-3a2: upload kind=audio sem extensão → rejeitado", async () => {
+    const fd = new FormData();
+    fd.append(
+      "file",
+      new File([Buffer.from("x")], "audio_sem_ext", {
+        type: "application/octet-stream",
+      }),
+    );
+    fd.append("kind", "audio");
+    const res = await router.request("/v1/custom/files", {
+      method: "POST",
+      headers: auth(token),
+      body: fd,
+    });
+    expect(res.status).toBe(400);
+  });
+
   it("AC-3b: upload kind=audio aceita ogg, m4a, flac e aac", async () => {
     for (const [name, mime] of [
       ["hino.ogg", "audio/ogg"],
