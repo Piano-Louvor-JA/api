@@ -12,7 +12,7 @@ O iPhone/iPad não usa nada disto: lá a atualização é pela App Store.
 | Rota | O que devolve |
 |---|---|
 | `GET /v1/app/version` | `{ version, apk_url, size, sha256, notes, published_at }`, ou `404` quando nada foi publicado |
-| `GET /v1/app/apk/louvorja-piano-<versão>.apk` | o apk publicado |
+| `GET /v1/app/apk/louvorja-piano-<versão>-universal.apk` | o apk publicado (releases antigas: sem `-universal`) |
 
 O app compara `version` com a instalada, mostra o banner, baixa `apk_url` e só
 instala se o SHA-256 bater. Se a API responder `404` ou estiver fora do ar, o
@@ -31,6 +31,8 @@ docker compose exec api node dist/cli/fetch-apk.js 1.0.1    # versão exata
 O comando:
 
 1. lê a release no GitHub (`Piano-Louvor-JA/apk`, ou `APK_RELEASE_REPO`);
+   a release traz o apk universal e APKs por ABI; só o universal é publicado,
+   porque serve a qualquer celular;
 2. baixa o apk e confere o SHA-256 que o GitHub publica no asset;
 3. nunca sobrescreve um apk já publicado que seja diferente da release;
 4. só então troca o `version.json`: o banner nunca aparece antes de o
