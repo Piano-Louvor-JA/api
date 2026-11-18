@@ -16,6 +16,7 @@ import { telemetryMiddleware } from "./middleware/telemetry.js";
 import { tenantMiddleware } from "./middleware/tenant.middleware.js";
 import { compatRoutes } from "./routes/compat.js";
 import { albumsRoutes } from "./v1/albums/albums.routes.js";
+import { appRoutes } from "./v1/app/app.routes.js";
 import { bibleRoutes } from "./v1/bible/bible.routes.js";
 import { categoriesRoutes } from "./v1/categories/categories.routes.js";
 import { customRoutes } from "./v1/custom/custom.routes.js";
@@ -193,6 +194,8 @@ export function createApp() {
   app.route("/v1/custom", customRoutes);
   app.route("/v1/custom", syncRoutes);
   app.route("/v1/palco", palcoRoutes);
+  // Atualização do apk Android (manifesto + download), sem auth.
+  app.route("/v1/app", appRoutes);
 
   // WT-5a: WS do relay do Palco — mesmo app raiz (requisito do @hono/node-ws)
   setPalcoWs(createNodeWebSocket({ app }));
