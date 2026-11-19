@@ -31,6 +31,14 @@ async function getFirebaseApp(): Promise<import("firebase-admin/app").App> {
   return firebaseApp;
 }
 
+/** Exclusão de conta: remove o usuário no Firebase Auth (no-op sem service account). */
+export async function deleteFirebaseUser(uid: string): Promise<void> {
+  if (!process.env.FIREBASE_SERVICE_ACCOUNT) return;
+  const app = await getFirebaseApp();
+  const { getAuth } = await import("firebase-admin/auth");
+  await getAuth(app).deleteUser(uid);
+}
+
 export const firebaseAuth: MiddlewareHandler<CustomAuthEnv> =
   createMiddleware<CustomAuthEnv>(async (c, next) => {
     // optionalAuth já populou user com token opaco legacy → respeitar
