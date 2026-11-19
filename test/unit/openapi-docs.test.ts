@@ -45,8 +45,9 @@ describe("OpenAPI Docs", () => {
     const tenantSchema = body.components.schemas["X-Tenant"];
 
     // SPEC piano-admin-panel v1.1.0: +6 rotas admin (GET/POST/PUT/DELETE
-    // seasonal-events + GET/PUT weekly-tasks)
-    expect(customOperations).toHaveLength(46);
+    // seasonal-events + GET/PUT weekly-tasks); +1 DELETE /auth/me (exclusão
+    // de conta, App Store 5.1.1(v)); +3 bloqueio de usuários (App Store 1.2)
+    expect(customOperations).toHaveLength(50);
     for (const operation of customOperations) {
       expect(operation.parameters).toContainEqual(
         expect.objectContaining({ in: "header", name: "X-Tenant" }),

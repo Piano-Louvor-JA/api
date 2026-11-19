@@ -212,3 +212,10 @@ export const MeResponseSchema = z.object({
     displayName: z.string().nullable(),
   }),
 });
+
+/** Exclusão de conta: a senha atual é obrigatória nas sessões de token opaco
+ * de contas com senha local. Sessões Firebase (ID token) não mandam senha: o
+ * cliente reautentica no Firebase antes de chamar. */
+export const DeleteAccountSchema = z.object({
+  password: z.string().min(1).optional(),
+});

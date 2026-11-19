@@ -16,6 +16,10 @@ Autenticação por **token opaco** (string aleatória de 32 bytes). O banco guar
 | POST | `/v1/custom/auth/login` | — | `{ email, password }` → `{ token, user }` (200) |
 | GET | `/v1/custom/auth/me` | Bearer | Dados da sessão atual (401 se inválido/expirado) |
 | POST | `/v1/custom/auth/logout` | Bearer | Invalida o token (204) |
+| DELETE | `/v1/custom/auth/me` | Bearer | Exclui a conta (204). Body `{ "password": "..." }` obrigatório em contas com senha (400 sem senha, 403 senha errada). Coletâneas privadas são apagadas; as públicas ficam na comunidade sem autor, sob o usuário-sistema "Conta excluída" |
+| POST | `/v1/custom/collections/{id}/block-author` | Bearer | Bloqueia o autor da coletânea: as coletâneas dele somem da listagem para quem bloqueou (400 se a coletânea é sua ou não tem autor) |
+| GET | `/v1/custom/blocks` | Bearer | Lista os autores bloqueados (`id_user`, `displayName`) |
+| DELETE | `/v1/custom/blocks/{id}` | Bearer | Desbloqueia o autor (204) |
 
 Header de autenticação: `Authorization: Bearer <token>`.
 
