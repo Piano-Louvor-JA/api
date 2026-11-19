@@ -142,13 +142,13 @@ describe("POST /v1/custom/admin/community/review", () => {
       const tabName = m?.[1] ?? "testadores";
       const rowN = Number(m?.[2] ?? 2);
       const rows: Record<string, string[][]> = {
-        testadores: [["Jeydson", "garciajeydson@gmail.com"]],
+        testadores: [["Testador Exemplo", "testador@exemplo.test"]],
         desenvolvedores: [
           ["", "invalid", "", "", "", "", "", "", "", "", "pendente"],
           [
             "",
-            "Felipe Nascimento Santos",
-            "fn0501925@gmail.com",
+            "Dev Exemplo Um",
+            "dev.um@exemplo.test",
             "",
             "",
             "",
@@ -160,8 +160,8 @@ describe("POST /v1/custom/admin/community/review", () => {
           ],
           [
             "",
-            "Lucas da Silva Vieira",
-            "lucassilvavieira2102@gmail.com",
+            "Dev Exemplo Dois",
+            "dev.dois@exemplo.test",
             "",
             "",
             "",
@@ -263,6 +263,32 @@ describe("POST /v1/custom/admin/community/review", () => {
     for (const body of casos) {
       const res = await post(reviewerToken, body);
       expect(res.status, JSON.stringify(body)).toBe(400);
+    }
+    expect(calls.filter((c) => c.startsWith("PUT")).length).toBe(0);
+  });
+
+  it("mapeia erros: linha inexistente → 404; configuração ausente → 500", async () => {
+    const naoExiste = await post(reviewerToken, {
+      tab: "testadores",
+      row: 9,
+      acao: "aprovar",
+    });
+    expect(naoExiste.status).toBe(404);
+
+    const sheetId = process.env.TESTERS_SHEET_ID;
+    delete process.env.TESTERS_SHEET_ID;
+    try {
+      const semSheet = await post(reviewerToken, {
+        tab: "testadores",
+        row: 2,
+        acao: "aprovar",
+      });
+      expect(semSheet.status).toBe(500);
+      expect(await semSheet.json()).toEqual({
+        error: "TESTERS_SHEET_ID não configurado",
+      });
+    } finally {
+      process.env.TESTERS_SHEET_ID = sheetId;
     }
     expect(calls.filter((c) => c.startsWith("PUT")).length).toBe(0);
   });
@@ -377,10 +403,10 @@ describe("POST /v1/custom/admin/community/review", () => {
     const testers = pendentesDaFixture("testadores");
     const devs = pendentesDaFixture("desenvolvedores");
     expect(testers.map((t) => t.row)).toEqual([2]);
-    expect(testers[0]!.nome).toBe("Jeydson");
+    expect(testers[0]!.nome).toBe("Testador Exemplo");
     expect(devs.map((d) => d.row)).toEqual([3, 4]);
-    expect(devs[0]!.nome).toContain("Felipe");
-    expect(devs[1]!.nome).toContain("Lucas");
+    expect(devs[0]!.nome).toContain("Exemplo Um");
+    expect(devs[1]!.nome).toContain("Exemplo Dois");
     // relatos: header-only → nenhum pendente
     expect(pendentesDaFixture("relatos")).toEqual([]);
 
