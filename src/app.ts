@@ -19,6 +19,7 @@ import { albumsRoutes } from "./v1/albums/albums.routes.js";
 import { appRoutes } from "./v1/app/app.routes.js";
 import { bibleRoutes } from "./v1/bible/bible.routes.js";
 import { categoriesRoutes } from "./v1/categories/categories.routes.js";
+import { communityReviewRoutes } from "./v1/custom/community-review.routes.js";
 import { customRoutes } from "./v1/custom/custom.routes.js";
 import { syncRoutes } from "./v1/custom/sync.routes.js";
 // Rotas OpenAPI (V1)
@@ -193,6 +194,7 @@ export function createApp() {
   app.use("/v1/custom/*", tenantMiddleware);
   app.route("/v1/custom", customRoutes);
   app.route("/v1/custom", syncRoutes);
+  app.route("/v1/custom", communityReviewRoutes);
   app.route("/v1/palco", palcoRoutes);
   // Atualização do apk Android (manifesto + download), sem auth.
   app.route("/v1/app", appRoutes);
