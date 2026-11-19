@@ -17,7 +17,9 @@ import type { CustomAuthEnv } from "./auth.middleware.js";
 
 let firebaseApp: import("firebase-admin/app").App | null = null;
 
-async function getFirebaseApp(): Promise<import("firebase-admin/app").App> {
+export async function getFirebaseApp(): Promise<
+  import("firebase-admin/app").App
+> {
   if (!firebaseApp) {
     const { initializeApp, cert } = await import("firebase-admin/app");
     const serviceAccount = JSON.parse(
