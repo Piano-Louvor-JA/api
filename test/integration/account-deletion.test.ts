@@ -1,4 +1,12 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -360,6 +368,57 @@ describe("DELETE /v1/custom/auth/me — exclusão de conta", () => {
     } finally {
       db.pragma("foreign_keys = OFF");
     }
+  });
+
+  it("conta-sistema não pode ser excluída (erro interno → 500, nada apagado)", async () => {
+    const db = app.getDb();
+    const sentinel = sentinelId();
+    const token = `sentinela-${seq}`;
+    const { hashToken } = await import("../../src/v1/custom/auth.service.js");
+    db.prepare(
+      `INSERT INTO custom_sessions (token_hash, id_user) VALUES (?, ?)`,
+    ).run(hashToken(token), sentinel);
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const res = await del(token, {});
+      expect(res.status).toBe(500);
+      expect(
+        count(
+          `SELECT COUNT(*) n FROM custom_users WHERE id_user = ?`,
+          sentinel,
+        ),
+      ).toBe(1);
+    } finally {
+      errorSpy.mockRestore();
+      db.prepare(`DELETE FROM custom_sessions WHERE token_hash = ?`).run(
+        hashToken(token),
+      );
+    }
+  });
+
+  it("conta apagada antes da validação da sessão → 401", async () => {
+    const db = app.getDb();
+    const id = alice.id_user;
+    // o corpo é lido na validação, antes do requireAuth: a sessão já não vale
+    const body = new ReadableStream({
+      pull(controller) {
+        db.prepare(`DELETE FROM custom_users WHERE id_user = ?`).run(id);
+        controller.enqueue(
+          new TextEncoder().encode(JSON.stringify({ password: PASS })),
+        );
+        controller.close();
+      },
+    });
+    const res = await router.request("/v1/custom/auth/me", {
+      method: "DELETE",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${alice.token}`,
+      },
+      body,
+      duplex: "half",
+    } as RequestInit);
+    expect(res.status).toBe(401);
   });
 
   it("não mexe nos dados de outro usuário", async () => {
