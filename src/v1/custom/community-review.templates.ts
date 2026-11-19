@@ -10,7 +10,11 @@ import { EMAIL_BRAND_TOKENS as T } from "./email-brand.js";
 const LOGO_URL = "https://pianolouvorja.com.br/brand/logo-louvor-ja.svg";
 
 function esc(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt");
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 function p(s: string): string {
