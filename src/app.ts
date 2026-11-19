@@ -22,6 +22,7 @@ import { categoriesRoutes } from "./v1/categories/categories.routes.js";
 import { communityReviewRoutes } from "./v1/custom/community-review.routes.js";
 import { customRoutes } from "./v1/custom/custom.routes.js";
 import { syncRoutes } from "./v1/custom/sync.routes.js";
+import { geoVisitRoutes } from "./v1/geo/geo-visit.routes.js";
 // Rotas OpenAPI (V1)
 import { liturgyRoutes } from "./v1/liturgy/liturgy.routes.js";
 import { musicsRoutes } from "./v1/musics/musics.routes.js";
@@ -195,6 +196,7 @@ export function createApp() {
   app.route("/v1/custom", customRoutes);
   app.route("/v1/custom", syncRoutes);
   app.route("/v1/custom", communityReviewRoutes);
+  app.route("/v1/geo", geoVisitRoutes);
   app.route("/v1/palco", palcoRoutes);
   // Atualização do apk Android (manifesto + download), sem auth.
   app.route("/v1/app", appRoutes);
