@@ -2169,8 +2169,8 @@ const deleteMeRoute = createRoute({
 // biome-ignore lint/suspicious/noExplicitAny: OpenAPI route context omite Variables injetadas por requireAuth.
 customRoutes.openapi(deleteMeRoute, async (c: any) => {
   try {
-    const authed = c.get("user") as { id_user: number } | undefined;
-    if (!authed) return c.json({ error: "Não autenticado" }, 401);
+    // requireAuth já garantiu usuário e header "Bearer <token>".
+    const authed = c.get("user") as { id_user: number };
 
     let password: string | undefined;
     try {
@@ -2183,22 +2183,23 @@ customRoutes.openapi(deleteMeRoute, async (c: any) => {
     }
 
     const db = getDb();
+    // Sempre devolve uma linha: se a conta já sumiu (exclusão concorrente),
+    // a exclusão abaixo vira no-op e o DELETE continua idempotente (204).
     const account = db
       .prepare(
-        `SELECT password_hash, firebase_uid FROM custom_users WHERE id_user = ?`,
+        `SELECT COALESCE((SELECT password_hash FROM custom_users WHERE id_user = ?), '') AS password_hash,
+                (SELECT firebase_uid FROM custom_users WHERE id_user = ?) AS firebase_uid`,
       )
-      .get(authed.id_user) as
-      | { password_hash: string; firebase_uid: string | null }
-      | undefined;
-    if (!account) return c.json({ error: "Não autenticado" }, 401);
+      .get(authed.id_user, authed.id_user) as {
+      password_hash: string;
+      firebase_uid: string | null;
+    };
 
     // Sessão Firebase (ID token JWT já verificado com checkRevoked pelo
     // firebaseAuth): a senha é conferida no cliente via reauthenticate do
     // Firebase — a senha local de conta legado vinculada pode ser outra.
-    const raw = c.req.header("authorization") ?? "";
-    const viaFirebase = raw.startsWith("Bearer ")
-      ? raw.slice(7).split(".").length === 3
-      : false;
+    const viaFirebase =
+      String(c.req.header("authorization")).slice(7).split(".").length === 3;
 
     if (!viaFirebase && hasLocalPassword(account.password_hash)) {
       if (!password) return c.json({ error: "Senha obrigatória" }, 400);
