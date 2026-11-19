@@ -17,6 +17,7 @@ import {
   CustomLyricsListResponseSchema,
   CustomMusicSchema,
   CustomMusicsListResponseSchema,
+  DeleteAccountSchema,
   ForgotPasswordSchema,
   LoginSchema,
   MeResponseSchema,
@@ -199,11 +200,20 @@ customRoutes.openapi(listCollectionsRoute, (c) => {
           SELECT 1 FROM collection_reports r
           WHERE r.collection_id = cc.id_collection AND r.status = 'open'
         )
+        ${
+          user
+            ? `AND NOT EXISTS (
+          SELECT 1 FROM custom_user_blocks b
+          WHERE b.blocker_id = ? AND b.blocked_id = cc.owner_id
+        )`
+            : ""
+        }
       GROUP BY cc.id_collection ORDER BY cc.updated_at DESC
     `;
     if (user) params.push(user.id_user); // is_owner
     params.push(tenantId);
     if (user) params.push(user.id_user); // filtro de visibilidade
+    if (user) params.push(user.id_user); // autores bloqueados (App Store 1.2)
 
     const collections = db
       .prepare(query)
@@ -2108,6 +2118,112 @@ customRoutes.openapi(meRoute, (c) => {
 });
 
 // ============================================
+// Auth — exclusão de conta (App Store 5.1.1(v) / LGPD)
+// ============================================
+
+import { deleteAccount, hasLocalPassword } from "./account-deletion.service.js";
+import { deleteFirebaseUser } from "./firebase-auth.middleware.js";
+
+const deleteMeRoute = createRoute({
+  method: "delete",
+  path: "/auth/me",
+  tags: ["custom"],
+  description:
+    "Exclui a conta do usuário autenticado. Contas com senha confirmam a senha atual. Coletâneas privadas são apagadas; as públicas ficam na comunidade sem autor.",
+  middleware: [requireAuth] as const,
+  request: {
+    body: {
+      content: { "application/json": { schema: DeleteAccountSchema } },
+      required: false,
+    },
+  },
+  responses: {
+    204: { description: "Conta excluída" },
+    400: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Senha obrigatória",
+    },
+    401: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Não autenticado",
+    },
+    403: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Senha incorreta",
+    },
+    500: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Erro interno",
+    },
+  },
+});
+
+// biome-ignore lint/suspicious/noExplicitAny: OpenAPI route context omite Variables injetadas por requireAuth.
+customRoutes.openapi(deleteMeRoute, async (c: any) => {
+  try {
+    const authed = c.get("user") as { id_user: number } | undefined;
+    if (!authed) return c.json({ error: "Não autenticado" }, 401);
+
+    let password: string | undefined;
+    try {
+      const body = (await c.req.json()) as { password?: unknown };
+      if (typeof body?.password === "string" && body.password.length > 0) {
+        password = body.password;
+      }
+    } catch {
+      // corpo ausente ou inválido = sem senha
+    }
+
+    const db = getDb();
+    const account = db
+      .prepare(
+        `SELECT password_hash, firebase_uid FROM custom_users WHERE id_user = ?`,
+      )
+      .get(authed.id_user) as
+      | { password_hash: string; firebase_uid: string | null }
+      | undefined;
+    if (!account) return c.json({ error: "Não autenticado" }, 401);
+
+    // Sessão Firebase (ID token JWT já verificado com checkRevoked pelo
+    // firebaseAuth): a senha é conferida no cliente via reauthenticate do
+    // Firebase — a senha local de conta legado vinculada pode ser outra.
+    const raw = c.req.header("authorization") ?? "";
+    const viaFirebase = raw.startsWith("Bearer ")
+      ? raw.slice(7).split(".").length === 3
+      : false;
+
+    if (!viaFirebase && hasLocalPassword(account.password_hash)) {
+      if (!password) return c.json({ error: "Senha obrigatória" }, 400);
+      if (!verifyPassword(password, account.password_hash)) {
+        return c.json({ error: "Senha incorreta" }, 403);
+      }
+    }
+
+    deleteAccount(db, authed.id_user);
+
+    // Firebase: best-effort, nunca falha a exclusão já feita no banco.
+    if (account.firebase_uid) {
+      void deleteFirebaseUser(account.firebase_uid).catch((e: unknown) => {
+        console.warn("[deleteMe] falha ao excluir usuário no Firebase:", e);
+      });
+    }
+
+    return c.body(null, 204);
+  } catch (error) {
+    console.error(error);
+    return c.json({ error: "Erro ao excluir conta" }, 500);
+  }
+});
+
+// ============================================
 // Auth — reset de senha (sem SMTP)
 // ============================================
 // Fluxo: usuário pede reset → API gera token opaco de 1h (uso único) → o
@@ -2581,6 +2697,143 @@ customRoutes.openapi(reportCollectionRoute, (c) => {
   ).run(collectionId, user.id_user, reason);
 
   return c.json({ ok: true }, 200);
+});
+
+// ============================================
+// Bloqueio de usuários (App Store 1.2 — conteúdo gerado por usuários)
+// ============================================
+// Quem bloqueia deixa de ver as coletâneas do autor na listagem da
+// Comunidade. O bloqueio é pelo dono da coletânea (o cliente não precisa
+// conhecer ids de usuário de antemão).
+
+const errorJson = (description: string) => ({
+  content: {
+    "application/json": { schema: z.object({ error: z.string() }) },
+  },
+  description,
+});
+
+const BlockedUserSchema = z.object({
+  id_user: z.number(),
+  displayName: z.string().nullable(),
+  created_at: z.string().nullable().optional(),
+});
+
+const blockAuthorRoute = createRoute({
+  method: "post",
+  path: "/collections/{id}/block-author",
+  tags: ["custom"],
+  description:
+    "Bloqueia o autor da coletânea: as coletâneas dele somem da Comunidade para quem bloqueou",
+  middleware: [requireAuth] as const,
+  request: { params: z.object({ id: z.string() }) },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({ blocked: BlockedUserSchema }),
+        },
+      },
+      description: "Autor bloqueado",
+    },
+    400: errorJson("Coletânea sem autor ou do próprio usuário"),
+    401: errorJson("Não autenticado"),
+    404: errorJson("Coletânea não encontrada"),
+  },
+});
+
+customRoutes.openapi(blockAuthorRoute, (c) => {
+  const db = getDb();
+  const user = c.get("user") as { id_user: number };
+  const collectionId = Number(c.req.valid("param").id);
+
+  const row = db
+    .prepare(
+      `SELECT cc.owner_id, cu.display_name
+       FROM custom_collections cc
+       LEFT JOIN custom_users cu ON cu.id_user = cc.owner_id
+       WHERE cc.id_collection = ? AND cc.tenant_id = ?`,
+    )
+    .get(collectionId, c.get("tenantId")) as
+    | { owner_id: number | null; display_name: string | null }
+    | undefined;
+
+  if (!row) return c.json({ error: "Coletânea não encontrada" }, 404);
+  if (row.owner_id == null) {
+    return c.json({ error: "Coletânea sem autor" }, 400);
+  }
+  if (row.owner_id === user.id_user) {
+    return c.json({ error: "Não é possível bloquear a si mesmo" }, 400);
+  }
+
+  db.prepare(
+    `INSERT OR IGNORE INTO custom_user_blocks (blocker_id, blocked_id) VALUES (?, ?)`,
+  ).run(user.id_user, row.owner_id);
+
+  return c.json(
+    { blocked: { id_user: row.owner_id, displayName: row.display_name } },
+    200,
+  );
+});
+
+const listBlocksRoute = createRoute({
+  method: "get",
+  path: "/blocks",
+  tags: ["custom"],
+  description: "Lista os autores que o usuário bloqueou",
+  middleware: [requireAuth] as const,
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({ data: z.array(BlockedUserSchema) }),
+        },
+      },
+      description: "Autores bloqueados",
+    },
+    401: errorJson("Não autenticado"),
+  },
+});
+
+customRoutes.openapi(listBlocksRoute, (c) => {
+  const user = c.get("user") as { id_user: number };
+  const rows = getDb()
+    .prepare(
+      `SELECT b.blocked_id AS id_user, cu.display_name AS displayName, b.created_at
+       FROM custom_user_blocks b
+       LEFT JOIN custom_users cu ON cu.id_user = b.blocked_id
+       WHERE b.blocker_id = ?
+       ORDER BY b.created_at DESC`,
+    )
+    .all(user.id_user) as {
+    id_user: number;
+    displayName: string | null;
+    created_at: string | null;
+  }[];
+  return c.json({ data: rows }, 200);
+});
+
+const unblockRoute = createRoute({
+  method: "delete",
+  path: "/blocks/{id}",
+  tags: ["custom"],
+  description: "Desbloqueia um autor",
+  middleware: [requireAuth] as const,
+  request: { params: z.object({ id: z.string() }) },
+  responses: {
+    204: { description: "Desbloqueado" },
+    401: errorJson("Não autenticado"),
+  },
+});
+
+customRoutes.openapi(unblockRoute, (c) => {
+  const user = c.get("user") as { id_user: number };
+  getDb()
+    .prepare(
+      `DELETE FROM custom_user_blocks WHERE blocker_id = ? AND blocked_id = ?`,
+    )
+    .run(user.id_user, Number(c.req.valid("param").id));
+  return c.body(null, 204);
 });
 
 // ============================================
