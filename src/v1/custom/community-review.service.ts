@@ -12,6 +12,8 @@
  * sem email; falha de SMTP → nunca falha a moderação já persistida.
  */
 
+import { sendEmail, smtpConfigured } from "./mail.service.js";
+
 const STATUS_COL: Record<string, number> = {
   testadores: 12, // L
   desenvolvedores: 11, // K
@@ -32,7 +34,7 @@ export function validarReviewBody(body: {
   acao?: unknown;
 }): string | null {
   const { tab, row, acao } = body ?? {};
-  if (!tab || typeof tab !== "string" || !(tab in STATUS_COL))
+  if (!tab || typeof tab !== "string" || !Object.hasOwn(STATUS_COL, tab))
     return "tab inválida";
   if (typeof row !== "number" || !Number.isInteger(row) || row < 2) {
     return "row inválida (>=2, linha 1 é header)";
@@ -116,6 +118,31 @@ export type EmailSender = (args: {
 
 let emailSender: EmailSender | null = null;
 
+/** HTML → texto puro para a parte text/plain do e-mail. */
+function htmlToText(html: string): string {
+  return html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&middot;/g, "·")
+    .replace(/&copy;/g, "©")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, "&")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n\s*\n+/g, "\n\n")
+    .trim();
+}
+
+/** Remetente padrão: SMTP da própria API (mail.service). */
+const smtpSender: EmailSender = async ({ to, subject, html }) => {
+  if (!smtpConfigured()) return { ok: false, error: "SMTP não configurado" };
+  const ok = await sendEmail(to, subject, html, htmlToText(html));
+  return ok ? { ok: true } : { ok: false, error: "falha no envio do e-mail" };
+};
+
 export function setCommunityReviewEmailSender(sender: EmailSender): void {
   emailSender = sender;
 }
@@ -154,7 +181,12 @@ export async function reviewCommunityEntry(
   const sheetId = process.env.TESTERS_SHEET_ID;
   if (!sheetId) return { ok: false, error: "TESTERS_SHEET_ID não configurado" };
 
-  const token = await getAccessToken(fetchImpl);
+  let token: string;
+  try {
+    token = await getAccessToken(fetchImpl);
+  } catch (err: unknown) {
+    return { ok: false, error: (err as Error).message };
+  }
   const colLetter = statusColLetter(tab);
 
   // 1) Lê a linha pra pegar nome/email (pro email)
@@ -224,11 +256,13 @@ export async function reviewCommunityEntry(
         "./community-review.templates.js"
       );
       const { subject, html } = renderCommunityReviewEmail(template, { nome });
-      if (emailSender) {
-        const result = await emailSender({ to: email, subject, html });
-        emailEnviado = result.ok;
-        emailErro = result.error;
-      }
+      const result = await (emailSender ?? smtpSender)({
+        to: email,
+        subject,
+        html,
+      });
+      emailEnviado = result.ok;
+      emailErro = result.error;
     } catch (err: unknown) {
       emailEnviado = false;
       emailErro =

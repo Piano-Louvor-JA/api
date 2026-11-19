@@ -20,7 +20,11 @@ import { createHash } from "node:crypto";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { adminAuth } from "../custom/admin.middleware.js";
-import { getFirebaseApp } from "../custom/firebase-auth.middleware.js";
+import { optionalAuth } from "../custom/auth.middleware.js";
+import {
+  firebaseAuth,
+  getFirebaseApp,
+} from "../custom/firebase-auth.middleware.js";
 
 export function countryFromHeaders(
   headers: Record<string, string | undefined>,
@@ -122,8 +126,8 @@ export async function recordVisit(input: {
   if (seenVisitors.has(visitorId)) return "dedup";
   seenVisitors.add(visitorId);
   if (seenVisitors.size > SEEN_MAX) {
-    const first = seenVisitors.values().next().value;
-    if (first !== undefined) seenVisitors.delete(first);
+    // Set preserva a ordem de inserção: descarta o mais antigo.
+    seenVisitors.delete(seenVisitors.values().next().value as string);
   }
 
   const db = await getDb();
@@ -274,7 +278,9 @@ const statsRoute = createRoute({
   },
 });
 
-geoVisitRoutes.use("/stats", adminAuth);
+// /v1/geo não passa pelos middlewares de sessão do /v1/custom: resolve o
+// usuário (token opaco ou Firebase) antes do gate de admin.
+geoVisitRoutes.use("/stats", optionalAuth, firebaseAuth, adminAuth);
 
 geoVisitRoutes.openapi(statsRoute, async (c) => {
   const rawDays = Number(c.req.query("days"));
