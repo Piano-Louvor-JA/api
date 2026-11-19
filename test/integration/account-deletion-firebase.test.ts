@@ -76,6 +76,40 @@ describe("DELETE /v1/custom/auth/me — sessão Firebase", () => {
     );
   });
 
+  it("falha ao excluir no Firebase não desfaz a exclusão (204 + aviso)", async () => {
+    const db = app.getDb();
+    const r = db
+      .prepare(
+        `INSERT INTO custom_users (email, password_hash, display_name, firebase_uid) VALUES (?, ?, ?, ?)`,
+      )
+      .run("fb-falha@test.local", "firebase$no-local-password", "F", "uid-f");
+    const id = Number(r.lastInsertRowid);
+    verifyIdTokenMock.mockResolvedValue({
+      uid: "uid-f",
+      email: "fb-falha@test.local",
+    });
+    deleteUserMock.mockRejectedValueOnce(new Error("firebase fora"));
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const res = await router.request("/v1/custom/auth/me", {
+        method: "DELETE",
+        headers: { authorization: `Bearer ${JWT}` },
+      });
+      expect(res.status).toBe(204);
+      expect(
+        db.prepare(`SELECT 1 FROM custom_users WHERE id_user = ?`).get(id),
+      ).toBeUndefined();
+      await vi.waitFor(() =>
+        expect(warn).toHaveBeenCalledWith(
+          "[deleteMe] falha ao excluir usuário no Firebase:",
+          expect.any(Error),
+        ),
+      );
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
   it("token Firebase inválido → 401", async () => {
     verifyIdTokenMock.mockRejectedValue(new Error("revoked"));
     const res = await router.request("/v1/custom/auth/me", {
