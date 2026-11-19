@@ -23,7 +23,10 @@ const sha = (b: Buffer) => createHash("sha256").update(b).digest("hex");
 
 /** GitHub de mentira: releases por tag e o download dos assets. */
 function fakeGithub(
-  releases: Record<string, { apk: Buffer; digest?: string; body?: string }>,
+  releases: Record<
+    string,
+    { apk: Buffer; digest?: string; body?: string; legacy?: boolean }
+  >,
   latest: string,
 ) {
   const calls: string[] = [];
@@ -40,13 +43,22 @@ function fakeGithub(
       : /\/tags\/v([\d.]+)$/.exec(url)?.[1];
     const r = tag ? releases[tag] : undefined;
     if (!r) return new Response("{}", { status: 404 });
-    const name = `louvorja-piano-${tag}.apk`;
+    // Releases novas: universal + APKs por ABI; as antigas: um só, sem sufixo.
+    const name = r.legacy
+      ? `louvorja-piano-${tag}.apk`
+      : `louvorja-piano-${tag}-universal.apk`;
     return Response.json({
       tag_name: `v${tag}`,
       body: r.body ?? `Notas da ${tag}`,
       published_at: "2026-11-18T12:00:00Z",
       assets: [
         { name: "louvorja-piano-ios-unsigned.ipa", size: 1, digest: null },
+        {
+          name: `louvorja-piano-${tag}-arm64-v8a.apk`,
+          size: 3,
+          digest: `sha256:${"1".repeat(64)}`,
+          browser_download_url: `https://github.com/x/releases/download/v${tag}/arm64.apk`,
+        },
         {
           name,
           size: r.apk.length,
@@ -95,14 +107,16 @@ describe("atualização do apk pela API", () => {
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({
       version: "1.0.1",
-      apk_url: "/v1/app/apk/louvorja-piano-1.0.1.apk",
+      apk_url: "/v1/app/apk/louvorja-piano-1.0.1-universal.apk",
       size: apk101.length,
       sha256: sha(apk101),
       notes: "Notas da 1.0.1",
       published_at: "2026-11-18T12:00:00Z",
     });
 
-    const file = await app.request("/v1/app/apk/louvorja-piano-1.0.1.apk");
+    const file = await app.request(
+      "/v1/app/apk/louvorja-piano-1.0.1-universal.apk",
+    );
     expect(file.status).toBe(200);
     expect(file.headers.get("content-type")).toBe(
       "application/vnd.android.package-archive",
@@ -145,18 +159,24 @@ describe("atualização do apk pela API", () => {
 
   it("nunca sobrescreve um apk publicado que difere da release", async () => {
     mkdirSync(join(dir, "android"), { recursive: true });
-    writeFileSync(join(dir, "android", "louvorja-piano-1.0.1.apk"), "outro");
+    writeFileSync(
+      join(dir, "android", "louvorja-piano-1.0.1-universal.apk"),
+      "outro",
+    );
     const gh = fakeGithub({ "1.0.1": { apk: apk101 } }, "1.0.1");
     expect(await run(["1.0.1"], out, gh.impl)).toBe(1);
     expect(
-      readFileSync(join(dir, "android", "louvorja-piano-1.0.1.apk"), "utf8"),
+      readFileSync(
+        join(dir, "android", "louvorja-piano-1.0.1-universal.apk"),
+        "utf8",
+      ),
     ).toBe("outro");
   });
 
   it("mantém só o atual e o anterior; versão antiga é o rollback", async () => {
     const gh = fakeGithub(
       {
-        "1.0.0": { apk: apk100 },
+        "1.0.0": { apk: apk100, legacy: true },
         "1.0.1": { apk: apk101 },
         "1.0.2": { apk: apk102 },
       },
@@ -169,7 +189,10 @@ describe("atualização do apk pela API", () => {
       readdirSync(join(dir, "android"))
         .filter((f) => f.endsWith(".apk"))
         .sort(),
-    ).toEqual(["louvorja-piano-1.0.1.apk", "louvorja-piano-1.0.2.apk"]);
+    ).toEqual([
+      "louvorja-piano-1.0.1-universal.apk",
+      "louvorja-piano-1.0.2-universal.apk",
+    ]);
 
     // Rollback para a 1.0.1 (já no disco: não baixa de novo).
     const before = gh.calls.length;
@@ -182,9 +205,24 @@ describe("atualização do apk pela API", () => {
   it("manifesto apontando para apk sumido ou corrompido vira 404", async () => {
     const gh = fakeGithub({ "1.0.1": { apk: apk101 } }, "1.0.1");
     await run([], out, gh.impl);
-    rmSync(join(dir, "android", "louvorja-piano-1.0.1.apk"));
+    rmSync(join(dir, "android", "louvorja-piano-1.0.1-universal.apk"));
     expect((await createApp().request("/v1/app/version")).status).toBe(404);
     writeFileSync(join(dir, "android", "version.json"), "{quebrado");
     expect((await createApp().request("/v1/app/version")).status).toBe(404);
+  });
+
+  it("publica só o universal, nunca um APK por ABI", async () => {
+    const gh = fakeGithub({ "1.0.1": { apk: apk101 } }, "1.0.1");
+    expect(await run([], out, gh.impl)).toBe(0);
+    expect(gh.calls.some((u) => u.endsWith("/arm64.apk"))).toBe(false);
+    expect(readdirSync(join(dir, "android")).sort()).toEqual([
+      "louvorja-piano-1.0.1-universal.apk",
+      "version.json",
+    ]);
+    const app = createApp();
+    expect(
+      (await app.request("/v1/app/apk/louvorja-piano-1.0.1-arm64-v8a.apk"))
+        .status,
+    ).toBe(404);
   });
 });

@@ -13,8 +13,13 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { z } from "@hono/zod-openapi";
 
-/** Nome dos apks publicados: só esse formato é servido (nada de ../). */
-export const APK_FILE_PATTERN = /^louvorja-piano-(\d+\.\d+\.\d+)\.apk$/;
+/**
+ * Nome dos apks publicados: só esse formato é servido (nada de ../).
+ * A release traz o universal (`-universal`) e APKs por ABI; só o universal
+ * (ou o nome antigo, sem sufixo) serve a qualquer celular.
+ */
+export const APK_FILE_PATTERN =
+  /^louvorja-piano-(\d+\.\d+\.\d+)(?:-universal)?\.apk$/;
 
 export const ManifestSchema = z.object({
   version: z.string().regex(/^\d+\.\d+\.\d+$/),
