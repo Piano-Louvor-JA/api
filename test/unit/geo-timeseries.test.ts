@@ -1,8 +1,9 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   buildBuckets,
   fetchDownloadsSeries,
+  fetchSubscribers,
   fetchSubscribersSeries,
   fetchVisitsSeries,
   resolvePeriod,
@@ -101,6 +102,33 @@ describe("geo-timeseries (RF-A3)", () => {
     ]);
   });
 
+  it("docs sem campo day usam o id; valores não numéricos contam zero", async () => {
+    store.set("2026-11-19", { countries: { BR: 2, XX: "?" as never } } as Doc);
+    store.set("2026-11-18", {} as Doc);
+    setTimeseriesFirestoreForTests(makeFakeFirestore(store));
+    // buckets fora de ordem: o intervalo da consulta não depende da ordem
+    expect(await fetchVisitsSeries(["2026-11-19", "2026-11-18"])).toEqual([
+      { key: "2026-11-19", value: 2 },
+      { key: "2026-11-18", value: 0 },
+    ]);
+
+    store.clear();
+    store.set("2026-11-19", { total: "x" as never } as Doc);
+    expect(await fetchDownloadsSeries(["2026-11-19"])).toEqual([
+      { key: "2026-11-19", value: 0 },
+    ]);
+  });
+
+  it("downloads mensal: snapshot mais antigo lido depois não substitui o mais recente", async () => {
+    store.set("2026-09-28", { day: "2026-09-28", total: 40 });
+    store.set("2026-09-03", { day: "2026-09-03", total: 10 });
+    // o fake devolve na ordem de inserção: 28 é lido antes de 03
+    setTimeseriesFirestoreForTests(makeFakeFirestore(store));
+    expect(await fetchDownloadsSeries(["2026-09"])).toEqual([
+      { key: "2026-09", value: 40 },
+    ]);
+  });
+
   it("subscribers: sem BUTTONDOWN_API_KEY vem zerada (fail-soft)", async () => {
     const buckets = ["2026-11-18", "2026-11-19"];
     const series = await fetchSubscribersSeries(buckets);
@@ -115,5 +143,79 @@ describe("geo-timeseries (RF-A3)", () => {
     expect(await fetchVisitsSeries([])).toEqual([]);
     expect(await fetchDownloadsSeries([])).toEqual([]);
     expect(await fetchSubscribersSeries([])).toEqual([]);
+  });
+  describe("Buttondown", () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it("pagina, aceita os dois formatos de campo e conta por bucket", async () => {
+      process.env.BUTTONDOWN_API_KEY = "chave-teste";
+      const pages: Record<string, unknown> = {
+        "https://api.buttondown.com/v1/subscribers": {
+          results: [
+            { email: "a@exemplo.test", creation_date: "2026-11-18T10:00:00Z" },
+            {
+              email_address: "b@exemplo.test",
+              created_at: "2026-11-19T09:00:00Z",
+            },
+          ],
+          next: "https://api.buttondown.com/v1/subscribers?page=2",
+        },
+        "https://api.buttondown.com/v1/subscribers?page=2": {
+          results: [{ creation_date: "2026-10-01T00:00:00Z" }, {}],
+        },
+      };
+      const fetchMock = vi.fn(async (url: string) => ({
+        ok: true,
+        json: async () => pages[url],
+      }));
+      vi.stubGlobal("fetch", fetchMock);
+
+      const subs = await fetchSubscribers();
+      expect(subs).toEqual([
+        { email: "a@exemplo.test", createdAt: "2026-11-18T10:00:00Z" },
+        { email: "b@exemplo.test", createdAt: "2026-11-19T09:00:00Z" },
+        { email: "", createdAt: "2026-10-01T00:00:00Z" },
+        { email: "", createdAt: "" },
+      ]);
+      expect(fetchMock.mock.calls[0]?.[1]).toEqual({
+        headers: { Authorization: "Token chave-teste" },
+      });
+
+      const series = await fetchSubscribersSeries(["2026-11-18", "2026-11-19"]);
+      expect(series).toEqual([
+        { key: "2026-11-18", value: 1 },
+        { key: "2026-11-19", value: 1 },
+      ]);
+    });
+
+    it("resposta não-ok devolve o que já foi lido", async () => {
+      process.env.BUTTONDOWN_API_KEY = "chave-teste";
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () => ({ ok: false, json: async () => ({}) })),
+      );
+      expect(await fetchSubscribers()).toEqual([]);
+    });
+
+    it("pagina sem results e falha de rede zeram a série (fail-soft)", async () => {
+      process.env.BUTTONDOWN_API_KEY = "chave-teste";
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () => ({ ok: true, json: async () => ({ next: null }) })),
+      );
+      expect(await fetchSubscribers()).toEqual([]);
+
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () => {
+          throw new Error("rede fora");
+        }),
+      );
+      expect(await fetchSubscribersSeries(["2026-11-19"])).toEqual([
+        { key: "2026-11-19", value: 0 },
+      ]);
+    });
   });
 });

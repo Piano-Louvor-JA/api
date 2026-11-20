@@ -19,7 +19,11 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getFirestore } from "firebase-admin/firestore";
 import { adminAuth } from "../custom/admin.middleware.js";
-import { firebaseAuth } from "../custom/firebase-auth.middleware.js";
+import { optionalAuth } from "../custom/auth.middleware.js";
+import {
+  firebaseAuth,
+  getFirebaseApp,
+} from "../custom/firebase-auth.middleware.js";
 
 // ── Períodos/buckets (paridade com timeseries-buckets.ts do site) ──
 export type Period = "7d" | "30d" | "12m";
@@ -41,7 +45,9 @@ export function buildBuckets(period: Period): string[] {
   const now = new Date();
   if (period === "12m") {
     for (let i = 11; i >= 0; i--) {
-      const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
+      const d = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1),
+      );
       out.push(`${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}`);
     }
   } else {
@@ -51,6 +57,12 @@ export function buildBuckets(period: Period): string[] {
     }
   }
   return out;
+}
+
+/** Menor e maior bucket (chaves ISO ordenam lexicograficamente). */
+function bucketRange(buckets: string[]): [string, string] {
+  const sorted = [...buckets].sort();
+  return [sorted[0] as string, sorted[sorted.length - 1] as string];
 }
 
 /** Match exato para dias, prefixo YYYY-MM para meses. */
@@ -77,13 +89,10 @@ interface Point {
 }
 
 /** Agrega docs diários { day, countries } — soma dos países por bucket. */
-export async function fetchVisitsSeries(
-  buckets: string[],
-): Promise<Point[]> {
+export async function fetchVisitsSeries(buckets: string[]): Promise<Point[]> {
   if (buckets.length === 0) return [];
   const db = await getDb();
-  const first = buckets.reduce((a, b) => (a < b ? a : b));
-  const last = buckets.reduce((a, b) => (a > b ? a : b));
+  const [first, last] = bucketRange(buckets);
   const snap = await db
     .collection("geoStats")
     .where("day", ">=", first)
@@ -101,7 +110,7 @@ export async function fetchVisitsSeries(
     }
     for (const bucket of buckets) {
       if (matchesBucket(bucket, day)) {
-        totals.set(bucket, (totals.get(bucket) ?? 0) + sum);
+        totals.set(bucket, (totals.get(bucket) as number) + sum);
         break;
       }
     }
@@ -119,8 +128,7 @@ export async function fetchDownloadsSeries(
 ): Promise<Point[]> {
   if (buckets.length === 0) return [];
   const db = await getDb();
-  const first = buckets.reduce((a, b) => (a < b ? a : b));
-  const last = buckets.reduce((a, b) => (a > b ? a : b));
+  const [first, last] = bucketRange(buckets);
   const snap = await db
     .collection("downloadSnapshots")
     .where("day", ">=", first)
@@ -200,7 +208,7 @@ export async function fetchSubscribersSeries(
       const day = sub.createdAt.slice(0, 10);
       for (const bucket of buckets) {
         if (matchesBucket(bucket, day)) {
-          totals.set(bucket, (totals.get(bucket) ?? 0) + 1);
+          totals.set(bucket, (totals.get(bucket) as number) + 1);
           break;
         }
       }
@@ -261,7 +269,8 @@ const timeseriesRoute = createRoute({
   },
 });
 
-geoTimeseriesRoutes.use("/timeseries", firebaseAuth, adminAuth);
+// optionalAuth popula c.var.user; sem ele firebaseAuth/adminAuth respondem 401 sempre.
+geoTimeseriesRoutes.use("/timeseries", optionalAuth, firebaseAuth, adminAuth);
 
 geoTimeseriesRoutes.openapi(timeseriesRoute, async (c) => {
   const period = resolvePeriod(c.req.query("period"));

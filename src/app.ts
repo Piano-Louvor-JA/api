@@ -22,8 +22,8 @@ import { categoriesRoutes } from "./v1/categories/categories.routes.js";
 import { communityReviewRoutes } from "./v1/custom/community-review.routes.js";
 import { customRoutes } from "./v1/custom/custom.routes.js";
 import { syncRoutes } from "./v1/custom/sync.routes.js";
-import { geoVisitRoutes } from "./v1/geo/geo-visit.routes.js";
 import { geoTimeseriesRoutes } from "./v1/geo/geo-timeseries.routes.js";
+import { geoVisitRoutes } from "./v1/geo/geo-visit.routes.js";
 // Rotas OpenAPI (V1)
 import { liturgyRoutes } from "./v1/liturgy/liturgy.routes.js";
 import { musicsRoutes } from "./v1/musics/musics.routes.js";
