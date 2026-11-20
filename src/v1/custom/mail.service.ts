@@ -81,7 +81,7 @@ export async function sendResetTokenEmail(
 }
 
 /** Genérico: envia e-mail transacional (html da marca + texto puro). */
-async function sendEmail(
+export async function sendEmail(
   to: string,
   subject: string,
   html: string,
