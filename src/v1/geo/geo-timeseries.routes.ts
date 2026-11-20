@@ -41,7 +41,9 @@ export function buildBuckets(period: Period): string[] {
   const now = new Date();
   if (period === "12m") {
     for (let i = 11; i >= 0; i--) {
-      const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
+      const d = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1),
+      );
       out.push(`${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}`);
     }
   } else {
@@ -77,9 +79,7 @@ interface Point {
 }
 
 /** Agrega docs diários { day, countries } — soma dos países por bucket. */
-export async function fetchVisitsSeries(
-  buckets: string[],
-): Promise<Point[]> {
+export async function fetchVisitsSeries(buckets: string[]): Promise<Point[]> {
   if (buckets.length === 0) return [];
   const db = await getDb();
   const first = buckets.reduce((a, b) => (a < b ? a : b));
