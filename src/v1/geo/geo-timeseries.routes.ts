@@ -19,7 +19,10 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getFirestore } from "firebase-admin/firestore";
 import { adminAuth } from "../custom/admin.middleware.js";
-import { firebaseAuth } from "../custom/firebase-auth.middleware.js";
+import {
+  firebaseAuth,
+  getFirebaseApp,
+} from "../custom/firebase-auth.middleware.js";
 
 // ── Períodos/buckets (paridade com timeseries-buckets.ts do site) ──
 export type Period = "7d" | "30d" | "12m";
