@@ -241,13 +241,6 @@ const adminPatchRoute = createRoute({
   },
 });
 
-function invalidTenantResponse(c: { json: (body: unknown, status: 400) => unknown }) {
-  return c.json(
-    { error: "Tenant inválido", valid_tenants: ["pianolouvorja"] as string[] },
-    400,
-  );
-}
-
 export const membersRoutes = new OpenAPIHono();
 
 membersRoutes.openapi(rosterRoute, async (c) => {

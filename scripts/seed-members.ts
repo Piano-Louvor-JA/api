@@ -13,9 +13,10 @@
  * Uso (server-side, com FIREBASE_SERVICE_ACCOUNT no env):
  *   npx tsx scripts/seed-members.ts
  */
+
+import { createHash } from "node:crypto";
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
-import { createHash } from "node:crypto";
 
 type SeedMember = {
   email: string;
@@ -122,9 +123,7 @@ async function main() {
   const sa =
     typeof serviceAccount === "string" && serviceAccount.trim().startsWith("{")
       ? JSON.parse(serviceAccount)
-      : JSON.parse(
-          Buffer.from(serviceAccount, "base64").toString("utf8"),
-        );
+      : JSON.parse(Buffer.from(serviceAccount, "base64").toString("utf8"));
   if (getApps().length === 0) {
     initializeApp({ credential: cert(sa) });
   }
@@ -158,7 +157,9 @@ async function main() {
     created += 1;
     console.log(`SEED ${member.email} → ${member.roles.join("+")}`);
   }
-  console.log(`\nFIM: ${created} criados, ${preserved} preservados. Nenhum gm atribuído.`);
+  console.log(
+    `\nFIM: ${created} criados, ${preserved} preservados. Nenhum gm atribuído.`,
+  );
 }
 
 main().catch((error) => {
