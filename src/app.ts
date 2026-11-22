@@ -34,6 +34,9 @@ import {
   setPalcoWs,
 } from "./v1/palco/palco.routes.js";
 import { remoteRoutes } from "./v1/remote/remote.routes.js";
+import intakeRoutes from "./v1/tickets/intake.routes.js";
+import kbRoutes from "./v1/tickets/kb.routes.js";
+import ticketsRoutes from "./v1/tickets/tickets.routes.js";
 
 // Rotas compativeis (nao-OpenAPI)
 
@@ -202,6 +205,9 @@ export function createApp() {
   app.route("/v1/palco", palcoRoutes);
   // Atualização do apk Android (manifesto + download), sem auth.
   app.route("/v1/app", appRoutes);
+  app.route("/v1/tickets", ticketsRoutes);
+  app.route("/v1/tickets-intake", intakeRoutes);
+  app.route("/v1/tickets-kb", kbRoutes);
 
   // WT-5a: WS do relay do Palco — mesmo app raiz (requisito do @hono/node-ws)
   setPalcoWs(createNodeWebSocket({ app }));
