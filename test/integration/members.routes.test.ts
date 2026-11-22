@@ -1,12 +1,15 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { Hono } from "hono";
 import type { getFirestore } from "firebase-admin/firestore";
-import { membersRoutes, setMembersRoutesFirestoreForTests } from "../../src/v1/custom/members.routes.js";
+import { Hono } from "hono";
+import { beforeEach, describe, expect, it } from "vitest";
+import {
+  membersRoutes,
+  setMembersRoutesFirestoreForTests,
+} from "../../src/v1/custom/members.routes.js";
 
-type DocData = Record<string, unknown>;
+export type DocData = Record<string, unknown>;
 type FakeDb = ReturnType<typeof getFirestore>;
 
-function fakeFirestore() {
+export function fakeFirestore() {
   const docs = new Map<string, DocData>();
   const db = {
     docs,
@@ -33,9 +36,7 @@ function fakeFirestore() {
               return {
                 async get() {
                   const out = [...docs.entries()]
-                    .filter(
-                      ([, d]) => d[field] === value && d[f2] === v2,
-                    )
+                    .filter(([, d]) => d[field] === value && d[f2] === v2)
                     .map(([id, d]) => ({ id, data: () => d }));
                   return { docs: out, empty: out.length === 0 };
                 },
@@ -47,18 +48,77 @@ function fakeFirestore() {
                 .map(([id, d]) => ({ id, data: () => d }));
               return { docs: out, empty: out.length === 0 };
             },
+            orderBy(_f: string, _dir?: string) {
+              return this;
+            },
+            startAfter(afterId: string) {
+              return {
+                limit(n: number) {
+                  return {
+                    async get() {
+                      const out = [...docs.entries()]
+                        .filter(([, d]) => d[field] === value)
+                        .map(([id, d]) => ({ id, data: () => d }))
+                        .sort((a, b) =>
+                          a.id < b.id ? -1 : a.id > b.id ? 1 : 0,
+                        )
+                        .filter((entry) => entry.id > afterId)
+                        .slice(0, n);
+                      return { docs: out, empty: out.length === 0 };
+                    },
+                  };
+                },
+                async get() {
+                  const out = [...docs.entries()]
+                    .filter(([, d]) => d[field] === value)
+                    .map(([id, d]) => ({ id, data: () => d }))
+                    .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
+                    .filter((entry) => entry.id > afterId);
+                  return { docs: out, empty: out.length === 0 };
+                },
+              };
+            },
+            limit(n: number) {
+              return {
+                async get() {
+                  const out = [...docs.entries()]
+                    .filter(([, d]) => d[field] === value)
+                    .map(([id, d]) => ({ id, data: () => d }))
+                    .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
+                    .slice(0, n);
+                  return { docs: out, empty: out.length === 0 };
+                },
+              };
+            },
           };
         },
-        limit(_n: number) {
-          return {
+        limit(n: number) {
+          type Ctx = {
+            orderByField?: string;
+            startAfterId?: string;
+          };
+          const ctx: Ctx = {};
+          const chain = {
+            orderBy(field: string) {
+              ctx.orderByField = field;
+              return chain;
+            },
+            startAfter(id: string) {
+              ctx.startAfterId = id;
+              return chain;
+            },
             async get() {
-              const out = [...docs.entries()].map(([id, d]) => ({
-                id,
-                data: () => d,
-              }));
+              let out = [...docs.entries()]
+                .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+                .map(([id, d]) => ({ id, data: () => d }));
+              if (ctx.startAfterId) {
+                out = out.filter((entry) => entry.id > ctx.startAfterId!);
+              }
+              out = out.slice(0, n);
               return { docs: out, empty: out.length === 0 };
             },
           };
+          return chain;
         },
       };
     },
@@ -74,7 +134,7 @@ function buildApp() {
 
 const now = new Date("2026-11-20T12:00:00Z");
 
-function seedMember(
+export function seedMember(
   docs: Map<string, DocData>,
   opts: {
     id: string;

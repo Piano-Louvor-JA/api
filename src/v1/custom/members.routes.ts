@@ -1,32 +1,33 @@
-import { createRoute, z } from "@hono/zod-openapi";
-import { OpenAPIHono } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getFirestore } from "firebase-admin/firestore";
-import { adminAuth } from "./admin.middleware.js";
 import { firebaseAuth } from "./firebase-auth.middleware.js";
+import { gmAuth } from "./gm.middleware.js";
 import {
   MEMBER_ROLES,
   MEMBER_STATUSES,
-  memberIdFor,
-  normalizeEmail,
-  toPublicMember,
   type Member,
   type MemberRole,
   type MemberStatus,
+  memberIdFor,
+  normalizeEmail,
+  toPublicMember,
 } from "./members.service.js";
 
-export const tenantHeader = z
-  .string()
-  .optional()
-  .openapi("X-Tenant", {
-    description:
-      "Tenant opcional; ausente resolve pianolouvorja. Inválido retorna 400.",
-  });
+export const tenantHeader = z.string().optional().openapi("X-Tenant", {
+  description:
+    "Tenant opcional; ausente resolve pianolouvorja. Inválido retorna 400.",
+});
 
 const PUBLIC_TENANTS = ["pianolouvorja"] as const;
 
-function resolveTenant(headerValue: string | undefined):
-  | { ok: true; tenant: string }
-  | { ok: false } {
+/** Invariante de domínio: roles únicas (dedupe preservando 1ª ocorrência). */
+function dedupeRoles(roles: MemberRole[]): MemberRole[] {
+  return [...new Set(roles)];
+}
+
+function resolveTenant(
+  headerValue: string | undefined,
+): { ok: true; tenant: string } | { ok: false } {
   if (headerValue === undefined || headerValue === "") {
     return { ok: true, tenant: "pianolouvorja" };
   }
@@ -45,9 +46,11 @@ export function setMembersRoutesFirestoreForTests(
 
 async function getDb(): Promise<ReturnType<typeof getFirestore>> {
   if (firestoreOverride) return firestoreOverride;
-  return getFirestore(await import("./firebase-auth.middleware.js").then(
-    (m) => m.getFirebaseApp(),
-  ));
+  return getFirestore(
+    await import("./firebase-auth.middleware.js").then((m) =>
+      m.getFirebaseApp(),
+    ),
+  );
 }
 
 // ── Schemas ──
@@ -94,12 +97,16 @@ const rosterRoute = createRoute({
   responses: {
     200: {
       content: {
-        "application/json": { schema: z.object({ data: z.array(PublicMemberSchema) }) },
+        "application/json": {
+          schema: z.object({ data: z.array(PublicMemberSchema) }),
+        },
       },
       description: "Roster público aprovado do tenant",
     },
     400: {
-      content: { "application/json": { schema: z.object({ error: z.string() }) } },
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
       description: "Tenant ou role inválido",
     },
   },
@@ -116,27 +123,42 @@ const adminListRoute = createRoute({
       status: StatusQuery.optional(),
       role: RoleQuery.optional(),
       limit: z.coerce.number().int().min(1).max(100).default(50).optional(),
+      cursor: z.string().optional(),
     }),
   },
   responses: {
     200: {
       content: {
         "application/json": {
-          schema: z.object({ data: z.array(AdminMemberSchema) }),
+          schema: z.object({
+            data: z.array(AdminMemberSchema),
+            next_cursor: z.string().nullable(),
+          }),
         },
       },
       description: "Membros do tenant (admin)",
     },
     401: {
-      content: { "application/json": { schema: z.object({ error: z.string() }) } },
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
       description: "Não autenticado",
     },
     403: {
-      content: { "application/json": { schema: z.object({ error: z.string() }) } },
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
       description: "Sem permissão GM",
     },
     400: {
-      content: { "application/json": { schema: z.object({ error: z.string(), valid_tenants: z.array(z.string()) }) } },
+      content: {
+        "application/json": {
+          schema: z.object({
+            error: z.string(),
+            valid_tenants: z.array(z.string()),
+          }),
+        },
+      },
       description: "Tenant inválido",
     },
   },
@@ -172,20 +194,34 @@ const adminCreateRoute = createRoute({
       content: { "application/json": { schema: AdminMemberSchema } },
       description: "Criado",
     },
+    422: {
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
+      description: "Membro aprovado sem role",
+    },
     400: {
-      content: { "application/json": { schema: z.object({ error: z.string() }) } },
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
       description: "Payload/tenant inválido",
     },
     401: {
-      content: { "application/json": { schema: z.object({ error: z.string() }) } },
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
       description: "Não autenticado",
     },
     403: {
-      content: { "application/json": { schema: z.object({ error: z.string() }) } },
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
       description: "Sem permissão GM",
     },
     409: {
-      content: { "application/json": { schema: z.object({ error: z.string() }) } },
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
       description: "Duplicata (tenant,email)",
     },
   },
@@ -227,15 +263,26 @@ const adminPatchRoute = createRoute({
       description: "Atualizado",
     },
     404: {
-      content: { "application/json": { schema: z.object({ error: z.string() }) } },
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
       description: "Não encontrado no tenant",
     },
     422: {
-      content: { "application/json": { schema: z.object({ error: z.string() }) } },
+      content: {
+        "application/json": { schema: z.object({ error: z.string() }) },
+      },
       description: "Transição inválida (ex.: aprovado sem role)",
     },
     400: {
-      content: { "application/json": { schema: z.object({ error: z.string(), valid_tenants: z.array(z.string()) }) } },
+      content: {
+        "application/json": {
+          schema: z.object({
+            error: z.string(),
+            valid_tenants: z.array(z.string()),
+          }),
+        },
+      },
       description: "Tenant inválido",
     },
   },
@@ -271,8 +318,8 @@ membersRoutes.openapi(rosterRoute, async (c) => {
   return c.json({ data }, 200);
 });
 
-membersRoutes.use("/admin/members", firebaseAuth, adminAuth);
-membersRoutes.use("/admin/members/*", firebaseAuth, adminAuth);
+membersRoutes.use("/admin/members", firebaseAuth, gmAuth);
+membersRoutes.use("/admin/members/*", firebaseAuth, gmAuth);
 
 membersRoutes.openapi(adminListRoute, async (c) => {
   const tenant = resolveTenant(c.req.header("X-Tenant"));
@@ -283,19 +330,32 @@ membersRoutes.openapi(adminListRoute, async (c) => {
     );
   }
   const { status, role } = c.req.valid("query");
-  const limit = c.req.valid("query").limit ?? 50;
+  const { limit, cursor } = c.req.valid("query");
+  const effectiveLimit = limit ?? 50;
   const db = await getDb();
-  let query = db
-    .collection("members")
-    .where("tenant_id", "==", tenant.tenant);
+  let query = db.collection("members").where("tenant_id", "==", tenant.tenant);
   if (status) query = query.where("status", "==", status) as typeof query;
-  if (role) query = query.where("roles", "array-contains", role) as typeof query;
-  const snapshot = await query.limit(limit).get();
-  const data = snapshot.docs.map((doc) => ({
+  if (role)
+    query = query.where("roles", "array-contains", role) as typeof query;
+  // Ordenação determinística por doc-id; cursor opaco = base64(doc-id).
+  query = query.orderBy("__name__", "asc") as typeof query;
+  if (cursor) {
+    const startAfter = Buffer.from(cursor, "base64").toString("utf8");
+    query = query.startAfter(startAfter) as typeof query;
+  }
+  const snapshot = await query.limit(effectiveLimit + 1).get();
+  const hasMore = snapshot.docs.length > effectiveLimit;
+  const pageDocs = hasMore
+    ? snapshot.docs.slice(0, effectiveLimit)
+    : snapshot.docs;
+  const data = pageDocs.map((doc) => ({
     id: doc.id,
     ...(doc.data() as unknown as Omit<Member, "id">),
   }));
-  return c.json({ data }, 200);
+  const next_cursor = hasMore
+    ? Buffer.from(pageDocs[pageDocs.length - 1].id).toString("base64")
+    : null;
+  return c.json({ data, next_cursor }, 200);
 });
 
 membersRoutes.openapi(adminCreateRoute, async (c) => {
@@ -323,13 +383,19 @@ membersRoutes.openapi(adminCreateRoute, async (c) => {
     bio: body.bio ?? null,
     github: body.github ?? null,
     since: now,
-    roles: body.roles ?? [],
+    roles: dedupeRoles(body.roles ?? []),
     status: body.status ?? "pendente",
     gm: body.gm ?? false,
     created_at: now,
     updated_at: now,
   };
-  await db.collection("members").doc(id).set(doc as never);
+  if (doc.status === "aprovado" && doc.roles.length === 0) {
+    return c.json({ error: "Membro aprovado exige ao menos uma role" }, 422);
+  }
+  await db
+    .collection("members")
+    .doc(id)
+    .set(doc as never);
   return c.json({ ...doc, id }, 201);
 });
 
@@ -357,8 +423,11 @@ membersRoutes.openapi(adminPatchRoute, async (c) => {
   ) {
     return c.json({ error: "Membro não encontrado" }, 404);
   }
-  const current = { id: snapshot.id, ...(existing as unknown as Omit<Member, "id">) };
-  const nextRoles = body.roles ?? (current.roles as MemberRole[]);
+  const current = {
+    id: snapshot.id,
+    ...(existing as unknown as Omit<Member, "id">),
+  };
+  const nextRoles = dedupeRoles(body.roles ?? (current.roles as MemberRole[]));
   const nextStatus = body.status ?? (current.status as MemberStatus);
   if (nextStatus === "aprovado" && nextRoles.length === 0) {
     return c.json({ error: "Membro aprovado exige ao menos uma role" }, 422);
