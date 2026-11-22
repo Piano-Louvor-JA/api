@@ -105,7 +105,7 @@ describe("gmAuth — gate GM das rotas admin/members", () => {
     expect(res.status).toBe(200);
   });
 
-  it("fail-closed: Firestore quebrado só passa via fallback explícito", async () => {
+  it("fail-closed absoluto: Firestore quebrado → 403 mesmo com ADMIN_EMAILS", async () => {
     const broken = {
       collection() {
         return {
@@ -125,19 +125,19 @@ describe("gmAuth — gate GM das rotas admin/members", () => {
     app.use("*", gmAuth as MiddlewareHandler);
     app.get("/ok", (c) => c.json({ ok: true }));
 
-    // sem fallback → 403 (nunca autoriza pelo erro)
+    // Firestore indisponível: resposta INDETERMINADA → 403 SEMPRE,
+    // mesmo com ADMIN_EMAILS (fail-closed absoluto, PLAN §2.4/§7).
     process.env.ADMIN_EMAILS = "";
     const denied = await app.request("/ok", {
       headers: { ...withUser("x@t.com"), "x-tenant": "pianolouvorja" },
     });
     expect(denied.status).toBe(403);
 
-    // com fallback → 200
     process.env.ADMIN_EMAILS = "x@t.com";
-    const ok = await app.request("/ok", {
+    const deniedComFallback = await app.request("/ok", {
       headers: { ...withUser("x@t.com"), "x-tenant": "pianolouvorja" },
     });
-    expect(ok.status).toBe(200);
+    expect(deniedComFallback.status).toBe(403);
   });
 
   it("cross-tenant: gm:true em outro tenant não autoriza aqui", async () => {

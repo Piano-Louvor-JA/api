@@ -15,7 +15,10 @@ import {
   membersRoutes,
   setMembersRoutesFirestoreForTests,
 } from "../../src/v1/custom/members.routes.js";
-import { memberIdFor } from "../../src/v1/custom/members.service.js";
+import {
+  memberIdFor,
+  setMembersFirestoreForTests,
+} from "../../src/v1/custom/members.service.js";
 import { fakeFirestore } from "./members.routes.test.js";
 
 const stubFirebaseAuth: MiddlewareHandler = async (c, next) => {
@@ -26,6 +29,20 @@ const stubFirebaseAuth: MiddlewareHandler = async (c, next) => {
 function buildApp(): { app: Hono; docs: Map<string, Record<string, unknown>> } {
   const fake = fakeFirestore();
   setMembersRoutesFirestoreForTests(fake as never);
+  setMembersFirestoreForTests(fake as never);
+  const docs = (
+    fake as unknown as { docs: Map<string, Record<string, unknown>> }
+  ).docs;
+  // Gate GM deve usar documento Firestore conclusivo; fallback não mascara
+  // indisponibilidade de autorização (P0 #221).
+  docs.set(memberIdFor("pianolouvorja", "gm@t.com"), {
+    tenant_id: "pianolouvorja",
+    email: "gm@t.com",
+    name: "GM",
+    roles: ["staff"],
+    status: "aprovado",
+    gm: true,
+  });
   const h = new Hono();
   h.use("*", stubFirebaseAuth);
   h.route("/v1/custom", membersRoutes);
@@ -73,7 +90,8 @@ describe("invariantes de domínio — POST/PATCH members", () => {
       }),
     });
     expect(res.status).toBe(422);
-    expect(docs.size).toBe(0);
+    // Só o GM fixture existe; o POST inválido não cria documento.
+    expect(docs.size).toBe(1);
   });
 
   it("PATCH para aprovado com roles vazias → 422 (doc preservado)", async () => {

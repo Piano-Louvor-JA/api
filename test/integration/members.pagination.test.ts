@@ -14,6 +14,10 @@ import {
   setMembersRoutesFirestoreForTests,
 } from "../../src/v1/custom/members.routes.js";
 import {
+  memberIdFor,
+  setMembersFirestoreForTests,
+} from "../../src/v1/custom/members.service.js";
+import {
   type DocData,
   fakeFirestore,
   seedMember,
@@ -36,7 +40,16 @@ describe("GET /admin/members — paginação por cursor", () => {
     const fake = fakeFirestore();
     docs = docsOf(fake);
     setMembersRoutesFirestoreForTests(fake as never);
-    process.env.ADMIN_EMAILS = "gm@t.com"; // fallback autoriza o stub
+    setMembersFirestoreForTests(fake as never);
+    // Autorização conclusiva via Firestore; fallback não autoriza erro P0 #221.
+    seedMember(docs, {
+      id: memberIdFor("pianolouvorja", "gm@t.com"),
+      tenant: "pianolouvorja",
+      email: "gm@t.com",
+      roles: ["staff"],
+      gm: true,
+    });
+    process.env.ADMIN_EMAILS = "";
     const h = new Hono();
     h.use("*", stubFirebaseAuth);
     h.use("*", gmAuth as MiddlewareHandler);
@@ -71,6 +84,7 @@ describe("GET /admin/members — paginação por cursor", () => {
       data: { id: string }[];
       next_cursor: string | null;
     };
+    // 55 membros + GM fixture: primeira página tem 50 e sobra 6.
     expect(b1.data).toHaveLength(50);
     expect(b1.next_cursor).toBeTruthy();
 
@@ -83,12 +97,12 @@ describe("GET /admin/members — paginação por cursor", () => {
       data: { id: string }[];
       next_cursor: string | null;
     };
-    expect(b2.data).toHaveLength(5);
+    expect(b2.data).toHaveLength(6); // 55 membros + GM fixture
     expect(b2.next_cursor).toBeNull();
 
     const ids = [...b1.data, ...b2.data].map((m) => m.id);
-    expect(new Set(ids).size).toBe(55); // sem duplicação
-    expect(ids).toHaveLength(55); // sem salto
+    expect(new Set(ids).size).toBe(56); // 55 + GM fixture, sem duplicação
+    expect(ids).toHaveLength(56); // sem salto
     const sorted = [...ids].sort();
     expect(ids).toEqual(sorted); // ordem determinística por doc-id
   });

@@ -131,17 +131,27 @@ function legacyAdminEmails(): Set<string> {
   );
 }
 
-/** Fail-closed: Firestore indisponível só permite fallback legado explícito. */
+/**
+ * Gate GM: Firestore é a fonte de autorização; o fallback ADMIN_EMAILS é
+ * transitório e só se aplica quando o lookup responde com certeza
+ * (não encontrado / gm:false). Erro de lookup = resposta INDETERMINADA:
+ * fail-closed absoluto (PLAN §2.4/§7) — retorna false mesmo com fallback
+ * configurado, porque indisponibilidade do controle de autorização nunca
+ * pode ser contornada pela env.
+ */
 export async function isGmMember(
   tenantId: string,
   email: string,
 ): Promise<boolean> {
   const normalized = normalizeEmail(email);
+  let lookupConclusive = false;
   try {
     const member = await getMemberByEmail(tenantId, normalized);
+    lookupConclusive = true;
     if (member?.gm === true) return true;
   } catch {
-    // Segue para fallback explícito; nunca autoriza pelo erro.
+    // Firestore indisponível: sem resposta de autorização → fail-closed.
+    return false;
   }
-  return legacyAdminEmails().has(normalized);
+  return lookupConclusive && legacyAdminEmails().has(normalized);
 }
