@@ -105,7 +105,7 @@ describe("migration 028 — central de tickets", () => {
     const count = db2.prepare("SELECT COUNT(*) as c FROM tenants").get() as {
       c: number;
     };
-    expect(count.c).toBe(6); // seeds 027 (piano/classic/flute/violin) + ndaad + z
+    expect(count.c).toBe(7); // seeds 027 (pianolouvorja/piano/classic/flute/violin) + ndaad + z
     expect(
       db2.prepare("SELECT COUNT(*) as c FROM tenants WHERE id = 'z'").get(),
     ).toEqual({ c: 1 });

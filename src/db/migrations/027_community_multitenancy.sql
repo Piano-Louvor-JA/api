@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS tenants (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 INSERT OR IGNORE INTO tenants (id, name) VALUES
+  ('pianolouvorja', 'Comunidade Piano Louvor JA'),
   ('piano',  'LouvorJA PIANO'),
   ('classic','LouvorJA Clássico'),
   ('flute',  'LouvorJA Flute'),

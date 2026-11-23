@@ -26,7 +26,14 @@ describe("tenant middleware", () => {
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toEqual({
       error: "Invalid tenant",
-      valid_tenants: ["classic", "flute", "ndaad", "piano", "violin"],
+      valid_tenants: [
+        "classic",
+        "flute",
+        "ndaad",
+        "piano",
+        "pianolouvorja",
+        "violin",
+      ],
     });
   });
 
