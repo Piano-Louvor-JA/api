@@ -27,20 +27,36 @@
   },
   "overrides": [
     {
-      "includes": ["test/**/*.ts", "src/routes/compat.ts"],
+      "includes": [
+        "test/**/*.ts",
+        "src/routes/compat.ts"
+      ],
       "linter": {
         "rules": {
           "suspicious": {
-            "noExplicitAny": "off"
+            "noExplicitAny": "off",
+            "noExportsInTest": "off"
           }
         }
       }
     },
     {
-      "includes": ["test/fixtures/**"],
-      "linter": { "enabled": false },
-      "formatter": { "enabled": false },
-      "assist": { "actions": { "source": { "organizeImports": "off" } } }
+      "includes": [
+        "test/fixtures/**"
+      ],
+      "linter": {
+        "enabled": false
+      },
+      "formatter": {
+        "enabled": false
+      },
+      "assist": {
+        "actions": {
+          "source": {
+            "organizeImports": "off"
+          }
+        }
+      }
     }
   ]
 }
