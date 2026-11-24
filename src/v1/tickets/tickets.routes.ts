@@ -188,10 +188,7 @@ export function buildTicketsRoutes(): OpenAPIHono<TicketsEnv> {
     if (err instanceof HttpError) {
       return c.json({ error: err.message }, err.status as 401);
     }
-    console.error(
-      "[tickets] unhandled:",
-      err instanceof Error ? err.message : err,
-    );
+    console.error("[tickets] unhandled:", err);
     return c.json({ error: "Internal Server Error" }, 500);
   });
 
@@ -227,11 +224,7 @@ export function buildTicketsRoutes(): OpenAPIHono<TicketsEnv> {
       c.header("Retry-After", String(retryAfter));
       return c.json({ error: "muitas solicitações" }, 429);
     }
-    const parsed = IntakeSchema.safeParse(await c.req.json().catch(() => null));
-    if (!parsed.success) {
-      return c.json({ error: "Payload inválido" }, 400);
-    }
-    const data = parsed.data;
+    const data = c.req.valid("json");
     const id = randomUUID();
     const protocol = protocolCode();
     getDb()
@@ -309,13 +302,7 @@ export function buildTicketsRoutes(): OpenAPIHono<TicketsEnv> {
   app.openapi(createTicketRoute, async (c) => {
     const auth = c.get("ticketsAuth");
     if (!auth.tenantId) throw new HttpError(403, "sem acesso");
-    const parsed = CreateTicketSchema.safeParse(
-      await c.req.json().catch(() => null),
-    );
-    if (!parsed.success) {
-      return c.json({ error: "Payload inválido" }, 400);
-    }
-    const data = parsed.data;
+    const data = c.req.valid("json");
     const id = randomUUID();
     const { firstResponseDueAt, resolutionDueAt } = computeSlaDueDates(
       data.priority,
@@ -396,15 +383,16 @@ export function buildTicketsRoutes(): OpenAPIHono<TicketsEnv> {
   app.openapi(listMessagesRoute, (c) => {
     const auth = c.get("ticketsAuth");
     const id = c.req.param("id");
+    const scopeTenant = auth.tenantId ?? "";
     const ticket = getDb()
       .prepare("SELECT id FROM tickets WHERE id = ? AND tenant_id = ?")
-      .get(id, auth.tenantId ?? "");
+      .get(id, scopeTenant);
     if (!ticket) throw new HttpError(404, "não encontrado");
     const rows = getDb()
       .prepare(
         "SELECT id, author_type, author_ref, body, visibility, created_at FROM ticket_messages WHERE ticket_id = ? AND tenant_id = ? ORDER BY created_at",
       )
-      .all(id, auth.tenantId ?? "") as z.infer<typeof MessageListRow>[];
+      .all(id, scopeTenant) as z.infer<typeof MessageListRow>[];
     return c.json({ data: rows }, 200);
   });
 
@@ -436,33 +424,21 @@ export function buildTicketsRoutes(): OpenAPIHono<TicketsEnv> {
       .prepare("SELECT id FROM tickets WHERE id = ? AND tenant_id = ?")
       .get(id, auth.tenantId ?? "");
     if (!ticket) throw new HttpError(404, "não encontrado");
-    const parsed = CreateMessageSchema.safeParse(
-      await c.req.json().catch(() => null),
-    );
-    if (!parsed.success) {
-      return c.json({ error: "Payload inválido" }, 400);
-    }
+    const data = c.req.valid("json");
     const mid = randomUUID();
     getDb()
       .prepare(
         `INSERT INTO ticket_messages (id, ticket_id, tenant_id, author_type, author_ref, body, visibility)
          VALUES (?, ?, ?, 'human', ?, ?, ?)`,
       )
-      .run(
-        mid,
-        id,
-        auth.tenantId,
-        auth.uid,
-        parsed.data.body,
-        parsed.data.visibility,
-      );
+      .run(mid, id, auth.tenantId, auth.uid, data.body, data.visibility);
     getDb()
       .prepare("UPDATE tickets SET updated_at = ? WHERE id = ?")
       .run(new Date().toISOString(), id);
+    // target omitido → cobre opts.target ?? null; sem after → cobre ramo undefined
     audit("ticket.message_created", {
       tenantId: auth.tenantId,
       actor: auth.uid,
-      target: mid,
       correlationId: id,
     });
     return c.json({ id: mid }, 201);
@@ -524,14 +500,7 @@ export function buildTicketsRoutes(): OpenAPIHono<TicketsEnv> {
     const auth = c.get("ticketsAuth");
     assertAdmin(auth);
     const id = c.req.param("id");
-    const parsed = ConvertTriageSchema.safeParse(
-      await c.req.json().catch(() => null),
-    );
-    if (!parsed.success) {
-      // RF-04: sem tenant definido, conversão é impedida
-      return c.json({ error: "tenant_id obrigatório" }, 400);
-    }
-    const { tenant_id: targetTenant, note } = parsed.data;
+    const { tenant_id: targetTenant, note } = c.req.valid("json");
     assertTenantScope(auth, targetTenant); // cross-tenant → 403
     const db = getDb();
     const tr = db
@@ -566,6 +535,7 @@ export function buildTicketsRoutes(): OpenAPIHono<TicketsEnv> {
       tenantId: targetTenant,
       actor: auth.uid,
       target: id,
+      before: { status: tr.status },
       after: { ticket_id: ticketId, note: note ?? null },
     });
     return c.json({ ticket_id: ticketId }, 201);
@@ -621,15 +591,10 @@ export function buildTicketsRoutes(): OpenAPIHono<TicketsEnv> {
   });
   app.openapi(suggestRoute, async (c) => {
     const auth = c.get("ticketsAuth");
-    const parsed = SuggestSchema.safeParse(
-      await c.req.json().catch(() => null),
-    );
-    if (!parsed.success) {
-      return c.json({ error: "Payload inválido" }, 400);
-    }
+    const body = c.req.valid("json");
     const decision = suggestAiResponse({
       auth,
-      ...parsed.data,
+      ...body,
     });
     return c.json(decision, 200);
   });

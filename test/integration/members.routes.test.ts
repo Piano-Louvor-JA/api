@@ -11,6 +11,69 @@ type FakeDb = ReturnType<typeof getFirestore>;
 
 export function fakeFirestore() {
   const docs = new Map<string, DocData>();
+
+  function matches(
+    d: DocData,
+    filters: { field: string; op: string; value: unknown }[],
+  ): boolean {
+    return filters.every(({ field, op, value }) => {
+      const cur = d[field];
+      if (op === "array-contains") {
+        return Array.isArray(cur) && cur.includes(value);
+      }
+      return cur === value;
+    });
+  }
+
+  function filtered(
+    filters: { field: string; op: string; value: unknown }[],
+  ): { id: string; data: () => DocData }[] {
+    return [...docs.entries()]
+      .filter(([, d]) => matches(d, filters))
+      .map(([id, d]) => ({ id, data: () => d }))
+      .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  }
+
+  function queryChain(
+    filters: { field: string; op: string; value: unknown }[],
+  ) {
+    const state = { startAfterId: undefined as string | undefined };
+    const chain = {
+      where(field: string, op: string, value: unknown) {
+        return queryChain([...filters, { field, op, value }]);
+      },
+      orderBy(_f: string, _dir?: string) {
+        return chain;
+      },
+      startAfter(afterId: string) {
+        state.startAfterId = afterId;
+        return chain;
+      },
+      limit(n: number) {
+        return {
+          async get() {
+            let out = filtered(filters);
+            if (state.startAfterId) {
+              out = out.filter((entry) => entry.id > state.startAfterId!);
+            }
+            return {
+              docs: out.slice(0, n),
+              empty: out.length === 0,
+            };
+          },
+        };
+      },
+      async get() {
+        let out = filtered(filters);
+        if (state.startAfterId) {
+          out = out.filter((entry) => entry.id > state.startAfterId!);
+        }
+        return { docs: out, empty: out.length === 0 };
+      },
+    };
+    return chain;
+  }
+
   const db = {
     docs,
     collection(_name: string) {
@@ -30,67 +93,8 @@ export function fakeFirestore() {
             },
           };
         },
-        where(field: string, _op: string, value: unknown) {
-          return {
-            where(f2: string, _o2: string, v2: unknown) {
-              return {
-                async get() {
-                  const out = [...docs.entries()]
-                    .filter(([, d]) => d[field] === value && d[f2] === v2)
-                    .map(([id, d]) => ({ id, data: () => d }));
-                  return { docs: out, empty: out.length === 0 };
-                },
-              };
-            },
-            async get() {
-              const out = [...docs.entries()]
-                .filter(([, d]) => d[field] === value)
-                .map(([id, d]) => ({ id, data: () => d }));
-              return { docs: out, empty: out.length === 0 };
-            },
-            orderBy(_f: string, _dir?: string) {
-              return this;
-            },
-            startAfter(afterId: string) {
-              return {
-                limit(n: number) {
-                  return {
-                    async get() {
-                      const out = [...docs.entries()]
-                        .filter(([, d]) => d[field] === value)
-                        .map(([id, d]) => ({ id, data: () => d }))
-                        .sort((a, b) =>
-                          a.id < b.id ? -1 : a.id > b.id ? 1 : 0,
-                        )
-                        .filter((entry) => entry.id > afterId)
-                        .slice(0, n);
-                      return { docs: out, empty: out.length === 0 };
-                    },
-                  };
-                },
-                async get() {
-                  const out = [...docs.entries()]
-                    .filter(([, d]) => d[field] === value)
-                    .map(([id, d]) => ({ id, data: () => d }))
-                    .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
-                    .filter((entry) => entry.id > afterId);
-                  return { docs: out, empty: out.length === 0 };
-                },
-              };
-            },
-            limit(n: number) {
-              return {
-                async get() {
-                  const out = [...docs.entries()]
-                    .filter(([, d]) => d[field] === value)
-                    .map(([id, d]) => ({ id, data: () => d }))
-                    .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
-                    .slice(0, n);
-                  return { docs: out, empty: out.length === 0 };
-                },
-              };
-            },
-          };
+        where(field: string, op: string, value: unknown) {
+          return queryChain([{ field, op, value }]);
         },
         limit(n: number) {
           type Ctx = {

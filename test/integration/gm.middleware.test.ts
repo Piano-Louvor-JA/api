@@ -161,4 +161,23 @@ describe("gmAuth — gate GM das rotas admin/members", () => {
     });
     expect(res.status).toBe(400);
   });
+
+  it("X-Tenant ausente ou vazio → default pianolouvorja", async () => {
+    const { app, docs } = buildChainedApp();
+    gmSeed(docs, {
+      tenant: "pianolouvorja",
+      email: "boss@t.com",
+      roles: ["dev"],
+      gm: true,
+    });
+    const semHeader = await app.request("/ok", {
+      headers: { ...withUser("boss@t.com") },
+    });
+    expect(semHeader.status).toBe(200);
+
+    const vazio = await app.request("/ok", {
+      headers: { ...withUser("boss@t.com"), "x-tenant": "" },
+    });
+    expect(vazio.status).toBe(200);
+  });
 });

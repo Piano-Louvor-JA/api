@@ -3,7 +3,10 @@ process.env.TICKETS_AUTH_TEST_MODE = "1";
 
 import { beforeEach, describe, expect, it } from "vitest";
 import { closeDb, getDb, initDb } from "../../src/db/connection.js";
-import { evaluateAutoSend } from "../../src/v1/tickets/tickets.ai.js";
+import {
+  evaluateAutoSend,
+  suggestAiResponse,
+} from "../../src/v1/tickets/tickets.ai.js";
 import type { TicketsAuth } from "../../src/v1/tickets/tickets.auth.js";
 
 const auth = (over: Partial<TicketsAuth> = {}): TicketsAuth => ({
@@ -190,5 +193,64 @@ describe("gate determinístico de autoenvio (SPEC 5.2)", () => {
       )
       .get() as { c: number };
     expect(audit.c).toBeGreaterThanOrEqual(1);
+  });
+
+  it("sem tenant na auth → no_tenant_scope + tenant_not_found", () => {
+    const result = evaluateAutoSend({
+      ...baseInput,
+      auth: auth({
+        tenantId: null,
+        globalOperator: true,
+        role: "global_operator",
+      }),
+    });
+    expect(result.decision).not.toBe("auto_send");
+    expect(result.blockedReasons).toContain("no_tenant_scope");
+    expect(result.blockedReasons).toContain("tenant_not_found");
+  });
+
+  it("tenant inexistente no banco → tenant_not_found", () => {
+    const result = evaluateAutoSend({
+      ...baseInput,
+      auth: auth({ tenantId: "ghost" }),
+    });
+    expect(result.blockedReasons).toContain("tenant_not_found");
+  });
+
+  it("kill switch no registro do tenant → tenant_kill_switch", () => {
+    getDb()
+      .prepare(
+        "UPDATE tenants SET automation_opt_in = 1, automation_kill_switch = 1 WHERE id = 'a'",
+      )
+      .run();
+    const result = evaluateAutoSend(baseInput);
+    expect(result.blockedReasons).toContain("tenant_kill_switch");
+  });
+
+  it("suggestAiResponse sempre exige revisão humana e nunca auto_send", () => {
+    getDb()
+      .prepare("UPDATE tenants SET automation_opt_in = 1 WHERE id = 'a'")
+      .run();
+    const result = suggestAiResponse({
+      auth: auth(),
+      draft: "texto sugerido",
+      confidence: 0.99,
+      category: "faq",
+    });
+    expect(result.requiresHumanReview).toBe(true);
+    expect(result.decision).toBe("draft");
+    expect(result.suggestion).toBe("texto sugerido");
+    expect(result.blockedReasons.length).toBeGreaterThan(0);
+  });
+
+  it("suggestAiResponse com categoria R3 → decision blocked", () => {
+    const result = suggestAiResponse({
+      auth: auth(),
+      draft: "não enviar",
+      confidence: 0.99,
+      category: "financeiro",
+    });
+    expect(result.decision).toBe("blocked");
+    expect(result.blockedReasons).toContain("risk_r3");
   });
 });
