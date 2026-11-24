@@ -3,6 +3,8 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     globals: true,
+    // Runners GitHub são mais lentos (disco/rede); default 5s causava timeouts flaky em /file/* e /json_db/*
+    testTimeout: 15000,
     environment: "node",
     include: ["test/**/*.test.ts"],
     setupFiles: ["test/setup/isolate-bible-cache.ts"],

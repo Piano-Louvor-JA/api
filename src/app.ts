@@ -21,6 +21,7 @@ import { bibleRoutes } from "./v1/bible/bible.routes.js";
 import { categoriesRoutes } from "./v1/categories/categories.routes.js";
 import { communityReviewRoutes } from "./v1/custom/community-review.routes.js";
 import { customRoutes } from "./v1/custom/custom.routes.js";
+import { membersRoutes } from "./v1/custom/members.routes.js";
 import { syncRoutes } from "./v1/custom/sync.routes.js";
 import { geoTimeseriesRoutes } from "./v1/geo/geo-timeseries.routes.js";
 import { geoVisitRoutes } from "./v1/geo/geo-visit.routes.js";
@@ -34,6 +35,8 @@ import {
   setPalcoWs,
 } from "./v1/palco/palco.routes.js";
 import { remoteRoutes } from "./v1/remote/remote.routes.js";
+// Central de Tickets (B1)
+import { buildTicketsRoutes } from "./v1/tickets/tickets.routes.js";
 
 // Rotas compativeis (nao-OpenAPI)
 
@@ -197,11 +200,14 @@ export function createApp() {
   app.route("/v1/custom", customRoutes);
   app.route("/v1/custom", syncRoutes);
   app.route("/v1/custom", communityReviewRoutes);
+  app.route("/v1/custom", membersRoutes);
   app.route("/v1/geo", geoVisitRoutes);
   app.route("/v1/geo", geoTimeseriesRoutes);
   app.route("/v1/palco", palcoRoutes);
   // Atualização do apk Android (manifesto + download), sem auth.
   app.route("/v1/app", appRoutes);
+  // Central de Tickets (B1) — intake público, portal, triagem, KB, IA
+  app.route("/v1/tickets", buildTicketsRoutes());
 
   // WT-5a: WS do relay do Palco — mesmo app raiz (requisito do @hono/node-ws)
   setPalcoWs(createNodeWebSocket({ app }));

@@ -48,7 +48,8 @@ describe("OpenAPI Docs", () => {
     // seasonal-events + GET/PUT weekly-tasks); +1 DELETE /auth/me (exclusão
     // de conta, App Store 5.1.1(v)); +3 bloqueio de usuários (App Store 1.2).
     // SPEC piano-admin-comunidade-moderacao v2.0.0: +1 POST community/review.
-    expect(customOperations).toHaveLength(51);
+    // SPEC comunidade-organica v1.0.0: +4 rotas members (roster + admin CRUD).
+    expect(customOperations).toHaveLength(55);
     for (const operation of customOperations) {
       expect(operation.parameters).toContainEqual(
         expect.objectContaining({ in: "header", name: "X-Tenant" }),
