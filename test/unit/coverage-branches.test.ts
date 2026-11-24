@@ -1,3 +1,6 @@
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import {
   afterAll,
   afterEach,
@@ -15,9 +18,19 @@ import {
 } from "../../src/lib/upstream.js";
 
 describe("unit - connection.ts branches", () => {
+  // DB tmp isolado por arquivo: evita FK race com workers paralelos no DB compartilhado (data/catalog.db)
+  const tmpDir = mkdtempSync(join(tmpdir(), "cov-branches-"));
+  const originalDbPath = process.env.DB_PATH;
+
   afterAll(() => {
     // Restore default DB_PATH
-    delete process.env.DB_PATH;
+    if (originalDbPath === undefined) delete process.env.DB_PATH;
+    else process.env.DB_PATH = originalDbPath;
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  beforeEach(() => {
+    process.env.DB_PATH = join(tmpDir, "cov.db");
   });
 
   it("getDb throws when db not initialized", () => {
