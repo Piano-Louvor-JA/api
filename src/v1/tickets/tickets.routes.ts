@@ -599,5 +599,78 @@ export function buildTicketsRoutes(): OpenAPIHono<TicketsEnv> {
     return c.json(decision, 200);
   });
 
+  // ===== transição de status (RF-05, agent+; SPEC-B1.1 §6.1) =====
+  const StatusSchema = z.enum([
+    "open",
+    "pending",
+    "resolved",
+    "closed",
+    "reopened",
+  ]);
+  const updateStatusRoute = createRoute({
+    method: "patch",
+    path: "/portal/tickets/{id}/status",
+    summary: "Transição de status com reopen (audit)",
+    tags: ["tickets"],
+    request: {
+      params: z.object({ id: z.string() }),
+      body: {
+        content: { "application/json": { schema: StatusSchema } },
+      },
+    },
+    responses: {
+      200: {
+        content: {
+          "application/json": { schema: z.object({ ok: z.boolean() }) },
+        },
+        description: "Atualizado",
+      },
+      ...errorResponses(400, 401, 403, 404),
+    },
+  });
+  app.openapi(updateStatusRoute, (c) => {
+    const auth = c.get("ticketsAuth");
+    const id = c.req.param("id");
+    const status = c.req.valid("json");
+    const db = getDb();
+    const t = db
+      .prepare(
+        "SELECT id, status, tenant_id FROM tickets WHERE id = ? AND tenant_id = ?",
+      )
+      .get(id, auth.tenantId ?? "") as
+      | { id: string; status: string; tenant_id: string }
+      | undefined;
+    if (!t) throw new HttpError(404, "não encontrado");
+    const isReopen =
+      (t.status === "resolved" || t.status === "closed") &&
+      (status === "open" || status === "reopened");
+    if (isReopen) {
+      db.prepare(
+        `UPDATE tickets SET status = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now'),
+         reopened_at = strftime('%Y-%m-%dT%H:%M:%fZ','now'), reopen_count = reopen_count + 1
+         WHERE id = ?`,
+      ).run(status, id);
+      audit("ticket.reopened", {
+        tenantId: t.tenant_id,
+        actor: auth.uid,
+        target: id,
+        before: { status: t.status },
+        after: { status },
+      });
+      return c.json({ ok: true }, 200);
+    }
+    db.prepare(
+      "UPDATE tickets SET status = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id = ?",
+    ).run(status, id);
+    audit("ticket.status_changed", {
+      tenantId: t.tenant_id,
+      actor: auth.uid,
+      target: id,
+      before: { status: t.status },
+      after: { status },
+    });
+    return c.json({ ok: true }, 200);
+  });
+
   return app;
 }
