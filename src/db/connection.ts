@@ -49,7 +49,7 @@ export function initDb(): void {
   }
 
   const files = readdirSync(migrationsDir)
-    .filter((f: string) => f.endsWith(".sql"))
+    .filter((f: string) => f.endsWith(".sql") && !f.endsWith(".down.sql"))
     .sort();
 
   for (const file of files) {
