@@ -28,7 +28,10 @@ import ticketsRoutes from "../../src/v1/tickets/tickets.routes.js";
 
 const U_NDAAD_AGENT = { uid: "uid-b11-agent", email: "agente@ndaad.org" };
 const U_NDAAD_ADMIN = { uid: "uid-b11-admin", email: "admin@ndaad.org" };
-const U_PIANO_ADMIN = { uid: "uid-b11-piano-admin", email: "admin@pianolouvorja.com.br" };
+const U_PIANO_ADMIN = {
+  uid: "uid-b11-piano-admin",
+  email: "admin@pianolouvorja.com.br",
+};
 const U_OTHER_AGENT = { uid: "uid-b11-other-agent", email: "agente@other.com" };
 
 function bearer(token: string): Record<string, string> {
@@ -68,10 +71,14 @@ beforeAll(() => {
   process.env.FIREBASE_SERVICE_ACCOUNT ??= JSON.stringify({ project_id: "t" });
   initDb();
   getDb()
-    .prepare("INSERT OR IGNORE INTO tickets_tenants (id, name) VALUES ('other-co','Other')")
+    .prepare(
+      "INSERT OR IGNORE INTO tickets_tenants (id, name) VALUES ('other-co','Other')",
+    )
     .run();
   getDb()
-    .prepare("INSERT OR IGNORE INTO tickets_tenants (id, name) VALUES ('piano','PIANO')")
+    .prepare(
+      "INSERT OR IGNORE INTO tickets_tenants (id, name) VALUES ('piano','PIANO')",
+    )
     .run();
   seedMembership("ndaad", U_NDAAD_AGENT.uid, "agent");
   seedMembership("ndaad", U_NDAAD_ADMIN.uid, "admin");
@@ -188,7 +195,10 @@ describe("P1-3 KB global só operador global (admin piano)", () => {
     stubUser(U_NDAAD_ADMIN);
     const res = await app.request("/v1/tickets-kb", {
       method: "POST",
-      headers: { "content-type": "application/json", ...bearer("x.y.z-nadmin") },
+      headers: {
+        "content-type": "application/json",
+        ...bearer("x.y.z-nadmin"),
+      },
       body: JSON.stringify({
         slug: "global-indevida-nadmin",
         title: "Global indevida 2",
@@ -203,7 +213,10 @@ describe("P1-3 KB global só operador global (admin piano)", () => {
     stubUser(U_PIANO_ADMIN);
     const res = await app.request("/v1/tickets-kb", {
       method: "POST",
-      headers: { "content-type": "application/json", ...bearer("x.y.z-padmin") },
+      headers: {
+        "content-type": "application/json",
+        ...bearer("x.y.z-padmin"),
+      },
       body: JSON.stringify({
         slug: "global-ok-b11",
         title: "Global ok",
@@ -218,7 +231,10 @@ describe("P1-3 KB global só operador global (admin piano)", () => {
     stubUser(U_NDAAD_ADMIN);
     const res = await app.request("/v1/tickets-kb", {
       method: "POST",
-      headers: { "content-type": "application/json", ...bearer("x.y.z-nadmin") },
+      headers: {
+        "content-type": "application/json",
+        ...bearer("x.y.z-nadmin"),
+      },
       body: JSON.stringify({
         slug: "kb-ndaad-b11",
         title: "KB ndaad",
@@ -242,7 +258,11 @@ describe("P1-4 tickets_messages.tenant_id (migration 037)", () => {
     const t = await app.request("/v1/tickets", {
       method: "POST",
       headers: { "content-type": "application/json", ...bearer("x.y.z-agent") },
-      body: JSON.stringify({ subject: "Msg tenant", message: "m", priority: "P3" }),
+      body: JSON.stringify({
+        subject: "Msg tenant",
+        message: "m",
+        priority: "P3",
+      }),
     });
     const tb = (await t.json()) as { id: number };
     await app.request(`/v1/tickets/${tb.id}/messages`, {
@@ -251,7 +271,9 @@ describe("P1-4 tickets_messages.tenant_id (migration 037)", () => {
       body: JSON.stringify({ body: "primeira resposta" }),
     });
     const msg = getDb()
-      .prepare("SELECT tenant_id FROM tickets_messages WHERE ticket_id=? ORDER BY id DESC")
+      .prepare(
+        "SELECT tenant_id FROM tickets_messages WHERE ticket_id=? ORDER BY id DESC",
+      )
       .get(tb.id) as { tenant_id: string };
     expect(msg.tenant_id).toBe("ndaad");
   });
@@ -261,13 +283,23 @@ describe("P1-4 tickets_messages.tenant_id (migration 037)", () => {
     stubUser(U_OTHER_AGENT);
     const t = await app.request("/v1/tickets?tenant=other-co", {
       method: "POST",
-      headers: { "content-type": "application/json", ...bearer("x.y.z-oagent") },
-      body: JSON.stringify({ subject: "Other ticket", message: "m", priority: "P4" }),
+      headers: {
+        "content-type": "application/json",
+        ...bearer("x.y.z-oagent"),
+      },
+      body: JSON.stringify({
+        subject: "Other ticket",
+        message: "m",
+        priority: "P4",
+      }),
     });
     const tb = (await t.json()) as { id: number };
     await app.request(`/v1/tickets/${tb.id}/messages`, {
       method: "POST",
-      headers: { "content-type": "application/json", ...bearer("x.y.z-oagent") },
+      headers: {
+        "content-type": "application/json",
+        ...bearer("x.y.z-oagent"),
+      },
       body: JSON.stringify({ body: "secreta other" }),
     });
     stubUser(U_NDAAD_AGENT);
@@ -275,7 +307,9 @@ describe("P1-4 tickets_messages.tenant_id (migration 037)", () => {
       headers: bearer("x.y.z-agent"),
     });
     expect(res.status).toBe(404); // cross-tenant: 404 uniforme, sem vazamento
-    const list = await app.request("/v1/tickets", { headers: bearer("x.y.z-agent") });
+    const list = await app.request("/v1/tickets", {
+      headers: bearer("x.y.z-agent"),
+    });
     const lb = (await list.json()) as { items: { id: number }[] };
     expect(lb.items.find((i) => i.id === tb.id)).toBeUndefined();
   });
@@ -363,18 +397,24 @@ describe("P1-6 RF-05 reabertura/escalada + RF-07/08/09 IA kill/audit", () => {
         "UPDATE tickets SET first_response_due_at = datetime('now','-2 hours') WHERE id=?",
       )
       .run(id);
-    const { escalateBreached } = await import("../../src/v1/tickets/escalation.js");
+    const { escalateBreached } = await import(
+      "../../src/v1/tickets/escalation.js"
+    );
     const n = escalateBreached();
     expect(n).toBeGreaterThanOrEqual(1);
     const esc = getDb()
-      .prepare("SELECT reason, tenant_id FROM tickets_escalations WHERE ticket_id=?")
+      .prepare(
+        "SELECT reason, tenant_id FROM tickets_escalations WHERE ticket_id=?",
+      )
       .get(id) as { reason: string; tenant_id: string };
     expect(esc.tenant_id).toBe("ndaad");
     expect(esc.reason).toMatch(/sla|SLA/);
   });
 
   it("autoSendEligible: matriz R0–R3 + sinais", async () => {
-    const { autoSendEligible } = await import("../../src/v1/tickets/ai.policy.js");
+    const { autoSendEligible } = await import(
+      "../../src/v1/tickets/ai.policy.js"
+    );
     const base = {
       tenantOptIn: true,
       globalKill: false,
@@ -396,9 +436,13 @@ describe("P1-6 RF-05 reabertura/escalada + RF-07/08/09 IA kill/audit", () => {
     expect(autoSendEligible({ ...base, tenantKill: true })).toBe(false);
     expect(autoSendEligible({ ...base, reopened: true })).toBe(false);
     expect(autoSendEligible({ ...base, slaCritical: true })).toBe(false);
-    expect(autoSendEligible({ ...base, categoryAllowlisted: false })).toBe(false);
+    expect(autoSendEligible({ ...base, categoryAllowlisted: false })).toBe(
+      false,
+    );
     expect(autoSendEligible({ ...base, confidence: 0.5 })).toBe(false);
-    expect(autoSendEligible({ ...base, approvedSourcesOnly: false })).toBe(false);
+    expect(autoSendEligible({ ...base, approvedSourcesOnly: false })).toBe(
+      false,
+    );
     expect(autoSendEligible({ ...base, noSensitiveData: false })).toBe(false);
   });
 
@@ -406,7 +450,10 @@ describe("P1-6 RF-05 reabertura/escalada + RF-07/08/09 IA kill/audit", () => {
     stubUser(U_PIANO_ADMIN);
     const put = await app.request("/v1/tickets/admin/kill-switch", {
       method: "PUT",
-      headers: { "content-type": "application/json", ...bearer("x.y.z-padmin") },
+      headers: {
+        "content-type": "application/json",
+        ...bearer("x.y.z-padmin"),
+      },
       body: JSON.stringify({ enabled: true, reason: "teste B11" }),
     });
     expect(put.status).toBe(200);
@@ -424,7 +471,10 @@ describe("P1-6 RF-05 reabertura/escalada + RF-07/08/09 IA kill/audit", () => {
     // restore
     await app.request("/v1/tickets/admin/kill-switch", {
       method: "PUT",
-      headers: { "content-type": "application/json", ...bearer("x.y.z-padmin") },
+      headers: {
+        "content-type": "application/json",
+        ...bearer("x.y.z-padmin"),
+      },
       body: JSON.stringify({ enabled: false, reason: "restore" }),
     });
   });
@@ -433,10 +483,15 @@ describe("P1-6 RF-05 reabertura/escalada + RF-07/08/09 IA kill/audit", () => {
     stubUser(U_PIANO_ADMIN);
     await app.request("/v1/tickets/admin/kill-switch", {
       method: "PUT",
-      headers: { "content-type": "application/json", ...bearer("x.y.z-padmin") },
+      headers: {
+        "content-type": "application/json",
+        ...bearer("x.y.z-padmin"),
+      },
       body: JSON.stringify({ enabled: true, reason: "bloqueio teste" }),
     });
-    const { enqueueAutoReplies } = await import("../../src/v1/tickets/ai.policy.js");
+    const { enqueueAutoReplies } = await import(
+      "../../src/v1/tickets/ai.policy.js"
+    );
     const out = enqueueAutoReplies();
     expect(out.enqueued).toBe(0);
     const audit = getDb()
@@ -447,7 +502,10 @@ describe("P1-6 RF-05 reabertura/escalada + RF-07/08/09 IA kill/audit", () => {
     expect(audit.metadata).toContain("kill");
     await app.request("/v1/tickets/admin/kill-switch", {
       method: "PUT",
-      headers: { "content-type": "application/json", ...bearer("x.y.z-padmin") },
+      headers: {
+        "content-type": "application/json",
+        ...bearer("x.y.z-padmin"),
+      },
       body: JSON.stringify({ enabled: false, reason: "restore" }),
     });
   });
@@ -456,7 +514,10 @@ describe("P1-6 RF-05 reabertura/escalada + RF-07/08/09 IA kill/audit", () => {
     stubUser(U_NDAAD_ADMIN);
     const res = await app.request("/v1/tickets/admin/kill-switch", {
       method: "PUT",
-      headers: { "content-type": "application/json", ...bearer("x.y.z-nadmin") },
+      headers: {
+        "content-type": "application/json",
+        ...bearer("x.y.z-nadmin"),
+      },
       body: JSON.stringify({ enabled: true, reason: "indevido" }),
     });
     expect(res.status).toBe(403);

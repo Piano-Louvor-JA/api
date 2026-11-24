@@ -3,8 +3,8 @@
  * Todo acesso escopa por tenantId do contexto (isolamento rígido).
  */
 import { randomBytes } from "node:crypto";
-import type { MiddlewareHandler } from "hono";
 import { OpenAPIHono, z } from "@hono/zod-openapi";
+import type { MiddlewareHandler } from "hono";
 import { getDb } from "../../db/connection.js";
 import { audit } from "./audit.service.js";
 import {
@@ -227,9 +227,17 @@ function createStatusHandler(): MiddlewareHandler<TicketsEnv> {
   };
 }
 
-app.patch("/:id{[0-9]+}/status", requireTicketRole("agent"), createStatusHandler());
+app.patch(
+  "/:id{[0-9]+}/status",
+  requireTicketRole("agent"),
+  createStatusHandler(),
+);
 // Compat: POST aceito na v1 B1 (site B2 usava POST) — mesmo handler
-app.post("/:id{[0-9]+}/status", requireTicketRole("agent"), createStatusHandler());
+app.post(
+  "/:id{[0-9]+}/status",
+  requireTicketRole("agent"),
+  createStatusHandler(),
+);
 
 // --- memberships admin ---
 app.post("/memberships", requireTicketRole("admin"), async (c) => {

@@ -51,7 +51,10 @@ app.post("/", requireTicketRole("agent"), async (c) => {
       status: z.enum(["draft", "published"]).default("draft"),
     })
     .parse(await c.req.json());
-  if (body.scope === "global" && !(u.tenantId === "piano" && u.role === "admin")) {
+  if (
+    body.scope === "global" &&
+    !(u.tenantId === "piano" && u.role === "admin")
+  ) {
     return c.json({ error: "KB global exige operador global" }, 403);
   }
   try {
