@@ -37,11 +37,20 @@ describe("RF-02: error handler global", () => {
 });
 
 describe("RF-03: CORS configurável", () => {
-  it("CORS default permite qualquer origem (compat apps)", async () => {
-    const res = await app.request("/v1/health", {
-      headers: { Origin: "https://example.com" },
+  it("CORS sem env é fail-closed em produção (SPEC-B1.1 §5)", async () => {
+    const prevEnv = process.env.NODE_ENV;
+    const prevCors = process.env.CORS_ORIGINS;
+    delete process.env.CORS_ORIGINS;
+    const { createApp } = await import("../../src/app.js");
+    const prodApp = createApp();
+    const res = await prodApp.request("/v1/health", {
+      headers: { Origin: "https://evil.example" },
     });
-    expect(res.headers.get("access-control-allow-origin")).toBeTruthy();
+    process.env.NODE_ENV = prevEnv;
+    if (prevCors !== undefined) process.env.CORS_ORIGINS = prevCors;
+    expect(res.headers.get("access-control-allow-origin")).not.toBe(
+      "https://evil.example",
+    );
   });
 });
 

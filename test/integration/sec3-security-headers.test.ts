@@ -83,9 +83,18 @@ describe("SEC-3: headers de segurança em todas as rotas", () => {
     // o HTML completo do Scalar); valida-se no smoke pós-deploy (stg/dev).
   });
 
-  it("mantém CORP cross-origin em dev (CORS_ORIGINS=*) para mídia do web/Electron", async () => {
-    const res = await app.request("http://localhost/v1/albums");
-    expect(res.headers.get("cross-origin-resource-policy")).toBe(
+  it("CORS sem env é fail-closed em produção (SPEC-B1.1 §5)", async () => {
+    const prevEnv = process.env.NODE_ENV;
+    const prevCors = process.env.CORS_ORIGINS;
+    delete process.env.CORS_ORIGINS;
+    const { createApp } = await import("../../src/app.js");
+    const prodApp = createApp();
+    const res = await prodApp.request("http://localhost/v1/albums", {
+      headers: { Origin: "https://evil.example" },
+    });
+    process.env.NODE_ENV = prevEnv;
+    if (prevCors !== undefined) process.env.CORS_ORIGINS = prevCors;
+    expect(res.headers.get("cross-origin-resource-policy")).not.toBe(
       "cross-origin",
     );
   });

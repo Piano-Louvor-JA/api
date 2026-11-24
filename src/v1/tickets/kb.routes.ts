@@ -39,7 +39,7 @@ app.get("/:slug", requireTicketRole("client"), (c) => {
   return c.json(row);
 });
 
-// gestão de artigos: agent+
+// gestão de artigos: agent+; global exige operador global (SPEC-B1.1 §3)
 app.post("/", requireTicketRole("agent"), async (c) => {
   const u = c.get("ticketsUser");
   const body = z
@@ -51,6 +51,9 @@ app.post("/", requireTicketRole("agent"), async (c) => {
       status: z.enum(["draft", "published"]).default("draft"),
     })
     .parse(await c.req.json());
+  if (body.scope === "global" && !(u.tenantId === "piano" && u.role === "admin")) {
+    return c.json({ error: "KB global exige operador global" }, 403);
+  }
   try {
     const info = getDb()
       .prepare(

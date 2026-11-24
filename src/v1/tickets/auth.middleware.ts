@@ -70,8 +70,12 @@ export const ticketsAuth: MiddlewareHandler<TicketsEnv> =
 
     const wanted =
       c.req.query("tenant") ?? c.req.header("x-tenant") ?? undefined;
-    const chosen =
-      memberships.find((m) => m.tenant_id === wanted) ?? memberships[0];
+    // SPEC-B1.1 §1.2: tenant explicitamente solicitado e não pertencente à
+    // identidade → 403 (sem fallback silencioso). Default = primeira
+    // membership apenas quando nenhum tenant foi informado.
+    const chosen = wanted
+      ? memberships.find((m) => m.tenant_id === wanted)
+      : memberships[0];
     if (!chosen) return c.json({ error: "Sem acesso ao tenant" }, 403);
 
     c.set("ticketsUser", {

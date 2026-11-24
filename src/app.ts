@@ -55,12 +55,15 @@ export function createApp() {
     return antiBotMiddleware(c, next);
   });
 
-  // RF-03: CORS configurável via CORS_ORIGINS (default * para compat com apps)
-  const corsOrigins = process.env.CORS_ORIGINS ?? "*";
+  // RF-03: CORS configurável via CORS_ORIGINS. Fail-closed (SPEC-B1.1 §5):
+  // sem env em produção → nenhuma origem habilitada; test/dev mantém permissivo.
+  const corsOrigins = process.env.CORS_ORIGINS;
   const corsConfig =
     corsOrigins === "*"
       ? {}
-      : { origin: corsOrigins.split(",").map((o) => o.trim()) };
+      : corsOrigins
+        ? { origin: corsOrigins.split(",").map((o) => o.trim()) }
+        : { origin: () => null };
   app.use("*", cors(corsConfig));
   // SEC-3 (api#124): CSP por rota — a API não serve HTML (default-src 'none'),
   // mas DUAS superfícies servem: /palco (receiver com script inline + WS) e

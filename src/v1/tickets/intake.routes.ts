@@ -108,8 +108,8 @@ app.post("/:id/triage", requireTicketRole("agent"), async (c) => {
     );
   const ticketId = Number(ticketInfo.lastInsertRowid);
   db.prepare(
-    "INSERT INTO tickets_messages (ticket_id, author_type, author_name, body) VALUES (?,?,?,?)",
-  ).run(ticketId, "client", intake.name, intake.message);
+    "INSERT INTO tickets_messages (ticket_id, tenant_id, author_type, author_name, body) VALUES (?,?,?,?,?)",
+  ).run(ticketId, u.tenantId, "client", intake.name, intake.message);
   db.prepare(
     "UPDATE tickets_intake SET status = 'converted', triage_priority = ?, triage_note = ?, triaged_at = datetime('now'), triaged_by_uid = ?, converted_ticket_id = ? WHERE id = ?",
   ).run(body.priority, body.note ?? null, u.uid, ticketId, id);
