@@ -183,6 +183,104 @@ describe("members.service — queries tenant-scoped (estrutural)", () => {
   });
 });
 
+describe("members.service — memberFromDoc / getDb / sort", () => {
+  it("listRoster ignora docs malformados e ordena por nome", async () => {
+    const ff = fakeFirestore();
+    ff.docs.set("bad", {
+      tenant_id: "pianolouvorja",
+      // email ausente → memberFromDoc retorna null
+      name: "Zzz",
+      avatar_url: null,
+      bio: null,
+      github: null,
+      since: 1,
+      roles: ["dev"],
+      status: "aprovado",
+      gm: false,
+    } as MemberDoc);
+    ff.docs.set("ok-b", {
+      tenant_id: "pianolouvorja",
+      email: "b@t.com",
+      name: "Bruno",
+      avatar_url: null,
+      bio: null,
+      github: null,
+      since: 1,
+      roles: ["dev"],
+      status: "aprovado",
+      gm: false,
+    });
+    ff.docs.set("ok-a", {
+      tenant_id: "pianolouvorja",
+      email: "a@t.com",
+      name: "Ana",
+      avatar_url: null,
+      bio: null,
+      github: null,
+      since: 1,
+      roles: ["dev"],
+      status: "aprovado",
+      gm: false,
+    });
+    // doc.data() null → memberFromDoc early-return
+    const baseCollection = ff.collection("members");
+    ff.collection = ((_name: string) => ({
+      ...baseCollection,
+      where(field: string, op: string, value: unknown) {
+        const inner = baseCollection.where(field, op, value);
+        return {
+          where(f2: string, o2: string, v2: unknown) {
+            return {
+              async get() {
+                const snap = await inner.where(f2, o2, v2).get();
+                return {
+                  docs: [
+                    ...snap.docs,
+                    { id: "nullish", data: () => null },
+                    { id: "prim", data: () => "x" },
+                  ],
+                };
+              },
+            };
+          },
+        };
+      },
+    })) as typeof ff.collection;
+
+    const mod = await loadModule();
+    mod.setMembersFirestoreForTests(ff as never);
+    const roster = await mod.listRoster("pianolouvorja", "dev");
+    expect(roster.map((m: { name: string }) => m.name)).toEqual([
+      "Ana",
+      "Bruno",
+    ]);
+  });
+
+  it("getMemberByEmail: doc de outro tenant_id no id → null", async () => {
+    const { createHash } = await import("node:crypto");
+    const ff = fakeFirestore();
+    const id = createHash("sha256")
+      .update("pianolouvorja\0cross@t.com")
+      .digest("hex");
+    ff.docs.set(id, {
+      tenant_id: "outro",
+      email: "cross@t.com",
+      name: "Cross",
+      avatar_url: null,
+      bio: null,
+      github: null,
+      since: 1,
+      roles: ["dev"],
+      status: "aprovado",
+      gm: false,
+    });
+    const mod = await loadModule();
+    mod.setMembersFirestoreForTests(ff as never);
+    expect(
+      await mod.getMemberByEmail("pianolouvorja", "cross@t.com"),
+    ).toBeNull();
+  });
+});
 describe("members.service — gate GM", () => {
   it("isGmMember: gm=true autoriza; gm=false + ADMIN_EMAILS fallback; Firestore falho = fail-closed", async () => {
     const { createHash } = await import("node:crypto");

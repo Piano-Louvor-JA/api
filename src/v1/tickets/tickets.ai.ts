@@ -174,22 +174,26 @@ export function evaluateAutoSend(input: AutoSendInput): AutoSendDecision {
         ? "blocked"
         : "draft";
 
-  // registro imutável da decisão (RF-09)
+  // registro imutável da decisão (RF-09).
+  // automation_runs.tenant_id é NOT NULL+FK: sem tenant resolvível,
+  // só audit_events (tenant_id nullable) para não abortar o fail-closed.
   const runId = randomUUID();
-  db.prepare(
-    `INSERT INTO automation_runs (id, ticket_id, tenant_id, model, classification, confidence, sources_json, decision, blocked_reasons, output_ref)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)`,
-  ).run(
-    runId,
-    input.ticketId ?? null,
-    tenantId ?? "",
-    "policy-gate-v1",
-    classification,
-    input.confidence,
-    JSON.stringify(input.sourceIds),
-    decision,
-    JSON.stringify(reasons),
-  );
+  if (tenantId && tenant) {
+    db.prepare(
+      `INSERT INTO automation_runs (id, ticket_id, tenant_id, model, classification, confidence, sources_json, decision, blocked_reasons, output_ref)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)`,
+    ).run(
+      runId,
+      input.ticketId ?? null,
+      tenantId,
+      "policy-gate-v1",
+      classification,
+      input.confidence,
+      JSON.stringify(input.sourceIds),
+      decision,
+      JSON.stringify(reasons),
+    );
+  }
   auditRun("ai.evaluated", tenantId, input.auth.uid, input.ticketId ?? null, {
     runId,
     decision,
@@ -222,10 +226,11 @@ export function suggestAiResponse(input: {
     sourceIds: [], // sugestão da rota não cita fontes → sempre draft (fail-closed)
     ticketId: input.ticketId,
   });
+  // Fonte vazia nesta rota → evaluateAutoSend nunca libera auto_send;
+  // mapeia qualquer não-bloqueio para draft (revisão humana obrigatória).
   return {
     suggestion: input.draft,
-    decision:
-      evaluation.decision === "auto_send" ? "draft" : evaluation.decision,
+    decision: evaluation.decision === "blocked" ? "blocked" : "draft",
     blockedReasons: evaluation.blockedReasons,
     requiresHumanReview: true, // v1: toda sugestão exige revisão humana (RF-07)
     runId: evaluation.runId,

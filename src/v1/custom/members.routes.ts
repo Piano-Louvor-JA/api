@@ -122,7 +122,7 @@ const adminListRoute = createRoute({
     query: z.object({
       status: StatusQuery.optional(),
       role: RoleQuery.optional(),
-      limit: z.coerce.number().int().min(1).max(100).default(50).optional(),
+      limit: z.coerce.number().int().min(1).max(100).optional(),
       cursor: z.string().optional(),
     }),
   },
@@ -322,18 +322,16 @@ membersRoutes.use("/admin/members", firebaseAuth, gmAuth);
 membersRoutes.use("/admin/members/*", firebaseAuth, gmAuth);
 
 membersRoutes.openapi(adminListRoute, async (c) => {
-  const tenant = resolveTenant(c.req.header("X-Tenant"));
-  if (!tenant.ok) {
-    return c.json(
-      { error: "Tenant inválido", valid_tenants: [...PUBLIC_TENANTS] },
-      400,
-    );
-  }
+  // gmAuth já rejeitou tenant inválido; aqui só normaliza default/ausente.
+  const header = c.req.header("X-Tenant");
+  const tenantId =
+    header === undefined || header === "" ? "pianolouvorja" : header;
   const { status, role } = c.req.valid("query");
   const { limit, cursor } = c.req.valid("query");
-  const effectiveLimit = limit ?? 50;
+  // default(50) no schema OpenAPI; fallback defensivo se ausente
+  const effectiveLimit = typeof limit === "number" ? limit : 50;
   const db = await getDb();
-  let query = db.collection("members").where("tenant_id", "==", tenant.tenant);
+  let query = db.collection("members").where("tenant_id", "==", tenantId);
   if (status) query = query.where("status", "==", status) as typeof query;
   if (role)
     query = query.where("roles", "array-contains", role) as typeof query;
@@ -359,16 +357,13 @@ membersRoutes.openapi(adminListRoute, async (c) => {
 });
 
 membersRoutes.openapi(adminCreateRoute, async (c) => {
-  const tenant = resolveTenant(c.req.header("X-Tenant"));
-  if (!tenant.ok) {
-    return c.json(
-      { error: "Tenant inválido", valid_tenants: [...PUBLIC_TENANTS] },
-      400,
-    );
-  }
+  // gmAuth já rejeitou tenant inválido; aqui só normaliza default/ausente.
+  const header = c.req.header("X-Tenant");
+  const tenantId =
+    header === undefined || header === "" ? "pianolouvorja" : header;
   const body = c.req.valid("json");
   const email = normalizeEmail(body.email);
-  const id = memberIdFor(tenant.tenant, email);
+  const id = memberIdFor(tenantId, email);
   const db = await getDb();
   const existing = await db.collection("members").doc(id).get();
   if (existing.exists) {
@@ -376,7 +371,7 @@ membersRoutes.openapi(adminCreateRoute, async (c) => {
   }
   const now = new Date();
   const doc: Omit<Member, "id"> = {
-    tenant_id: tenant.tenant,
+    tenant_id: tenantId,
     email,
     name: body.name,
     avatar_url: body.avatar_url ?? null,
@@ -400,13 +395,10 @@ membersRoutes.openapi(adminCreateRoute, async (c) => {
 });
 
 membersRoutes.openapi(adminPatchRoute, async (c) => {
-  const tenant = resolveTenant(c.req.header("X-Tenant"));
-  if (!tenant.ok) {
-    return c.json(
-      { error: "Tenant inválido", valid_tenants: [...PUBLIC_TENANTS] },
-      400,
-    );
-  }
+  // gmAuth já rejeitou tenant inválido; aqui só normaliza default/ausente.
+  const header = c.req.header("X-Tenant");
+  const tenantId =
+    header === undefined || header === "" ? "pianolouvorja" : header;
   const { memberId } = c.req.valid("param");
   const body = c.req.valid("json");
   const db = await getDb();
@@ -418,7 +410,7 @@ membersRoutes.openapi(adminPatchRoute, async (c) => {
   // 404 uniforme: inexistente OU de outro tenant (não vaza existência)
   if (
     !existing ||
-    existing.tenant_id !== tenant.tenant ||
+    existing.tenant_id !== tenantId ||
     typeof existing.email !== "string"
   ) {
     return c.json({ error: "Membro não encontrado" }, 404);
