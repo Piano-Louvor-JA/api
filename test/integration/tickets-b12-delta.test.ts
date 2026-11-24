@@ -119,6 +119,27 @@ describe("B1.2 delta: PATCH status + reopen_count", () => {
     );
     expect(res.status).toBe(404);
   });
+
+  it("global_operator (tenantId null) PATCH → 404 sem tenant escopo", async () => {
+    getDb()
+      .prepare(
+        "INSERT INTO tenant_memberships (tenant_id, principal_id, role) VALUES ('a', 'uid-global', 'global_operator')",
+      )
+      .run();
+    const res = await app.request(
+      `/v1/tickets/portal/tickets/${ticketId}/status`,
+      {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json",
+          ...authHeader("uid-global"),
+        },
+        body: JSON.stringify("closed"),
+      },
+    );
+    // ticket existe em tenant 'a' mas global_operator tem tenantId null (?? "")
+    expect(res.status).toBe(404);
+  });
 });
 
 describe("B1.2 delta: escalada P1 SLA", () => {
