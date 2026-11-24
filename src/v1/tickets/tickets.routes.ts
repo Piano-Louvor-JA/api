@@ -634,7 +634,9 @@ export function buildTicketsRoutes(): OpenAPIHono<TicketsEnv> {
     const status = c.req.valid("json");
     const db = getDb();
     const t = db
-      .prepare("SELECT id, status, tenant_id FROM tickets WHERE id = ? AND tenant_id = ?")
+      .prepare(
+        "SELECT id, status, tenant_id FROM tickets WHERE id = ? AND tenant_id = ?",
+      )
       .get(id, auth.tenantId ?? "") as
       | { id: string; status: string; tenant_id: string }
       | undefined;

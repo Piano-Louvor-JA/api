@@ -4,8 +4,8 @@ process.env.TICKETS_AUTH_TEST_MODE = "1";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createApp } from "../../src/app.js";
 import { closeDb, getDb, initDb } from "../../src/db/connection.js";
-import { buildTicketsRoutes } from "../../src/v1/tickets/tickets.routes.js";
 import { escalateBreached } from "../../src/v1/tickets/escalation.js";
+import { buildTicketsRoutes } from "../../src/v1/tickets/tickets.routes.js";
 
 type App = ReturnType<typeof createApp>;
 
@@ -17,9 +17,7 @@ function makeApp(): App {
 
 function seed() {
   const db = getDb();
-  db.prepare(
-    "INSERT INTO tenants (id, name) VALUES ('a', 'Tenant A')",
-  ).run();
+  db.prepare("INSERT INTO tenants (id, name) VALUES ('a', 'Tenant A')").run();
   db.prepare(
     "INSERT INTO tenant_memberships (tenant_id, principal_id, role) VALUES ('a', 'uid-admin', 'admin')",
   ).run();
@@ -44,7 +42,10 @@ describe("B1.2 delta: PATCH status + reopen_count", () => {
     app = makeApp();
     const res = await app.request("/v1/tickets/portal/tickets", {
       method: "POST",
-      headers: { "content-type": "application/json", ...authHeader("uid-admin") },
+      headers: {
+        "content-type": "application/json",
+        ...authHeader("uid-admin"),
+      },
       body: JSON.stringify({
         subject: "Assunto teste",
         description: "Descrição completa do ticket.",
@@ -58,7 +59,10 @@ describe("B1.2 delta: PATCH status + reopen_count", () => {
   it("PATCH resolved → reopened incrementa reopen_count e grava reopened_at + audit", async () => {
     await app.request(`/v1/tickets/portal/tickets/${ticketId}/status`, {
       method: "PATCH",
-      headers: { "content-type": "application/json", ...authHeader("uid-admin") },
+      headers: {
+        "content-type": "application/json",
+        ...authHeader("uid-admin"),
+      },
       body: JSON.stringify("resolved"),
     });
     const res = await app.request(
@@ -74,13 +78,21 @@ describe("B1.2 delta: PATCH status + reopen_count", () => {
     );
     expect(res.status).toBe(200);
     const row = getDb()
-      .prepare("SELECT status, reopen_count, reopened_at FROM tickets WHERE id = ?")
-      .get(ticketId) as { status: string; reopen_count: number; reopened_at: string };
+      .prepare(
+        "SELECT status, reopen_count, reopened_at FROM tickets WHERE id = ?",
+      )
+      .get(ticketId) as {
+      status: string;
+      reopen_count: number;
+      reopened_at: string;
+    };
     expect(row.status).toBe("reopened");
     expect(row.reopen_count).toBe(1);
     expect(row.reopened_at).toBeTruthy();
     const audit = getDb()
-      .prepare("SELECT action FROM audit_events WHERE action = 'ticket.reopened'")
+      .prepare(
+        "SELECT action FROM audit_events WHERE action = 'ticket.reopened'",
+      )
       .get();
     expect(audit).toBeTruthy();
   });
@@ -91,9 +103,7 @@ describe("B1.2 delta: PATCH status + reopen_count", () => {
         "INSERT INTO tenant_memberships (tenant_id, principal_id, role) VALUES ('a', 'uid-x', 'member')",
       )
       .run();
-    getDb()
-      .prepare("INSERT INTO tenants (id, name) VALUES ('b', 'B')")
-      .run();
+    getDb().prepare("INSERT INTO tenants (id, name) VALUES ('b', 'B')").run();
     getDb()
       .prepare(
         "INSERT INTO tenant_memberships (tenant_id, principal_id, role) VALUES ('b', 'uid-b', 'admin')",
@@ -124,7 +134,10 @@ describe("B1.2 delta: escalada P1 SLA", () => {
   it("P1 com first_response vencido e aberto → escalada única + audit", async () => {
     const res = await app.request("/v1/tickets/portal/tickets", {
       method: "POST",
-      headers: { "content-type": "application/json", ...authHeader("uid-admin") },
+      headers: {
+        "content-type": "application/json",
+        ...authHeader("uid-admin"),
+      },
       body: JSON.stringify({
         subject: "Assunto P1",
         description: "Descrição completa do ticket.",
@@ -145,7 +158,9 @@ describe("B1.2 delta: escalada P1 SLA", () => {
       .get(j.id) as { reason: string };
     expect(esc.reason).toContain("breached");
     const audit = getDb()
-      .prepare("SELECT action FROM audit_events WHERE action = 'ticket.escalated'")
+      .prepare(
+        "SELECT action FROM audit_events WHERE action = 'ticket.escalated'",
+      )
       .get();
     expect(audit).toBeTruthy();
   });
