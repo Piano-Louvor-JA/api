@@ -18,6 +18,7 @@ import { compatRoutes } from "./routes/compat.js";
 import { albumsRoutes } from "./v1/albums/albums.routes.js";
 import { appRoutes } from "./v1/app/app.routes.js";
 import { bibleRoutes } from "./v1/bible/bible.routes.js";
+import { catalogRoutes } from "./v1/catalog/catalog.routes.js";
 import { categoriesRoutes } from "./v1/categories/categories.routes.js";
 import { communityReviewRoutes } from "./v1/custom/community-review.routes.js";
 import { customRoutes } from "./v1/custom/custom.routes.js";
@@ -194,6 +195,7 @@ export function createApp() {
   app.route("/", compatRoutes);
 
   app.route("/v1/bible", bibleRoutes);
+  app.route("/v1/catalog", catalogRoutes);
   app.route("/v1/liturgy", liturgyRoutes);
   app.route("/v1/remote", remoteRoutes);
   app.use("/v1/custom/*", tenantMiddleware);
