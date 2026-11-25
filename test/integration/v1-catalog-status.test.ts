@@ -35,7 +35,7 @@ describe("GET /v1/catalog/status", () => {
     expect(body.invite_catalogo).toBe(true);
   });
 
-  it("locale 'es' existe em languages mas não tem catálogo → convite, não erro", async () => {
+  it("locale 'es' com Bíblia no seed → catálogo presente, sem convite", async () => {
     const res = await router.request("/v1/catalog/status?lang=es");
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -43,6 +43,26 @@ describe("GET /v1/catalog/status", () => {
     expect(body.lang).toBe("es");
     expect(body.has_albums).toBe(false);
     expect(body.has_musics).toBe(false);
+    expect(body.has_bible).toBe(true);
+    expect(body.invite_catalogo).toBe(false);
+  });
+
+  it("idioma cadastrado sem álbuns/músicas/Bíblia → convite, não erro", async () => {
+    const { getDb } = await import("../../src/db/connection.js");
+    getDb()
+      .prepare(
+        "INSERT OR IGNORE INTO languages (id_language, name) VALUES (?, ?)",
+      )
+      .run("it", "Italiano");
+
+    const res = await router.request("/v1/catalog/status?lang=it");
+    expect(res.status).toBe(200);
+    const body = await res.json();
+
+    expect(body.lang).toBe("it");
+    expect(body.has_albums).toBe(false);
+    expect(body.has_musics).toBe(false);
+    expect(body.has_bible).toBe(false);
     expect(body.invite_catalogo).toBe(true);
   });
 
