@@ -30,7 +30,9 @@ export const optionalAuth: MiddlewareHandler<CustomAuthEnv> =
        INNER JOIN custom_users cu ON cu.id_user = cs.id_user
        WHERE cs.token_hash = ?`,
       )
-      .get(hashToken(token)) as any;
+      .get(hashToken(token)) as
+      | { id_user: number; email: string; display_name: string }
+      | undefined;
 
     if (session) {
       c.set("user", {
@@ -48,6 +50,11 @@ export const optionalAuth: MiddlewareHandler<CustomAuthEnv> =
  */
 export const requireAuth: MiddlewareHandler<CustomAuthEnv> =
   createMiddleware<CustomAuthEnv>(async (c, next) => {
+    // piano-unified-auth RF-01: usuário já resolvido pelos middlewares globais
+    // (optionalAuth com token opaco OU firebaseAuth com Firebase ID token) —
+    // não revalidar contra custom_sessions, senão todo token Firebase vira 401.
+    if (c.get("user")) return next();
+
     const raw = c.req.header("authorization") ?? "";
     const token = raw.startsWith("Bearer ") ? raw.slice(7) : "";
     if (!token) return c.json({ error: "Não autenticado" }, 401);
@@ -60,7 +67,9 @@ export const requireAuth: MiddlewareHandler<CustomAuthEnv> =
        INNER JOIN custom_users cu ON cu.id_user = cs.id_user
        WHERE cs.token_hash = ?`,
       )
-      .get(hashToken(token)) as any;
+      .get(hashToken(token)) as
+      | { id_user: number; email: string; display_name: string }
+      | undefined;
 
     if (!session) return c.json({ error: "Não autenticado" }, 401);
 

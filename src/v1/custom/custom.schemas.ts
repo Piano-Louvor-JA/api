@@ -10,7 +10,14 @@ export const CustomCollectionSchema = z.object({
   author_name: z.string().nullable().optional(),
   created_at: z.string(),
   updated_at: z.string(),
+  // campos do SELECT * (api#82/#24/#25) — opcionais p/ compat
+  visibility: z.enum(["public", "private"]).optional(),
+  client_uuid: z.string().nullable().optional(),
+  deleted_at: z.number().nullable().optional(),
+  updated_at_ms: z.number().nullable().optional(),
+  is_owner: z.number().optional(),
   musics_count: z.number().optional(),
+  tenant_id: z.string().openapi({ readOnly: true }).optional(),
 });
 
 export const CustomCollectionsListResponseSchema = z.object({
@@ -41,7 +48,8 @@ export const UpdateCustomCollectionSchema = z.object({
 export const CustomMusicSchema = z.object({
   id_music: z.number(),
   id_collection: z.number(),
-  name: z.string(),
+  // 020: name nullable (música pode ser só link p/ hino oficial)
+  name: z.string().nullable(),
   lyric: z.string().nullable(),
   auxiliary_lyric: z.string().nullable(),
   id_file_audio: z.number().nullable(),
@@ -50,6 +58,11 @@ export const CustomMusicSchema = z.object({
   duration: z.number().nullable(),
   // Link p/ hino oficial (null = música própria do usuário)
   official_music_id: z.number().nullable().optional(),
+  // 022/025: ownership e sync
+  owner_id: z.number().nullable().optional(),
+  client_uuid: z.string().nullable().optional(),
+  deleted_at: z.number().nullable().optional(),
+  updated_at_ms: z.number().nullable().optional(),
   created_at: z.string(),
   updated_at: z.string(),
   // Nested
@@ -81,6 +94,9 @@ export const CreateCustomMusicSchema = z
     // Hino oficial da API (link): id_music da tabela musics. Quando presente,
     // a faixa é um atalho — playback/letra resolvem pelo catálogo oficial.
     official_music_id: z.number().int().positive().optional(),
+    // Dedup de imports (app#336 fase 3): uuid v5 determinístico do hash do
+    // conteúdo. Mesmo arquivo do mesmo dono = mesmo uuid = no-op na rota.
+    client_uuid: z.string().min(8).max(64).optional(),
   })
   .refine(
     (v) => v.official_music_id != null || (v.name?.trim().length ?? 0) > 0,
@@ -94,9 +110,10 @@ export const UpdateCustomMusicSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   lyric: z.string().optional(),
   auxiliary_lyric: z.string().optional(),
-  id_file_audio: z.number().optional(),
-  id_file_instrumental: z.number().optional(),
-  id_file_image: z.number().optional(),
+  // SPEC-audio-removal v1.1.0: null explícito REMOVE o vínculo (field ausente mantém).
+  id_file_audio: z.number().nullable().optional(),
+  id_file_instrumental: z.number().nullable().optional(),
+  id_file_image: z.number().nullable().optional(),
   duration: z.number().optional(),
 });
 
@@ -104,15 +121,15 @@ export const UpdateCustomMusicSchema = z.object({
 export const CustomLyricSchema = z.object({
   id_lyric: z.number(),
   id_music: z.number(),
-  lyric: z.string(),
+  lyric: z.string().nullable(),
   aux_lyric: z.string().nullable(),
   id_file_image: z.number().nullable(),
-  time: z.string(),
-  instrumental_time: z.string(),
+  time: z.string().nullable(),
+  instrumental_time: z.string().nullable(),
   show_slide: z.number(),
   order: z.number(),
-  created_at: z.string(),
-  updated_at: z.string(),
+  created_at: z.string().nullable().optional(),
+  updated_at: z.string().nullable().optional(),
   // Nested
   image_url: z.string().nullable().optional(),
   image_position: z.number().nullable().optional(),
@@ -183,7 +200,8 @@ export const AuthResponseSchema = z.object({
   user: z.object({
     id_user: z.number(),
     email: z.string().email(),
-    displayName: z.string(),
+    // custom_users.display_name é nullable — registro pode não informar nome
+    displayName: z.string().nullable(),
   }),
 });
 
@@ -191,6 +209,13 @@ export const MeResponseSchema = z.object({
   user: z.object({
     id_user: z.number(),
     email: z.string().email(),
-    displayName: z.string(),
+    displayName: z.string().nullable(),
   }),
+});
+
+/** Exclusão de conta: a senha atual é obrigatória nas sessões de token opaco
+ * de contas com senha local. Sessões Firebase (ID token) não mandam senha: o
+ * cliente reautentica no Firebase antes de chamar. */
+export const DeleteAccountSchema = z.object({
+  password: z.string().min(1).optional(),
 });

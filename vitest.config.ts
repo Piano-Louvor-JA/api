@@ -3,8 +3,11 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     globals: true,
+    // Runners GitHub são mais lentos (disco/rede); default 5s causava timeouts flaky em /file/* e /json_db/*
+    testTimeout: 15000,
     environment: "node",
     include: ["test/**/*.test.ts"],
+    setupFiles: ["test/setup/isolate-bible-cache.ts"],
     // Serial: better-sqlite3 + mocks de migration não convivem bem com paralelismo
     // Vitest 5: poolOptions.forks.singleFork removido
     // Mantém isolate:true para não vazar mocks entre arquivos

@@ -23,14 +23,17 @@ export type SeasonalEvent = {
 };
 
 /** Evento sazonal ativo agora (multiplicador 1 = sem evento). */
-export function getActiveSeasonalMultiplier(db: DbLike): number {
+export function getActiveSeasonalMultiplier(
+  db: DbLike,
+  tenantId = "piano",
+): number {
   const row = db
     .prepare(
       `SELECT multiplier FROM seasonal_events
-       WHERE active = 1 AND datetime('now') BETWEEN starts_at AND ends_at
+       WHERE active = 1 AND tenant_id = ? AND datetime('now') BETWEEN starts_at AND ends_at
        ORDER BY multiplier DESC LIMIT 1`,
     )
-    .get() as { multiplier: number } | undefined;
+    .get(tenantId) as { multiplier: number } | undefined;
   return row?.multiplier ?? 1;
 }
 
@@ -60,7 +63,9 @@ export function promoteMusicToF(
   officialMusicId: number,
   promotedByUserId: number,
   sendEmail: (to: string, subject: string, body: string) => void,
-): { ok: boolean; error?: string; awardedTo?: number; points?: number } {
+):
+  | { ok: false; error: string; awardedTo?: never; points?: never }
+  | { ok: true; error?: never; awardedTo?: number; points: number } {
   const music = db
     .prepare(
       `SELECT id_music, name, owner_id, official_music_id FROM custom_musics WHERE id_music = ?`,

@@ -99,6 +99,9 @@ export function createRoom(): { code: string; token: string } | null {
       return { code, token: signRoom(code) };
     }
   }
+  // Inalcançável na prática: exigiria 5 colisões seguidas de makeCode
+  // (36^6 ≈ 2.2e9 combinações) — defesa em profundidade p/ loop infinito.
+  /* v8 ignore next -- 5 colisões de randomBytes são estatisticamente impossíveis */
   return null;
 }
 
@@ -125,7 +128,7 @@ export function getRoomToken(code: string): string | null {
 export function joinRoom(
   room: PalcoRoom,
   client: RelayClient,
-): { ok: boolean; error?: string } {
+): { ok: true; error?: never } | { ok: false; error: string } {
   // Reconexão por identidade: se existe client antigo com o MESMO cid (socket
   // morto cujo onClose não rodou — caso real 01/09: web/TV reconectando tomava
   // 4409 e entrava em loop), expulsa o morto e deixa o novo entrar.

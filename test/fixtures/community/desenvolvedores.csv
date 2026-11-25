@@ -1,0 +1,5 @@
+"timestamp","nome","email","bio","github","portfolio","areas","disponibilidade","stack","motivacao","status"
+"2026-11-10T01:06:03.245Z","","invalid","","","","","","","","pendente"
+"2026-11-13T00:01:59.250Z","Dev Exemplo Um ","dev.um@exemplo.test","Bio fictícia de teste, com vírgula, para exercitar o parser.","https://github.com/exemplo-um","","Web/PWA,Mobile (Flutter),TVs/Receiver","Noites e fins de semana ","Stack fictícia: JavaScript, Node.js, ""aspas"" escapadas.","Motivação fictícia.","pendente"
+"2026-11-13T00:12:34.277Z","Dev Exemplo Dois","dev.dois@exemplo.test","Bio fictícia em duas linhas.
+Segunda linha da bio para exercitar quebra de linha entre aspas.","https://github.com/exemplo-dois","","Web/PWA","Noites nos finais de semana","Inteligência artificial.","Motivação fictícia.","pendente"

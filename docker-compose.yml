@@ -10,6 +10,7 @@ services:
     volumes:
       - ./data:/app/data
       - ./media:/app/media
+      - ./media_community:/app/media_community:ro
     env_file:
       - .env
 

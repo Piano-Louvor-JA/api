@@ -1,11 +1,12 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getDb } from "../../db/connection.js";
+import { zodErrorHook } from "../../lib/zodErrorHook.js";
 import {
   CategoriesListResponseSchema,
   CategorySchema,
 } from "./categories.schemas.js";
 
-const categoriesRoutes = new OpenAPIHono();
+const categoriesRoutes = new OpenAPIHono({ defaultHook: zodErrorHook });
 
 // ============================================
 // GET /v1/categories — paridade com /json_db/pt_categories
@@ -58,7 +59,12 @@ categoriesRoutes.openapi(listCategoriesRoute, (c) => {
           AND ct.id_language = ?
         ORDER BY ct."order"`,
       )
-      .all(lang) as any[];
+      .all(lang) as Array<{
+      id_category: number;
+      name: string;
+      slug: string;
+      order: number;
+    }>;
 
     // Para cada categoria, buscar os albums aninhados
     // Traduzido do PHP: com pivot categories_albums (subtitle, order)
@@ -80,7 +86,14 @@ categoriesRoutes.openapi(listCategoriesRoute, (c) => {
             AND al.id_language = ?
           ORDER BY ca."order"`,
         )
-        .all(cat.id_category, lang) as any[];
+        .all(cat.id_category, lang) as Array<{
+        id_album: number;
+        name: string;
+        color: string | null;
+        url_image: string | null;
+        subtitle: string | null;
+        order: number;
+      }>;
 
       return {
         id_category: cat.id_category,
@@ -163,7 +176,9 @@ categoriesRoutes.openapi(getCategoryRoute, (c) => {
         WHERE ct.id_category = ?
           AND ct.id_language = ?`,
       )
-      .get(idCategory, lang) as any;
+      .get(idCategory, lang) as
+      | { id_category: number; name: string; slug: string; order: number }
+      | undefined;
 
     if (!category) {
       return c.json({ error: "Categoria não encontrada" }, 404);
@@ -185,7 +200,14 @@ categoriesRoutes.openapi(getCategoryRoute, (c) => {
           AND al.id_language = ?
         ORDER BY ca."order"`,
       )
-      .all(idCategory, lang) as any[];
+      .all(idCategory, lang) as Array<{
+      id_album: number;
+      name: string;
+      color: string | null;
+      url_image: string | null;
+      subtitle: string | null;
+      order: number;
+    }>;
 
     return c.json(
       {

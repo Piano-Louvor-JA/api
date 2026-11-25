@@ -12,7 +12,7 @@
 import type Database from "better-sqlite3";
 import { fetchUpstream, UpstreamError } from "./upstream.js";
 
-const UPSTREAM = process.env.UPSTREAM_API ?? "https://api.louvorja.com.br";
+const UPSTREAM = process.env.UPSTREAM_API ?? "https://api.louvorja.workers.dev";
 
 /** Flag de controle: desativa o fetch on-miss (default: ligado). */
 export const ON_MISS_ENABLED = (process.env.ON_MISS_FETCH ?? "on") !== "off";
@@ -45,7 +45,7 @@ interface UpstreamMusicDetail {
 function parseFilePath(fullPath: string): { dir: string; file_name: string } {
   const clean = fullPath.replace(/^https?:\/\/[^/]+\//, "");
   const parts = clean.split("/");
-  const file_name = parts.pop() ?? clean;
+  const file_name = parts.pop()!;
   const dir = parts.join("/");
   return { dir, file_name };
 }

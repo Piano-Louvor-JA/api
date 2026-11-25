@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { closeDb, getDb, initDb } from "../../src/db/connection.js";
 import {
+  activeTaskDefs,
   completeWeeklyTask,
   getWeeklyTasksForUser,
   isoWeekKey,
@@ -33,6 +34,11 @@ describe("weekly-tasks.service (F4)", () => {
     const key = isoWeekKey(new Date("2026-09-16T12:00:00Z"));
     expect(key).toMatch(/^\d{4}-W\d{2}$/);
     expect(key).toBe(isoWeekKey(new Date("2026-09-16T12:00:00Z")));
+  });
+
+  it("domingo pertence à semana ISO anterior mesmo na virada do ano", () => {
+    expect(isoWeekKey(new Date("2021-01-03T23:59:59Z"))).toBe("2020-W53");
+    expect(isoWeekKey(new Date("2021-01-04T00:00:00Z"))).toBe("2021-W01");
   });
 
   it("rotação: 3 tarefas por semana, determinísticas por weekKey", () => {
@@ -67,5 +73,24 @@ describe("weekly-tasks.service (F4)", () => {
     expect(tasks).toHaveLength(3);
     const done = tasks.filter((t) => t.done);
     expect(done).toHaveLength(1);
+  });
+
+  it("activeTaskDefs: catch e pool < 3 caem no fallback WEEKLY_TASKS", () => {
+    const broken = {
+      prepare: () => {
+        throw new Error("no table");
+      },
+    };
+    expect(activeTaskDefs(broken as never)).toEqual(WEEKLY_TASKS);
+
+    db.prepare(`DELETE FROM weekly_task_defs`).run();
+    db.prepare(
+      `INSERT INTO weekly_task_defs (id, description, active, sort_order) VALUES (?, ?, 1, 0)`,
+    ).run("only_one", "Única");
+    const small = weeklyTasksFor("2026-W10", db);
+    expect(small).toHaveLength(3);
+    expect(small.every((t) => WEEKLY_TASKS.some((p) => p.id === t.id))).toBe(
+      true,
+    );
   });
 });

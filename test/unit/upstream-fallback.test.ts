@@ -6,7 +6,7 @@ import {
   UpstreamError,
 } from "../../src/lib/upstream.js";
 
-// Fallback em cascata: host primário cai (rede/5xx) -> tenta workers.dev
+// Fallback em cascata: Workers cai (rede/5xx) -> tenta api.louvorja.com.br
 describe("fetchUpstream (fallback host)", () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -18,21 +18,19 @@ describe("fetchUpstream (fallback host)", () => {
     vi.unstubAllGlobals();
   });
 
-  it("monta candidatos: primário primeiro, fallback depois", () => {
+  it("monta candidatos: Workers primeiro, api.louvorja.com.br depois", () => {
     const cands = _candidatesForTest(
-      "https://api.louvorja.com.br/json_db/config",
+      "https://api.louvorja.workers.dev/json_db/config",
     );
     expect(cands).toEqual([
-      "https://api.louvorja.com.br/json_db/config",
       "https://api.louvorja.workers.dev/json_db/config",
+      "https://api.louvorja.com.br/json_db/config",
     ]);
   });
 
   it("URL já no fallback não duplica candidatos", () => {
-    const cands = _candidatesForTest(
-      "https://api.louvorja.workers.dev/json_db/x",
-    );
-    expect(cands).toEqual(["https://api.louvorja.workers.dev/json_db/x"]);
+    const cands = _candidatesForTest("https://api.louvorja.com.br/json_db/x");
+    expect(cands).toEqual(["https://api.louvorja.com.br/json_db/x"]);
   });
 
   it("erro de rede no primário cai pro fallback e retorna 200", async () => {
@@ -43,14 +41,14 @@ describe("fetchUpstream (fallback host)", () => {
       .mockResolvedValueOnce(ok);
     vi.stubGlobal("fetch", fetchMock);
 
-    const p = fetchUpstream("https://api.louvorja.com.br/json_db/x");
+    const p = fetchUpstream("https://api.louvorja.workers.dev/json_db/x");
     await vi.advanceTimersByTimeAsync(3000);
     const res = await p;
 
     expect(res.status).toBe(200);
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect((fetchMock.mock.calls[1] as string[])[0]).toContain(
-      "api.louvorja.workers.dev",
+      "api.louvorja.com.br",
     );
   });
 
@@ -66,7 +64,7 @@ describe("fetchUpstream (fallback host)", () => {
       .mockResolvedValueOnce(new Response("{}", { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
 
-    const p = fetchUpstream("https://api.louvorja.com.br/json_db/x");
+    const p = fetchUpstream("https://api.louvorja.workers.dev/json_db/x");
     // 3 retries no primário (2+4+8s backoff) + throttle calls
     const assertion = p.then((res) => {
       expect(res.status).toBe(200);
@@ -81,7 +79,7 @@ describe("fetchUpstream (fallback host)", () => {
     const fetchMock = vi.fn(async () => new Response("nf", { status: 404 }));
     vi.stubGlobal("fetch", fetchMock);
 
-    const p = fetchUpstream("https://api.louvorja.com.br/json_db/x");
+    const p = fetchUpstream("https://api.louvorja.workers.dev/json_db/x");
     const assertion = p.then(
       () => {
         throw new Error("deveria ter lançado");
@@ -100,7 +98,7 @@ describe("fetchUpstream (fallback host)", () => {
     const fetchMock = vi.fn().mockRejectedValue(new TypeError("fetch failed"));
     vi.stubGlobal("fetch", fetchMock);
 
-    const p = fetchUpstream("https://api.louvorja.com.br/json_db/x");
+    const p = fetchUpstream("https://api.louvorja.workers.dev/json_db/x");
     const assertion = p.then(
       () => {
         throw new Error("deveria ter lançado");

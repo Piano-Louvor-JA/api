@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import type { NodeWebSocket } from "@hono/node-ws";
 import { OpenAPIHono } from "@hono/zod-openapi";
+import { zodErrorHook } from "../../lib/zodErrorHook.js";
 import {
   createRoom,
   getRoom,
@@ -14,7 +15,7 @@ import {
   routeMessage,
 } from "./relay.js";
 
-export const palcoRoutes = new OpenAPIHono();
+export const palcoRoutes = new OpenAPIHono({ defaultHook: zodErrorHook });
 
 let palcoWsRef: NodeWebSocket | null = null;
 
@@ -78,7 +79,7 @@ export function registerPalcoWs(
           };
           const joined = joinRoom(room, client);
           if (!joined.ok) {
-            ws.close(4409, joined.error ?? "join_negado");
+            ws.close(4409, joined.error);
             return;
           }
           state.client = client;

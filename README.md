@@ -1,5 +1,10 @@
 # Piano Louvor JA — API
 
+![CI](https://img.shields.io/github/actions/workflow/status/Piano-Louvor-JA/api/ci.yml?branch=main&label=CI)
+![Release](https://img.shields.io/github/v/release/Piano-Louvor-JA/api?include_prereleases)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Platform](https://img.shields.io/badge/platform-Node%2022%20%7C%20Docker-lightgrey)
+
 REST API for the Louvor JA (Piano) system. Serves hymnal data, albums, musics, lyrics, and bible references with full OpenAPI documentation.
 
 ## Tech Stack

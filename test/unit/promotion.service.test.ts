@@ -108,11 +108,20 @@ describe("promotion.service (F6)", () => {
     expect(dup.ok).toBe(false);
   });
 
+  it("multiplicador sazonal não vaza entre tenants", () => {
+    db.prepare(
+      `INSERT INTO seasonal_events (name, multiplier, starts_at, ends_at, active, tenant_id)
+       VALUES ('Violin Season', 3.0, datetime('now', '-1 day'), datetime('now', '+1 day'), 1, 'violin')`,
+    ).run();
+    expect(getActiveSeasonalMultiplier(db, "violin")).toBe(3);
+    expect(getActiveSeasonalMultiplier(db)).toBe(1);
+  });
+
   it("evento sazonal 2x dobra os pontos da promoção", () => {
     // cria evento ativo 2x
     db.prepare(
-      `INSERT INTO seasonal_events (name, multiplier, starts_at, ends_at, active)
-       VALUES ('SDA Hymnal Season', 2.0, datetime('now', '-1 day'), datetime('now', '+1 day'), 1)`,
+      `INSERT INTO seasonal_events (name, multiplier, starts_at, ends_at, active, tenant_id)
+       VALUES ('SDA Hymnal Season', 2.0, datetime('now', '-1 day'), datetime('now', '+1 day'), 1, 'piano')`,
     ).run();
     expect(getActiveSeasonalMultiplier(db)).toBe(2);
 

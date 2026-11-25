@@ -32,9 +32,9 @@ function seedUserMusic(
   for (const bytes of fileBytes) {
     const f = db
       .prepare(
-        "INSERT INTO files (name, path, type, url, size) VALUES ('f', '/x', 'image', '/x', ?)",
+        "INSERT INTO files (name, path, type, url, size) VALUES ('f', '/x/' || ? || '/' || ?, 'image', '/x/' || ? || '/' || ?, ?)",
       )
-      .run(bytes);
+      .run(String(uid), String(bytes), String(uid), String(bytes), bytes);
     fileIds.push(Number(f.lastInsertRowid));
   }
   const m = db

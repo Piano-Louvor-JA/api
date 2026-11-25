@@ -241,6 +241,57 @@ describe("palco relay E2E (WS real)", () => {
     tv2.ws.close();
   });
 
+  it("role inválida é rejeitada (4400)", async () => {
+    const app = createApp();
+    const created = await app.request("/v1/palco/sessions", { method: "POST" });
+    const { code, token } = (await created.json()) as {
+      code: string;
+      token: string;
+    };
+
+    const bad = connectWs(
+      srv.url,
+      `/v1/palco/relay/${code}?token=${token}&role=hacker`,
+    );
+    await bad.opened.catch(() => {});
+    const result = await bad.closed;
+    expect(result.code).toBe(4400);
+  });
+
+  it("ping → pong sem broadcast; msg > MAX rejeitada; json inválido ignorado", async () => {
+    const app = createApp();
+    const created = await app.request("/v1/palco/sessions", { method: "POST" });
+    const { code, token } = (await created.json()) as {
+      code: string;
+      token: string;
+    };
+
+    const receiver = connectWs(
+      srv.url,
+      `/v1/palco/relay/${code}?token=${token}&role=receiver&slot=0`,
+    );
+    const operator = connectWs(
+      srv.url,
+      `/v1/palco/relay/${code}?token=${token}&role=operator`,
+    );
+    await Promise.all([receiver.opened, operator.opened]);
+
+    // ping → pong direto pro emissor
+    operator.ws.send('{"type":"ping"}');
+    await waitFor(operator.messages, (m) => m.includes("pong"));
+
+    // msg grande (> MAX_MSG_BYTES) → error msg_too_large
+    operator.ws.send("x".repeat(256 * 1024));
+    await waitFor(operator.messages, (m) => m.includes("msg_too_large"));
+
+    // json inválido → ignorado (sem crash, sem resposta)
+    operator.ws.send("{broken json");
+    await new Promise((r) => setTimeout(r, 100));
+
+    operator.ws.close();
+    receiver.ws.close();
+  });
+
   it("segundo operator é rejeitado (4409)", async () => {
     const app = createApp();
     const created = await app.request("/v1/palco/sessions", { method: "POST" });

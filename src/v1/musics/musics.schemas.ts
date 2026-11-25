@@ -52,9 +52,12 @@ const LyricDetailSchema = z.object({
     .string()
     .nullable()
     .openapi({ example: "/images/hasd_132B.jpg" }),
-  image_position: z.number().nullable().openapi({ example: null }),
-  time: z.string().openapi({ example: "00:00:08" }),
-  instrumental_time: z.string().openapi({ example: "00:00:08" }),
+  image_position: z
+    .union([z.string(), z.number()])
+    .nullable()
+    .openapi({ example: null }),
+  time: z.string().nullable().openapi({ example: "00:00:08" }),
+  instrumental_time: z.string().nullable().openapi({ example: "00:00:08" }),
   show_slide: z.union([z.literal(0), z.literal(1)]).openapi({ example: 1 }),
   order: z.number().openapi({ example: 1 }),
 });
@@ -68,7 +71,10 @@ export const MusicDetailSchema = z.object({
     .string()
     .nullable()
     .openapi({ example: "/images/hasd_132B.jpg" }),
-  image_position: z.number().nullable().openapi({ example: null }),
+  image_position: z
+    .union([z.string(), z.number()])
+    .nullable()
+    .openapi({ example: null }),
   url_music: z.string().nullable().openapi({
     example: "/musics/pt/1992 - Brilha Jesus/Nosso Sol É Jesus.mp3",
   }),

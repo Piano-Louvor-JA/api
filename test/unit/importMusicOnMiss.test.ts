@@ -3,9 +3,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import Database from "better-sqlite3";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { importMusicById } from "../../src/lib/importMusicOnMiss";
+import { importMusicById } from "../../src/lib/importMusicOnMiss.js";
 
-vi.mock("../../src/lib/upstream", () => ({
+vi.mock("../../src/lib/upstream.js", () => ({
   UpstreamError: class extends Error {
     status: number;
     constructor(msg: string, status: number) {
@@ -80,6 +80,29 @@ beforeEach(() => {
 });
 
 describe("importMusicById (fetch on-miss)", () => {
+  it("preserva áudio sem duração e estrofe vazia vindos do upstream", async () => {
+    const upstream = await import("../../src/lib/upstream.js");
+    vi.mocked(upstream.fetchUpstream).mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          id_music: 7788,
+          name: "Áudio sem metadados",
+          url_music: "https://files.louvorja.com.br/no-duration.mp3",
+          lyric: [{ lyric: "" }],
+        }),
+      ),
+    );
+    expect(await importMusicById(7788, db)).toBe(true);
+    expect(
+      db
+        .prepare("SELECT duration FROM files WHERE url = ?")
+        .get("https://files.louvorja.com.br/no-duration.mp3"),
+    ).toEqual({ duration: null });
+    expect(
+      db.prepare("SELECT lyric, time FROM lyrics WHERE id_music = 7788").get(),
+    ).toEqual({ lyric: "", time: "00:00:00" });
+  });
+
   it("importa musica inexistente: musics + files + lyrics", async () => {
     const ok = await importMusicById(9999, db);
     expect(ok).toBe(true);
@@ -125,4 +148,39 @@ describe("importMusicById (fetch on-miss)", () => {
     expect(files.n).toBe(2);
     expect(lyrics.n).toBe(1);
   });
+});
+
+it("importa imagens e estrofe sem identificador opcional", async () => {
+  const upstream = await import("../../src/lib/upstream.js");
+  vi.mocked(upstream.fetchUpstream).mockResolvedValueOnce(
+    new Response(
+      JSON.stringify({
+        id_music: 7777,
+        name: "Optional media",
+        url_image: "https://files.louvorja.com.br/optional.jpg",
+        lyric: [
+          {
+            lyric: "Verse",
+            url_image: "https://files.louvorja.com.br/verse.jpg",
+          },
+        ],
+      }),
+    ),
+  );
+  expect(await importMusicById(7777, db)).toBe(true);
+  expect(
+    db
+      .prepare(
+        "SELECT image_position FROM files WHERE url LIKE '%optional.jpg'",
+      )
+      .get(),
+  ).toEqual({ image_position: null });
+  const verse = db
+    .prepare(
+      "SELECT id_lyric,lyric,id_file_image FROM lyrics WHERE id_music=7777",
+    )
+    .get() as any;
+  expect(verse.id_lyric).toBeGreaterThan(0);
+  expect(verse.lyric).toBe("Verse");
+  expect(verse.id_file_image).toBeGreaterThan(0);
 });

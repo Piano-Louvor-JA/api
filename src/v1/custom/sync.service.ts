@@ -64,11 +64,33 @@ export const CustomSyncCollectionSchema = z.object({
   deleted_at: z.number().int().nonnegative().nullable().optional(),
 });
 
+// ── Sync v2 (app#336): estado do operador ──────────────────────────────
+// Namespaces: liturgy | scheduled | stage | timer | prefs — payload é
+// JSON opaco pro servidor (o servidor só aplica LWW, nunca interpreta).
+export const OPERATOR_NAMESPACES = [
+  "liturgy",
+  "scheduled",
+  "stage",
+  "timer",
+  "prefs",
+] as const;
+
+export const OperatorStateSchema = z.object({
+  client_uuid: z.string().min(8).max(64),
+  namespace: z.enum(OPERATOR_NAMESPACES),
+  key: z.string().min(1).max(200),
+  value_json: z.string().max(1_000_000),
+  updated_at: z.number().int().nonnegative(),
+  deleted_at: z.number().int().nonnegative().nullable().optional(),
+});
+
 export const SyncRequestSchema = z.object({
   collections: z.array(CustomSyncCollectionSchema).max(500),
+  operator_state: z.array(OperatorStateSchema).max(500).optional(),
 });
 
 export type SyncRequest = z.infer<typeof SyncRequestSchema>;
+export type OperatorStateItem = z.infer<typeof OperatorStateSchema>;
 export type SyncCollection = z.infer<typeof CustomSyncCollectionSchema>;
 export type SyncMusic = z.infer<typeof CustomSyncMusicSchema>;
 
@@ -124,14 +146,28 @@ function nowMs(): number {
 function loadServerCollections(
   db: ReturnType<typeof getDb>,
   userId: number,
+  tenantId: string,
 ): SyncResultCollection[] {
   const cols = db
     .prepare(
       `SELECT cc.* FROM custom_collections cc
-       WHERE cc.deleted_at IS NULL AND (cc.owner_id = ? OR cc.owner_id IS NULL)
+       WHERE cc.deleted_at IS NULL AND cc.tenant_id = ?
+         AND (cc.owner_id = ? OR cc.owner_id IS NULL)
        ORDER BY cc.id_collection`,
     )
-    .all(userId) as any[];
+    .all(tenantId, userId) as Array<{
+    id_collection: number;
+    client_uuid: string;
+    name: string;
+    description: string | null;
+    author_name: string | null;
+    owner_id: number | null;
+    created_at: number;
+    updated_at: number;
+    updated_at_ms: number | null;
+    deleted_at: number | null;
+    visibility: string;
+  }>;
 
   return cols.map((col) => {
     const musics = db
@@ -139,7 +175,22 @@ function loadServerCollections(
         `SELECT * FROM custom_musics
          WHERE id_collection = ? AND deleted_at IS NULL ORDER BY id_music`,
       )
-      .all(col.id_collection) as any[];
+      .all(col.id_collection) as Array<{
+      id_music: number;
+      id_collection: number;
+      client_uuid: string;
+      name: string;
+      official_music_id: number | null;
+      duration: number | null;
+      lyric: string | null;
+      auxiliary_lyric: string | null;
+      id_file_audio: number | null;
+      id_file_instrumental: number | null;
+      id_file_image: number | null;
+      owner_id: number | null;
+      updated_at_ms: number | null;
+      deleted_at: number | null;
+    }>;
 
     return {
       client_uuid: col.client_uuid ?? null,
@@ -178,6 +229,7 @@ function loadServerCollections(
 function applyCollection(
   db: ReturnType<typeof getDb>,
   userId: number,
+  tenantId: string,
   incoming: SyncCollection,
   applied: { created: number; updated: number },
   conflicts: Array<{ client_uuid: string; resolution: string }>,
@@ -187,9 +239,20 @@ function applyCollection(
       `SELECT cc.*, u.id_user as owner_matched
        FROM custom_collections cc
        LEFT JOIN custom_users u ON u.id_user = cc.owner_id
-       WHERE cc.client_uuid = ?`,
+       WHERE cc.client_uuid = ? AND cc.tenant_id = ?`,
     )
-    .get(incoming.client_uuid) as any;
+    .get(incoming.client_uuid, tenantId) as
+    | {
+        id_collection: number;
+        client_uuid: string;
+        name: string;
+        description: string | null;
+        author_name: string | null;
+        owner_id: number | null;
+        updated_at_ms: number | null;
+        deleted_at: number | null;
+      }
+    | undefined;
 
   if (!existing) {
     // criação — mas se algum tombstone existia com esse uuid (purgado?) não há
@@ -198,8 +261,8 @@ function applyCollection(
     const r = db
       .prepare(
         `INSERT INTO custom_collections
-           (name, description, author_name, owner_id, client_uuid, deleted_at, updated_at_ms)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+           (name, description, author_name, owner_id, client_uuid, deleted_at, updated_at_ms, tenant_id)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         incoming.name,
@@ -209,11 +272,12 @@ function applyCollection(
         incoming.client_uuid,
         incoming.deleted_at ?? null,
         incoming.deleted_at ?? incoming.updated_at,
+        tenantId,
       );
     const idCol = Number(r.lastInsertRowid);
     applied.created++;
     for (const m of incoming.musics ?? []) {
-      applyMusic(db, userId, idCol, m, applied, conflicts);
+      applyMusic(db, userId, tenantId, idCol, m, applied, conflicts);
     }
     return;
   }
@@ -259,6 +323,7 @@ function applyCollection(
       applyMusic(
         db,
         userId,
+        tenantId,
         existing.id_collection,
         mIncoming,
         applied,
@@ -276,14 +341,29 @@ function applyCollection(
 function applyMusic(
   db: ReturnType<typeof getDb>,
   userId: number,
+  tenantId: string,
   collectionId: number,
   incoming: SyncMusic,
   applied: { created: number; updated: number },
   conflicts: Array<{ client_uuid: string; resolution: string }>,
 ): void {
   const existing = db
-    .prepare(`SELECT * FROM custom_musics WHERE client_uuid = ?`)
-    .get(incoming.client_uuid) as any;
+    .prepare(
+      `SELECT cm.* FROM custom_musics cm
+       INNER JOIN custom_collections cc ON cc.id_collection = cm.id_collection
+       WHERE cm.client_uuid = ? AND cc.tenant_id = ?`,
+    )
+    .get(incoming.client_uuid, tenantId) as
+    | {
+        id_music: number;
+        id_collection: number;
+        client_uuid: string;
+        name: string | null;
+        owner_id: number | null;
+        updated_at_ms: number | null;
+        deleted_at: number | null;
+      }
+    | undefined;
 
   if (!existing) {
     const t = incoming.deleted_at ?? incoming.updated_at;
@@ -376,19 +456,118 @@ function replaceLyrics(
   }
 }
 
-export function runSync(userId: number, body: SyncRequest) {
+export function runSync(userId: number, body: SyncRequest, tenantId = "piano") {
   const db = getDb();
   const applied = { created: 0, updated: 0 };
   const conflicts: Array<{ client_uuid: string; resolution: string }> = [];
 
   for (const col of body.collections) {
-    applyCollection(db, userId, col, applied, conflicts);
+    applyCollection(db, userId, tenantId, col, applied, conflicts);
+  }
+
+  if (body.operator_state?.length) {
+    applyOperatorState(db, userId, body.operator_state, applied, conflicts);
   }
 
   return {
     server_time: nowMs(),
     applied,
     conflicts,
-    collections: loadServerCollections(db, userId),
+    collections: loadServerCollections(db, userId, tenantId),
+    ...(body.operator_state !== undefined
+      ? { operator_state: loadServerOperatorState(db, userId) }
+      : {}),
   };
+}
+
+/**
+ * LWW do estado do operador (sync v2). Mesma semântica das coletâneas:
+ * client vence por updated_at_ms; tombstone nunca ressuscita.
+ */
+function applyOperatorState(
+  db: ReturnType<typeof getDb>,
+  userId: number,
+  items: OperatorStateItem[],
+  applied: { created: number; updated: number },
+  conflicts: Array<{ client_uuid: string; resolution: string }>,
+): boolean {
+  const insert = db.prepare(`
+    INSERT INTO operator_state
+      (id_user, namespace, key, value_json, client_uuid, updated_at_ms, deleted_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `);
+  const update = db.prepare(`
+    UPDATE operator_state
+       SET namespace = ?, key = ?, value_json = ?, updated_at_ms = ?, deleted_at = ?
+     WHERE client_uuid = ?
+  `);
+
+  for (const item of items) {
+    const existing = db
+      .prepare(`SELECT * FROM operator_state WHERE client_uuid = ?`)
+      .get(item.client_uuid) as
+      | { updated_at_ms: number; deleted_at: number | null }
+      | undefined;
+
+    if (!existing) {
+      insert.run(
+        userId,
+        item.namespace,
+        item.key,
+        item.value_json,
+        item.client_uuid,
+        item.updated_at,
+        item.deleted_at ?? null,
+      );
+      applied.created += 1;
+      continue;
+    }
+
+    if (item.updated_at > existing.updated_at_ms) {
+      update.run(
+        item.namespace,
+        item.key,
+        item.value_json,
+        item.updated_at,
+        item.deleted_at ?? null,
+        item.client_uuid,
+      );
+      applied.updated += 1;
+    } else {
+      conflicts.push({
+        client_uuid: item.client_uuid,
+        resolution: "server_wins",
+      });
+    }
+  }
+  return true;
+}
+
+function loadServerOperatorState(
+  db: ReturnType<typeof getDb>,
+  userId: number,
+): Array<{
+  client_uuid: string;
+  namespace: string;
+  key: string;
+  value_json: string;
+  updated_at_ms: number;
+  deleted_at: number | null;
+}> {
+  return (
+    db
+      .prepare(
+        `SELECT client_uuid, namespace, key, value_json, updated_at_ms, deleted_at
+         FROM operator_state
+         WHERE id_user = ? AND deleted_at IS NULL`,
+      )
+      .all(userId) as Array<{
+      client_uuid: string;
+      namespace: string;
+      key: string;
+      value_json: string;
+      updated_at_ms: number;
+      deleted_at: number | null;
+    }>
+  ).map((row) => ({ ...row }));
 }

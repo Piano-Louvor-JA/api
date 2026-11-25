@@ -1,30 +1,49 @@
-## Resumo
+<!--
+  PR Template — pianolouvorja/api
+  Base: SEMPRE `staging` (DEPLOY.md). main só via PR de staging.
+  Uma PR única quando a funcionalidade INTEIRA estiver pronta (F0..F5) — NÃO uma PR por fase.
+  Commits por fase dentro da branch feat/...
+-->
 
-<!-- O que mudou e por quê? -->
+## 📋 Descrição
+<!-- O que muda e por quê. Link para issue/spec se houver. -->
 
-## Tipo
+## ✅ Checklist de Qualidade (obrigatório)
+- [ ] `npm run lint` passa
+- [ ] `npm run typecheck` passa
+- [ ] `npm run test` passa (cobertura ≥ threshold)
+- [ ] `npm run build` passa
+- [ ] Docker build + smoke test passam
+- [ ] **Evidência de Regressão** preenchida abaixo
 
-- [ ] Correção
-- [ ] Feature
-- [ ] Refactor
-- [ ] Documentação
-- [ ] CI / infraestrutura
-- [ ] Segurança
+## 🔁 Evidência de Regressão (obrigatório — anti-regressão)
+| Métrica | Baseline (staging) | Pós-mudança (esta PR) |
+|---------|-------------------|----------------------|
+| Testes passed | | |
+| Testes failed | | |
+| Typecheck | OK / FAIL | OK / FAIL |
+| Build | OK / FAIL | OK / FAIL |
 
-## Validação
+**Como obter:**
+```bash
+# 1. Em staging (baseline)
+git checkout staging && git pull
+npm run test:regression -- --baseline
 
-- [ ] Testes relevantes passam
-- [ ] Analyze/lint/typecheck passam
-- [ ] Build relevante passa
-- [ ] Fluxo manual foi testado quando há UI
-- [ ] Sem segredo, credencial ou dado pessoal no diff
+# 2. Na branch da PR (comparação)
+git checkout feat/sua-branch
+npm run test:regression -- --compare
+```
+Cole os números acima. Se houver regressão → **PR não passa no CI** (gate `regression-gate`).
 
-## Evidência
+## 🎯 Consumidores impactados (paridade api↔app↔web↔APK)
+- [ ] Nenhum (mudança isolada)
+- [ ] `pianolouvorja/app` (desktop Electron) — endpoints: ____
+- [ ] `pianolouvorja/web` (Vue 3) — endpoints: ____
+- [ ] `pianolouvorja/apk` (Flutter) — endpoints: ____
+- [ ] Outro: ____
 
-<!-- Screenshots, logs, vídeo, ou N/A. -->
-
-## Risco / rollback
-
-<!-- Impacto, compatibilidade e como reverter; ou N/A. -->
-
-Closes #
+## 🧪 Como testar localmente
+```bash
+# passos para reproduzir/validar
+```

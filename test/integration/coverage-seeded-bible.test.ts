@@ -1,6 +1,7 @@
 import { existsSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { resolveBibleCacheDir } from "../../src/lib/bibleCacheDir.js";
 import { setupSeededDb } from "../helpers/seeded-db.js";
 
 describe("coverage seeded — bible proxy", () => {
@@ -17,7 +18,7 @@ describe("coverage seeded — bible proxy", () => {
   });
 
   it("bible_1_50_1 via cache local e 502 quando upstream falha", async () => {
-    const cacheDir = join(process.cwd(), "data", "bible_cache");
+    const cacheDir = resolveBibleCacheDir();
     const cacheFile = join(cacheDir, "bible_1_50_1.json");
     const { mkdirSync } = await import("node:fs");
     mkdirSync(cacheDir, { recursive: true });

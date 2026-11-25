@@ -283,7 +283,7 @@ it("delete de coleção com música SEM updated_at próprio (herda ts do delete)
   db.prepare(
     "INSERT INTO custom_musics (id_collection, name, owner_id, client_uuid, updated_at_ms) VALUES (?,?,?,?,2)",
   ).run(colId, "inhm", uid, "inh-mus");
-  const res = runSync(uid, {
+  const _res = runSync(uid, {
     last_sync_at: 0,
     collections: [
       {

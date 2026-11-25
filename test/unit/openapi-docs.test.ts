@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createApp } from "../../src/app.js";
 
 describe("OpenAPI Docs", () => {
@@ -23,6 +23,44 @@ describe("OpenAPI Docs", () => {
     expect(res.headers.get("content-type")).toContain("text/html");
   });
 
+  it("documents X-Tenant for every custom operation and tenant_id as read-only", async () => {
+    const res = await app.request("/openapi.json");
+    const body = await res.json();
+    const customOperations = Object.values(
+      body.paths as Record<string, Record<string, unknown>>,
+    )
+      .flatMap((pathItem) =>
+        Object.entries(pathItem).filter(([method]) =>
+          ["delete", "get", "patch", "post", "put"].includes(method),
+        ),
+      )
+      .filter(([, operation]) =>
+        (operation as { tags?: string[] }).tags?.includes("custom"),
+      )
+      .map(([, operation]) => operation as { parameters?: unknown[] });
+    const collectionGet = body.paths["/v1/custom/collections"].get;
+    const collectionSchema =
+      collectionGet.responses["200"].content["application/json"].schema
+        .properties.data.items;
+    const tenantSchema = body.components.schemas["X-Tenant"];
+
+    // SPEC piano-admin-panel v1.1.0: +6 rotas admin (GET/POST/PUT/DELETE
+    // seasonal-events + GET/PUT weekly-tasks); +1 DELETE /auth/me (exclusão
+    // de conta, App Store 5.1.1(v)); +3 bloqueio de usuários (App Store 1.2).
+    // SPEC piano-admin-comunidade-moderacao v2.0.0: +1 POST community/review.
+    // SPEC comunidade-organica v1.0.0: +4 rotas members (roster + admin CRUD).
+    expect(customOperations).toHaveLength(55);
+    for (const operation of customOperations) {
+      expect(operation.parameters).toContainEqual(
+        expect.objectContaining({ in: "header", name: "X-Tenant" }),
+      );
+    }
+    expect(tenantSchema).toEqual(expect.objectContaining({ default: "piano" }));
+    expect(collectionSchema.properties.tenant_id).toEqual(
+      expect.objectContaining({ readOnly: true }),
+    );
+  });
+
   it("GET /v1/health deve estar documentado com schema", async () => {
     const res = await app.request("/openapi.json");
     const body = await res.json();
@@ -34,5 +72,45 @@ describe("OpenAPI Docs", () => {
     expect(responseSchema.properties.uptime).toBeDefined();
     expect(responseSchema.properties.db_size).toBeDefined();
     expect(responseSchema.properties.tables).toBeDefined();
+  });
+});
+
+describe("SEC-5: docs bloqueados em producao", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("GET /openapi.json responde 404 com NODE_ENV=production", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const prodApp = createApp();
+
+    const res = await prodApp.request("/openapi.json");
+    expect(res.status).toBe(404);
+    const body = (await res.json()) as { error?: string };
+    expect(body.error).toBeTruthy();
+  });
+
+  it("GET /doc responde 404 com NODE_ENV=production", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const prodApp = createApp();
+
+    const res = await prodApp.request("/doc");
+    expect(res.status).toBe(404);
+    const body = (await res.json()) as { error?: string };
+    expect(body.error).toBeTruthy();
+  });
+
+  it("GET /doc e /openapi.json continuam 200 sem NODE_ENV=production", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const devApp = createApp();
+
+    const spec = await devApp.request("/openapi.json");
+    expect(spec.status).toBe(200);
+    const specBody = (await spec.json()) as { paths?: Record<string, unknown> };
+    expect(specBody.paths?.["/v1/health"]).toBeDefined();
+
+    const doc = await devApp.request("/doc");
+    expect(doc.status).toBe(200);
+    expect(doc.headers.get("content-type")).toContain("text/html");
   });
 });

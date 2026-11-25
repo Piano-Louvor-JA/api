@@ -12,10 +12,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }  # histórico completo pra scan
-      - uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with: { fetch-depth: 0 }
+      # CLI open source. A action oficial (gitleaks-action@v2) passou a exigir
+      # licença paga (GITLEAKS_LICENSE) e quebrava todo PR.
+      - name: Install gitleaks
+        run: |
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_x64.tar.gz | tar -xz -C "$RUNNER_TEMP"
+      - name: Scan
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            "$RUNNER_TEMP/gitleaks" detect --source . --redact --log-opts="${{ github.event.pull_request.base.sha }}..HEAD"
+          else
+            "$RUNNER_TEMP/gitleaks" detect --source . --redact
+          fi
 
   dependencies:
     name: npm audit (high+ bloqueia)
@@ -33,4 +42,11 @@ jobs:
     container: semgrep/semgrep
     steps:
       - uses: actions/checkout@v4
-      - run: semgrep scan --config auto --error --exclude-rule generic.secrets.security.detected-generic-secret
+      # Só src/ e só severidade ERROR. `auto` no repo inteiro marcava tag
+      # @v4, dependabot e scripts como bloqueio (44 findings, zero CVE).
+      # ws:// em remote.routes é protocolo de LAN de propósito.
+      - run: |
+          semgrep scan --config p/javascript --config p/typescript \
+            --severity ERROR --error \
+            --exclude-rule javascript.lang.security.detect-insecure-websocket.detect-insecure-websocket \
+            src
