@@ -36,6 +36,7 @@ import {
   setPalcoWs,
 } from "./v1/palco/palco.routes.js";
 import { remoteRoutes } from "./v1/remote/remote.routes.js";
+import { telemetryRoutes } from "./v1/telemetry/telemetry.routes.js";
 // Central de Tickets (B1)
 import { buildTicketsRoutes } from "./v1/tickets/tickets.routes.js";
 
@@ -205,6 +206,7 @@ export function createApp() {
   app.route("/v1/custom", membersRoutes);
   app.route("/v1/geo", geoVisitRoutes);
   app.route("/v1/geo", geoTimeseriesRoutes);
+  app.route("/v1/telemetry", telemetryRoutes);
   app.route("/v1/palco", palcoRoutes);
   // Atualização do apk Android (manifesto + download), sem auth.
   app.route("/v1/app", appRoutes);
