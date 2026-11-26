@@ -36,6 +36,14 @@ try {
   console.error("[purge] falhou (não-fatal):", e);
 }
 
+// Telemetria de dispositivos online: repõe o estado e grava em lote (não-fatal).
+try {
+  const { startPresencePersistence } = await import("./lib/devicePresence.js");
+  startPresencePersistence();
+} catch (e) {
+  console.error("[presence] não iniciou (não-fatal):", e);
+}
+
 const server = serve(
   { fetch: app.fetch, port, hostname: "0.0.0.0" },
   (info) => {

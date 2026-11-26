@@ -77,7 +77,7 @@ function expireOldMinutes(current: string): void {
   }
 }
 
-function clientIp(c: Context): string {
+export function clientIp(c: Context): string {
   // Ordem alinhada ao header usado pelo rateLimit.ts / Cloudflare Tunnel.
   const fwd = c.req.header("x-forwarded-for");
   if (fwd) return fwd.split(",")[0].trim();
@@ -86,7 +86,7 @@ function clientIp(c: Context): string {
   return c.req.raw.headers.get("cf-connecting-ip")?.trim() || "unknown";
 }
 
-const VALID_PLATFORMS = new Set([
+export const VALID_PLATFORMS = new Set([
   "desktop-windows",
   "desktop-mac",
   "desktop-linux",
@@ -103,7 +103,7 @@ const VALID_PLATFORMS = new Set([
  * nos 4 clientes) com fallback heurístico por User-Agent quando o header
  * ainda não existe (transição até todos os apps atualizarem).
  */
-function clientPlatform(c: Context): string {
+export function clientPlatform(c: Context): string {
   const declared = c.req.header("x-client-platform")?.trim().toLowerCase();
   if (declared && VALID_PLATFORMS.has(declared)) return declared;
   const ua = c.req.header("user-agent") || "";
