@@ -41,6 +41,41 @@ export async function deleteFirebaseUser(uid: string): Promise<void> {
   await getAuth(app).deleteUser(uid);
 }
 
+/**
+ * admin-membros v1.0.0 — espelho Auth→community_members/{uid} no login.
+ * Fire-and-forget: falha no espelho NUNCA derruba o login. Usuário novo →
+ * doc mínimo (role member, status active). Existente → não sobrescreve
+ * (never-downgrade: role/status são geridos pelo admin via PATCH).
+ */
+async function mirrorCommunityMember(
+  uid: string,
+  email: string | null,
+  name: string,
+): Promise<void> {
+  if (!process.env.FIREBASE_SERVICE_ACCOUNT) return;
+  try {
+    const app = await getFirebaseApp();
+    const { getFirestore } = await import("firebase-admin/firestore");
+    const doc = getFirestore(app).collection("community_members").doc(uid);
+    const existing = await doc.get();
+    if (existing.exists) return; // AC5: nunca sobrescrever role/status
+    await doc.set({
+      uid,
+      email,
+      name,
+      role: "member",
+      status: "active",
+      createdAt: new Date(),
+      lastLoginAt: null,
+    });
+  } catch (e) {
+    console.warn(
+      "[firebaseAuth] espelho community_members falhou (não bloqueia login):",
+      e instanceof Error ? e.message : String(e),
+    );
+  }
+}
+
 export const firebaseAuth: MiddlewareHandler<CustomAuthEnv> =
   createMiddleware<CustomAuthEnv>(async (c, next) => {
     // optionalAuth já populou user com token opaco legacy → respeitar
@@ -127,6 +162,12 @@ export const firebaseAuth: MiddlewareHandler<CustomAuthEnv> =
           email: user.email,
           display_name: user.display_name,
         });
+        // admin-membros v1.0.0 — espelho no Firestore (fire-and-forget)
+        await mirrorCommunityMember(
+          decoded.uid,
+          decoded.email ?? null,
+          decoded.name ?? user.display_name,
+        );
       }
     } catch (e) {
       // Token Firebase inválido/expirado → segue anônimo (mesma semântica do optionalAuth)
