@@ -5,6 +5,7 @@ import {
   lookupGeo,
   parseGeoResponse,
   resetGeoIpForTests,
+  setGeoCacheMaxForTests,
   setGeoFetchForTests,
 } from "../../src/lib/geoIp.js";
 
@@ -33,8 +34,14 @@ describe("geoIp", () => {
       "10.0.0.5",
       "192.168.1.9",
       "172.16.3.4",
+      "169.254.1.1",
+      "100.64.0.1",
+      "100.127.255.1",
       "::1",
+      "::",
       "fe80::1",
+      "fc00::1",
+      "fd12::abcd",
       "unknown",
       "",
     ]) {
@@ -98,6 +105,20 @@ describe("geoIp", () => {
       parseGeoResponse({ status: "fail", message: "private range" }),
     ).toBeNull();
     expect(parseGeoResponse(null)).toBeNull();
+    // Objeto sem cidade/UF/país útil
+    expect(parseGeoResponse({ status: "success" })).toBeNull();
+    expect(
+      parseGeoResponse({ city: "   ", region: "", country: null }),
+    ).toBeNull();
+    // Região longa fora do BR: cai no nome (não na sigla curta)
+    expect(
+      parseGeoResponse({
+        city: "Berlin",
+        region: "Berlin",
+        regionName: "Berlin",
+        countryCode: "DE",
+      }),
+    ).toEqual({ city: "Berlin", region: "Berlin", country: "DE" });
   });
 
   it("monta a URL do template e usa o cache para o mesmo IP", async () => {
@@ -170,5 +191,64 @@ describe("geoIp", () => {
     const started = Date.now();
     expect(await lookupGeo("177.38.10.24", undefined, 50)).toBeNull();
     expect(Date.now() - started).toBeLessThan(1000);
+  });
+
+  it("LRU: ao atingir o teto, remove a entrada mais antiga", async () => {
+    setGeoCacheMaxForTests(1);
+    const fetchMock = vi.fn(
+      async (url: string) =>
+        new Response(
+          JSON.stringify({
+            city: url.includes("10.20") ? "A" : "B",
+            region: "SP",
+            countryCode: "BR",
+          }),
+        ),
+    );
+    setGeoFetchForTests(fetchMock as never);
+    await lookupGeo("177.38.10.20");
+    await lookupGeo("177.38.10.21");
+    // Cap=1: a 2ª entrada expulsou a 1ª do cache.
+    await lookupGeo("177.38.10.20");
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    setGeoCacheMaxForTests(null);
+  });
+
+  it("LRU com teto 0: cache vazio não encontra oldest (ramo else)", async () => {
+    setGeoCacheMaxForTests(0);
+    setGeoFetchForTests(
+      (async () =>
+        new Response(
+          JSON.stringify({ city: "A", region: "SP", countryCode: "BR" }),
+        )) as never,
+    );
+    expect(await lookupGeo("177.38.10.25")).toEqual({
+      city: "A",
+      region: "SP",
+      country: "BR",
+    });
+    setGeoCacheMaxForTests(null);
+  });
+
+  it("sem fetch injetado, usa globalThis.fetch", async () => {
+    setGeoFetchForTests(null);
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({ city: "C", region: "RJ", countryCode: "BR" }),
+        ),
+    );
+    const original = globalThis.fetch;
+    globalThis.fetch = fetchMock as never;
+    try {
+      expect(await lookupGeo("177.38.10.26")).toEqual({
+        city: "C",
+        region: "RJ",
+        country: "BR",
+      });
+      expect(fetchMock).toHaveBeenCalled();
+    } finally {
+      globalThis.fetch = original;
+    }
   });
 });

@@ -1,4 +1,5 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import * as connection from "../../src/db/connection.js";
 import { setupSeededDb } from "../helpers/seeded-db.js";
 
 // SPEC locale-convite v1.1 (AC-4): verificação de catálogo por locale.
@@ -72,5 +73,25 @@ describe("GET /v1/catalog/status", () => {
     const body = await res.json();
     expect(body.lang).toBe("pt");
     expect(body.invite_catalogo).toBe(false);
+  });
+
+  it("falha no banco → 500 com mensagem genérica", async () => {
+    const db = connection.getDb();
+    const spy = vi.spyOn(db, "prepare").mockImplementation(() => {
+      throw new Error("db exploded");
+    });
+    const err = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const res = await router.request("/v1/catalog/status?lang=pt");
+      expect(res.status).toBe(500);
+      expect(await res.json()).toEqual({ error: "Erro ao verificar catalogo" });
+      expect(err).toHaveBeenCalledWith(
+        "Error checking catalog status:",
+        expect.any(Error),
+      );
+    } finally {
+      spy.mockRestore();
+      err.mockRestore();
+    }
   });
 });
