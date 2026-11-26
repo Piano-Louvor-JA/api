@@ -16,6 +16,12 @@ import type { GeoInfo } from "./devicePresence.js";
 const CACHE_TTL_MS = 24 * 3600_000;
 const CACHE_MAX = 5_000;
 const DEFAULT_TIMEOUT_MS = 1_500;
+let cacheMax = CACHE_MAX;
+
+/** Testes: reduz o LRU para exercitar eviction sem 5k lookups. `0` é válido. */
+export function setGeoCacheMaxForTests(n: number | null): void {
+  cacheMax = n == null ? CACHE_MAX : Math.max(0, n);
+}
 
 type FetchLike = (
   url: string,
@@ -32,6 +38,7 @@ export function setGeoFetchForTests(fn: FetchLike | null): void {
 
 export function resetGeoIpForTests(): void {
   cache.clear();
+  cacheMax = CACHE_MAX;
 }
 
 /** IPv4/IPv6 roteável na internet (fora de loopback, privado e link-local). */
@@ -136,7 +143,7 @@ export function parseGeoResponse(raw: unknown): GeoInfo | null {
 }
 
 function remember(ip: string, geo: GeoInfo | null, now: number): void {
-  if (cache.size >= CACHE_MAX) {
+  if (cache.size >= cacheMax) {
     const oldest = cache.keys().next().value;
     if (oldest !== undefined) cache.delete(oldest);
   }

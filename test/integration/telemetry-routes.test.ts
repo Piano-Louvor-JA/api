@@ -187,4 +187,41 @@ describe("/v1/telemetry", () => {
     delete process.env.DEVICE_TELEMETRY_DISABLED;
     expect((await (await online(adminToken)).json()).totals.online).toBe(0);
   });
+
+  it("só install_id: campos opcionais viram null e strings vazias são descartadas", async () => {
+    expect(
+      (
+        await beat({
+          install_id: INSTALL_ID,
+          locale: "   ",
+          timezone: "",
+          church: "  ",
+        })
+      ).status,
+    ).toBe(204);
+    const [device] = (await (await online(adminToken)).json()).devices;
+    expect(device).toMatchObject({
+      app_version: null,
+      os: null,
+      district: null,
+      church: null,
+    });
+  });
+
+  it("geo que rejeita a promise não derruba o heartbeat", async () => {
+    const geo = await import("../../src/lib/geoIp.js");
+    const spy = vi
+      .spyOn(geo, "lookupGeo")
+      .mockRejectedValueOnce(new Error("reject"));
+    try {
+      expect((await beat(body())).status).toBe(204);
+      await vi.waitFor(async () => {
+        expect(spy).toHaveBeenCalled();
+      });
+      const [device] = (await (await online(adminToken)).json()).devices;
+      expect(device.city).toBeNull();
+    } finally {
+      spy.mockRestore();
+    }
+  });
 });

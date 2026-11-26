@@ -15,6 +15,12 @@ export const ONLINE_WINDOW_MS = 11 * 60_000;
 
 /** Hard cap defensivo de memória (ordens de grandeza acima do uso real). */
 const MAX_DEVICES = 50_000;
+let maxDevicesCap = MAX_DEVICES;
+
+/** Testes: reduz o teto para exercitar o eviction sem encher 50k entradas. */
+export function setMaxDevicesForTests(n: number | null): void {
+  maxDevicesCap = n == null ? MAX_DEVICES : Math.max(1, n);
+}
 
 export interface DeviceHeartbeat {
   installId: string;
@@ -78,6 +84,7 @@ const presence = new Map<string, PresenceEntry>();
 /** Testes: zera o estado em memória. */
 export function resetPresenceForTests(): void {
   presence.clear();
+  maxDevicesCap = MAX_DEVICES;
 }
 
 /** Minúsculas, sem acento e com espaços colapsados — para agrupar e filtrar. */
@@ -101,7 +108,7 @@ function evictStale(now: number): void {
 
 export function recordHeartbeat(hb: DeviceHeartbeat, now = Date.now()): void {
   const current = presence.get(hb.installId);
-  if (!current && presence.size >= MAX_DEVICES) evictStale(now);
+  if (!current && presence.size >= maxDevicesCap) evictStale(now);
   presence.set(hb.installId, {
     ...hb,
     city: current?.city ?? null,

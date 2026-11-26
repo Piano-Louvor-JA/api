@@ -37,12 +37,8 @@ try {
 }
 
 // Telemetria de dispositivos online: repõe o estado e grava em lote (não-fatal).
-try {
-  const { startPresencePersistence } = await import("./lib/devicePresence.js");
-  startPresencePersistence();
-} catch (e) {
-  console.error("[presence] não iniciou (não-fatal):", e);
-}
+const { bootPresence } = await import("./lib/bootPresence.js");
+await bootPresence();
 
 const server = serve(
   { fetch: app.fetch, port, hostname: "0.0.0.0" },

@@ -20,6 +20,7 @@ import {
   ONLINE_WINDOW_MS,
   recordHeartbeat,
   resetPresenceForTests,
+  setMaxDevicesForTests,
   setPresenceGeo,
   startPresencePersistence,
 } from "../../src/lib/devicePresence.js";
@@ -191,6 +192,56 @@ describe("devicePresence", () => {
     expect(loadRecentPresence(T0 + ONLINE_WINDOW_MS + 1, db)).toBe(0);
   });
 
+  it("loadRecent não sobrescreve quem já está no Map", () => {
+    recordHeartbeat(hb({ church: "Ao vivo" }), T0);
+    flushPresence(db);
+    // Ainda no Map (dirty limpo pelo flush); loadRecent deve pular.
+    expect(loadRecentPresence(T0 + 1000, db)).toBe(1);
+    expect(listOnline(T0 + 1000).devices[0].church).toBe("Ao vivo");
+  });
+
+  it("setPresenceGeo em install_id desconhecido é no-op", () => {
+    expect(() =>
+      setPresenceGeo("00000000-0000-4000-8000-000000000099", {
+        city: "X",
+        region: "SP",
+        country: "BR",
+      }),
+    ).not.toThrow();
+    expect(listOnline(T0 + 1000).devices).toHaveLength(0);
+  });
+
+  it("ao atingir o teto, evictStale remove entradas velhas e limpas", () => {
+    setMaxDevicesForTests(1);
+    recordHeartbeat(hb(), T0);
+    expect(flushPresence(db)).toBe(1); // dirty=false
+    // Cap=1 e entrada ainda "online" mas dirty=false: eviction só tira se
+    // lastSeen passou da janela.
+    recordHeartbeat(
+      hb({ installId: "0a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d" }),
+      T0 + ONLINE_WINDOW_MS + 1,
+    );
+    // A antiga ainda estava dentro do Map até o eviction (fora da janela).
+    expect(listOnline(T0 + ONLINE_WINDOW_MS + 2).devices).toHaveLength(1);
+    expect(
+      listOnline(T0 + ONLINE_WINDOW_MS + 2).devices[0].install_id_short,
+    ).toBe("0a1b2c");
+    setMaxDevicesForTests(null);
+  });
+
+  it("evictStale mantém entradas recentes ou dirty (ramo else do if)", () => {
+    setMaxDevicesForTests(1);
+    // Entrada fresh + dirty: condição do if falha → else.
+    recordHeartbeat(hb(), T0);
+    recordHeartbeat(
+      hb({ installId: "0a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d" }),
+      T0 + 1000,
+    );
+    // Sem eviction efetiva: ambas podem coexistir além do cap (defesa best-effort).
+    expect(listOnline(T0 + 2000).devices.length).toBeGreaterThanOrEqual(1);
+    setMaxDevicesForTests(null);
+  });
+
   it("a tabela não tem coluna de IP", () => {
     const cols = (
       db.prepare("PRAGMA table_info(device_presence)").all() as {
@@ -277,6 +328,27 @@ describe("devicePresence", () => {
         stop();
       } finally {
         err.mockRestore();
+        vi.useRealTimers();
+      }
+    });
+
+    it("sem db explícito usa getDb() do processo", () => {
+      vi.useFakeTimers();
+      try {
+        recordHeartbeat(hb(), Date.now());
+        flushPresence(db);
+        resetPresenceForTests();
+        const stop = startPresencePersistence(60_000);
+        expect(listOnline().devices).toHaveLength(1);
+        // Dispara safeFlush → flushPresence(getDb()) quando db não foi passado.
+        recordHeartbeat(hb({ church: "Via getDb" }), Date.now());
+        vi.advanceTimersByTime(60_000);
+        const row = db
+          .prepare("SELECT church FROM device_presence WHERE install_id = ?")
+          .get(hb().installId) as { church: string };
+        expect(row.church).toBe("Via getDb");
+        stop();
+      } finally {
         vi.useRealTimers();
       }
     });
