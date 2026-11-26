@@ -12,13 +12,17 @@
  *   - burst: tokens iniciais (pico permitido instantaneamente)
  *
  * Configurável via env:
- *   RATE_LIMIT_MAX=5000                (general: max tokens, default 5000)
- *   RATE_LIMIT_FILE_MAX=10000          (files: max tokens, default 10000)
- *   RATE_LIMIT_METADATA_MAX=10000      (metadata: max tokens, default 10000)
- *   RATE_LIMIT_DECAY=60               (janela em segundos, default 60)
- *   RATE_LIMIT_BURST=100              (burst/pico geral, default 100)
- *   RATE_LIMIT_FILE_BURST=200         (burst/pico files, default 200)
- *   RATE_LIMIT_METADATA_BURST=200     (burst/pico metadata, default 200)
+ *   RATE_LIMIT_MAX=20000               (general: max tokens, default 20000)
+ *   RATE_LIMIT_FILE_MAX=500000         (files: max tokens, default 500000 —
+ *                                      download em massa de biblioteca ~15 GB /
+ *                                      milhares de /file/* no mesmo IP)
+ *   RATE_LIMIT_METADATA_MAX=50000      (metadata: max tokens, default 50000)
+ *   RATE_LIMIT_DECAY=60                (janela em segundos, default 60)
+ *   RATE_LIMIT_BURST=500               (burst/pico geral, default 500)
+ *   RATE_LIMIT_FILE_BURST=20000        (burst/pico files, default 20000)
+ *   RATE_LIMIT_METADATA_BURST=1000     (burst/pico metadata, default 1000)
+ *
+ * Obs.: RATE_LIMIT_PER_MIN (legado) NÃO é lido por este middleware.
  *
  * Headers de resposta (paridade com louvorja/api):
  *   X-RateLimit-Limit      — max tokens (cap) do bucket
@@ -79,15 +83,15 @@ function intEnv(name: string, fallback: number): number {
 const DECAY_SECONDS = intEnv("RATE_LIMIT_DECAY", 60);
 
 function resolveMaxTokens(bucket: Bucket): number {
-  if (bucket === "files") return intEnv("RATE_LIMIT_FILE_MAX", 10_000);
-  if (bucket === "metadata") return intEnv("RATE_LIMIT_METADATA_MAX", 10_000);
-  return intEnv("RATE_LIMIT_MAX", 5000);
+  if (bucket === "files") return intEnv("RATE_LIMIT_FILE_MAX", 500_000);
+  if (bucket === "metadata") return intEnv("RATE_LIMIT_METADATA_MAX", 50_000);
+  return intEnv("RATE_LIMIT_MAX", 20_000);
 }
 
 function resolveBurst(bucket: Bucket): number {
-  if (bucket === "files") return intEnv("RATE_LIMIT_FILE_BURST", 200);
-  if (bucket === "metadata") return intEnv("RATE_LIMIT_METADATA_BURST", 200);
-  return intEnv("RATE_LIMIT_BURST", 100);
+  if (bucket === "files") return intEnv("RATE_LIMIT_FILE_BURST", 20_000);
+  if (bucket === "metadata") return intEnv("RATE_LIMIT_METADATA_BURST", 1_000);
+  return intEnv("RATE_LIMIT_BURST", 500);
 }
 
 /** Normaliza o path removendo prefixo de idioma. /pt-BR/file/x -> /file/x */
