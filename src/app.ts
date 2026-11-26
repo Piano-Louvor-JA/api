@@ -5,6 +5,7 @@ import { apiReference } from "@scalar/hono-api-reference";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import { getDbStats } from "./db/connection.js";
+import { receiverIdentityScript } from "./lib/receiverIdentity.js";
 import { reportError } from "./lib/telemetry.js";
 import { APP_VERSION } from "./lib/version.js";
 import { antiBotMiddleware } from "./middleware/antiBot.js";
@@ -196,6 +197,11 @@ export function createApp() {
 
   // WT-5J: receiver desktop/TV browser na mesma origem da API/relay.
   // `index: "index.html"` evita redirect que descartaria ?code= e ?api=.
+  app.get("/palco/client-identity.js", (c) => {
+    c.header("Content-Type", "application/javascript; charset=utf-8");
+    c.header("Cache-Control", "no-store");
+    return c.body(receiverIdentityScript());
+  });
   app.use("/palco", serveStatic({ root: "./static", index: "index.html" }));
   app.use("/palco/", serveStatic({ root: "./static", index: "index.html" }));
   app.use("/palco/*", serveStatic({ root: "./static" }));
