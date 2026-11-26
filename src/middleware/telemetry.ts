@@ -87,6 +87,8 @@ export function clientIp(c: Context): string {
 }
 
 export const VALID_PLATFORMS = new Set([
+  "site",
+  "palco-browser",
   "desktop-windows",
   "desktop-mac",
   "desktop-linux",

@@ -51,3 +51,21 @@ A revogação vale na requisição seguinte, sem reiniciar. Em dev:
 `npm run partners -- list`.
 
 Spec: `.planning/partner-keys/SPEC.md`.
+
+## Site e receiver distribuído pela API
+
+A telemetria reconhece também `site` e `palco-browser`; esses valores
+não caem no fallback por User-Agent. Nenhum header novo é obrigatório.
+
+O HTML em `/palco` carrega `/palco/client-identity.js`, gerado em runtime
+com a versão do artefato da API e as variáveis `PALCO_PARTNER_KEY_STG` e
+`PALCO_PARTNER_KEY_PROD`. Configure no container as chaves já emitidas para
+o parceiro Palco no banco de cada ambiente. Sem variável, o receiver mantém
+o acesso sem chave. Não há nova migration ou emissão automática de token.
+
+Essa configuração pública e revogável é usada somente nas chamadas HTTP
+`/v1/palco` à API Piano HTTPS (ou API local). Não altera o token de sessão,
+não coloca a chave na URL do WebSocket e não a envia a upstream ou terceiros.
+O script é servido com `Cache-Control: no-store`; recarregue o receiver após
+alterar a configuração. O receiver hospedado na API não depende da publicação
+do repositório `palco-receiver` para receber esta correção.
