@@ -58,11 +58,22 @@ export function createApp() {
   });
 
   // RF-03: CORS configurável via CORS_ORIGINS (default * para compat com apps)
+  // allowHeaders explícito: Electron/web mandam X-Partner-Key e X-Client-*
+  // (preflight); sem a lista, CORS restrito derruba o OPTIONS.
   const corsOrigins = process.env.CORS_ORIGINS ?? "*";
+  const allowHeaders = [
+    "Content-Type",
+    "Authorization",
+    "X-Partner-Key",
+    "X-Client-Platform",
+    "X-Client-Version",
+    "X-Tenant",
+    "Api-Token",
+  ];
   const corsConfig =
     corsOrigins === "*"
-      ? {}
-      : { origin: corsOrigins.split(",").map((o) => o.trim()) };
+      ? { allowHeaders }
+      : { origin: corsOrigins.split(",").map((o) => o.trim()), allowHeaders };
   app.use("*", cors(corsConfig));
   // SEC-3 (api#124): CSP por rota — a API não serve HTML (default-src 'none'),
   // mas DUAS superfícies servem: /palco (receiver com script inline + WS) e
