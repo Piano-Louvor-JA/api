@@ -26,6 +26,7 @@ describe("rateLimit handler", () => {
 
   beforeAll(async () => {
     process.env.RATE_LIMIT_MAX = "100";
+    process.env.RATE_LIMIT_BURST = "100";
     process.env.RATE_LIMIT_DECAY = "60";
     mod = await import("../../src/middleware/rateLimit.js");
   });
