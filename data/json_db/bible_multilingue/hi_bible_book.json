@@ -1,0 +1,464 @@
+[
+  {
+    "id_bible_book": 992,
+    "name": "उत्पत्ति",
+    "abbreviation": "Gn",
+    "chapters": 50,
+    "book_number": 1
+  },
+  {
+    "id_bible_book": 993,
+    "name": "निर्गमन",
+    "abbreviation": "Ex",
+    "chapters": 40,
+    "book_number": 2
+  },
+  {
+    "id_bible_book": 994,
+    "name": "लैव्यव्यवस्था",
+    "abbreviation": "Lv",
+    "chapters": 27,
+    "book_number": 3
+  },
+  {
+    "id_bible_book": 995,
+    "name": "गिनती",
+    "abbreviation": "Nm",
+    "chapters": 36,
+    "book_number": 4
+  },
+  {
+    "id_bible_book": 996,
+    "name": "व्यवस्थाविवरण",
+    "abbreviation": "Dt",
+    "chapters": 34,
+    "book_number": 5
+  },
+  {
+    "id_bible_book": 997,
+    "name": "यहोशू",
+    "abbreviation": "Js",
+    "chapters": 24,
+    "book_number": 6
+  },
+  {
+    "id_bible_book": 998,
+    "name": "न्यायियों",
+    "abbreviation": "Jz",
+    "chapters": 21,
+    "book_number": 7
+  },
+  {
+    "id_bible_book": 999,
+    "name": "रूत",
+    "abbreviation": "Rt",
+    "chapters": 4,
+    "book_number": 8
+  },
+  {
+    "id_bible_book": 1000,
+    "name": "शमूएल की पहली पुस्तक",
+    "abbreviation": "1Sm",
+    "chapters": 31,
+    "book_number": 9
+  },
+  {
+    "id_bible_book": 1001,
+    "name": "शमूएल की दूसरी पुस्तक",
+    "abbreviation": "2Sm",
+    "chapters": 24,
+    "book_number": 10
+  },
+  {
+    "id_bible_book": 1002,
+    "name": "राजाओं की पहली पुस्तक",
+    "abbreviation": "1Rs",
+    "chapters": 22,
+    "book_number": 11
+  },
+  {
+    "id_bible_book": 1003,
+    "name": "राजाओं की दूसरी पुस्तक",
+    "abbreviation": "2Rs",
+    "chapters": 25,
+    "book_number": 12
+  },
+  {
+    "id_bible_book": 1004,
+    "name": "इतिहास की पहली पुस्तक",
+    "abbreviation": "1Cr",
+    "chapters": 29,
+    "book_number": 13
+  },
+  {
+    "id_bible_book": 1005,
+    "name": "इतिहास की दूसरी पुस्तक",
+    "abbreviation": "2Cr",
+    "chapters": 36,
+    "book_number": 14
+  },
+  {
+    "id_bible_book": 1006,
+    "name": "एज्रा",
+    "abbreviation": "Ed",
+    "chapters": 10,
+    "book_number": 15
+  },
+  {
+    "id_bible_book": 1007,
+    "name": "नहेम्याह",
+    "abbreviation": "Ne",
+    "chapters": 13,
+    "book_number": 16
+  },
+  {
+    "id_bible_book": 1008,
+    "name": "एस्तेर",
+    "abbreviation": "Et",
+    "chapters": 10,
+    "book_number": 17
+  },
+  {
+    "id_bible_book": 1009,
+    "name": "अय्यूब",
+    "abbreviation": "Jó",
+    "chapters": 42,
+    "book_number": 18
+  },
+  {
+    "id_bible_book": 1010,
+    "name": "भजन संहिता",
+    "abbreviation": "Sl",
+    "chapters": 150,
+    "book_number": 19
+  },
+  {
+    "id_bible_book": 1011,
+    "name": "नीतिवचन",
+    "abbreviation": "Pv",
+    "chapters": 31,
+    "book_number": 20
+  },
+  {
+    "id_bible_book": 1012,
+    "name": "सभोपदेशक",
+    "abbreviation": "Ec",
+    "chapters": 12,
+    "book_number": 21
+  },
+  {
+    "id_bible_book": 1013,
+    "name": "श्रेष्ठगीत",
+    "abbreviation": "Ct",
+    "chapters": 8,
+    "book_number": 22
+  },
+  {
+    "id_bible_book": 1014,
+    "name": "यशायाह",
+    "abbreviation": "Is",
+    "chapters": 66,
+    "book_number": 23
+  },
+  {
+    "id_bible_book": 1015,
+    "name": "यिर्मयाह",
+    "abbreviation": "Jr",
+    "chapters": 52,
+    "book_number": 24
+  },
+  {
+    "id_bible_book": 1016,
+    "name": "विलापगीत",
+    "abbreviation": "Lm",
+    "chapters": 5,
+    "book_number": 25
+  },
+  {
+    "id_bible_book": 1017,
+    "name": "यहेजकेल",
+    "abbreviation": "Ez",
+    "chapters": 48,
+    "book_number": 26
+  },
+  {
+    "id_bible_book": 1018,
+    "name": "दानिय्येल",
+    "abbreviation": "Dn",
+    "chapters": 12,
+    "book_number": 27
+  },
+  {
+    "id_bible_book": 1019,
+    "name": "होशे",
+    "abbreviation": "Os",
+    "chapters": 14,
+    "book_number": 28
+  },
+  {
+    "id_bible_book": 1020,
+    "name": "योएल",
+    "abbreviation": "Jl",
+    "chapters": 3,
+    "book_number": 29
+  },
+  {
+    "id_bible_book": 1021,
+    "name": "आमोस",
+    "abbreviation": "Am",
+    "chapters": 9,
+    "book_number": 30
+  },
+  {
+    "id_bible_book": 1022,
+    "name": "ओबद्याह",
+    "abbreviation": "Ob",
+    "chapters": 1,
+    "book_number": 31
+  },
+  {
+    "id_bible_book": 1023,
+    "name": "योना",
+    "abbreviation": "Jn",
+    "chapters": 4,
+    "book_number": 32
+  },
+  {
+    "id_bible_book": 1024,
+    "name": "मीका",
+    "abbreviation": "Mq",
+    "chapters": 7,
+    "book_number": 33
+  },
+  {
+    "id_bible_book": 1025,
+    "name": "नहूम",
+    "abbreviation": "Na",
+    "chapters": 3,
+    "book_number": 34
+  },
+  {
+    "id_bible_book": 1026,
+    "name": "हबक्कूक",
+    "abbreviation": "Hc",
+    "chapters": 3,
+    "book_number": 35
+  },
+  {
+    "id_bible_book": 1027,
+    "name": "सपन्याह",
+    "abbreviation": "Sf",
+    "chapters": 3,
+    "book_number": 36
+  },
+  {
+    "id_bible_book": 1028,
+    "name": "हाग्गै",
+    "abbreviation": "Ag",
+    "chapters": 2,
+    "book_number": 37
+  },
+  {
+    "id_bible_book": 1029,
+    "name": "जकर्याह",
+    "abbreviation": "Zc",
+    "chapters": 14,
+    "book_number": 38
+  },
+  {
+    "id_bible_book": 1030,
+    "name": "मलाकी",
+    "abbreviation": "Ml",
+    "chapters": 4,
+    "book_number": 39
+  },
+  {
+    "id_bible_book": 1031,
+    "name": "मत्ती रचित सुसमाचार",
+    "abbreviation": "Mt",
+    "chapters": 28,
+    "book_number": 40
+  },
+  {
+    "id_bible_book": 1032,
+    "name": "मरकुस रचित सुसमाचार",
+    "abbreviation": "Mc",
+    "chapters": 16,
+    "book_number": 41
+  },
+  {
+    "id_bible_book": 1033,
+    "name": "लूका रचित सुसमाचार",
+    "abbreviation": "Lc",
+    "chapters": 24,
+    "book_number": 42
+  },
+  {
+    "id_bible_book": 1034,
+    "name": "यूहन्ना रचित सुसमाचार",
+    "abbreviation": "Jo",
+    "chapters": 21,
+    "book_number": 43
+  },
+  {
+    "id_bible_book": 1035,
+    "name": "प्रेरितों के काम",
+    "abbreviation": "At",
+    "chapters": 28,
+    "book_number": 44
+  },
+  {
+    "id_bible_book": 1036,
+    "name": "रोमियों के नाम पौलुस प्रेरित की पत्री",
+    "abbreviation": "Rm",
+    "chapters": 16,
+    "book_number": 45
+  },
+  {
+    "id_bible_book": 1037,
+    "name": "कुरिन्थियों के नाम पौलुस प्रेरित की पहली पत्री",
+    "abbreviation": "1Co",
+    "chapters": 16,
+    "book_number": 46
+  },
+  {
+    "id_bible_book": 1038,
+    "name": "कुरिन्थियों के नाम पौलुस प्रेरित की दूसरी पत्री",
+    "abbreviation": "2Co",
+    "chapters": 13,
+    "book_number": 47
+  },
+  {
+    "id_bible_book": 1039,
+    "name": "गलातियों के नाम पौलुस प्रेरित की पत्री",
+    "abbreviation": "Gl",
+    "chapters": 6,
+    "book_number": 48
+  },
+  {
+    "id_bible_book": 1040,
+    "name": "इफिसियों के नाम पौलुस प्रेरित की पत्री",
+    "abbreviation": "Ef",
+    "chapters": 6,
+    "book_number": 49
+  },
+  {
+    "id_bible_book": 1041,
+    "name": "फिलिप्पियों के नाम पौलुस प्रेरित की पत्री",
+    "abbreviation": "Fp",
+    "chapters": 4,
+    "book_number": 50
+  },
+  {
+    "id_bible_book": 1042,
+    "name": "कुलुस्सियों के नाम पौलुस प्रेरित की पत्री",
+    "abbreviation": "Cl",
+    "chapters": 4,
+    "book_number": 51
+  },
+  {
+    "id_bible_book": 1043,
+    "name": "थिस्सलुनीकियों के नाम पौलुस प्रेरित की पहली पत्री",
+    "abbreviation": "1Ts",
+    "chapters": 5,
+    "book_number": 52
+  },
+  {
+    "id_bible_book": 1044,
+    "name": "थिस्सलुनीकियों के नाम पौलुस प्रेरित की दूसरी पत्री",
+    "abbreviation": "2Ts",
+    "chapters": 3,
+    "book_number": 53
+  },
+  {
+    "id_bible_book": 1045,
+    "name": "तीमुथियुस के नाम प्रेरित पौलुस की पहली पत्री",
+    "abbreviation": "1Tm",
+    "chapters": 6,
+    "book_number": 54
+  },
+  {
+    "id_bible_book": 1046,
+    "name": "तीमुथियुस के नाम प्रेरित पौलुस की दूसरी पत्री",
+    "abbreviation": "2Tm",
+    "chapters": 4,
+    "book_number": 55
+  },
+  {
+    "id_bible_book": 1047,
+    "name": "तीतुस के नाम प्रेरित पौलुस की पत्री",
+    "abbreviation": "Tt",
+    "chapters": 3,
+    "book_number": 56
+  },
+  {
+    "id_bible_book": 1048,
+    "name": "फिलेमोन के नाम प्रेरित पौलुस की पत्री",
+    "abbreviation": "Fm",
+    "chapters": 1,
+    "book_number": 57
+  },
+  {
+    "id_bible_book": 1049,
+    "name": "इब्रानियों के नाम पत्री",
+    "abbreviation": "Hb",
+    "chapters": 13,
+    "book_number": 58
+  },
+  {
+    "id_bible_book": 1050,
+    "name": "याकूब की पत्री",
+    "abbreviation": "Tg",
+    "chapters": 5,
+    "book_number": 59
+  },
+  {
+    "id_bible_book": 1051,
+    "name": "पतरस की पहली पत्री",
+    "abbreviation": "1Pe",
+    "chapters": 5,
+    "book_number": 60
+  },
+  {
+    "id_bible_book": 1052,
+    "name": "पतरस की दूसरी पत्री",
+    "abbreviation": "2Pe",
+    "chapters": 3,
+    "book_number": 61
+  },
+  {
+    "id_bible_book": 1053,
+    "name": "यूहन्ना की पहली पत्री",
+    "abbreviation": "1Jo",
+    "chapters": 5,
+    "book_number": 62
+  },
+  {
+    "id_bible_book": 1054,
+    "name": "यूहन्ना की दूसरी पत्री",
+    "abbreviation": "2Jo",
+    "chapters": 1,
+    "book_number": 63
+  },
+  {
+    "id_bible_book": 1055,
+    "name": "यूहन्ना की तीसरी पत्री",
+    "abbreviation": "3Jo",
+    "chapters": 1,
+    "book_number": 64
+  },
+  {
+    "id_bible_book": 1056,
+    "name": "यहूदा की पत्री",
+    "abbreviation": "Jd",
+    "chapters": 1,
+    "book_number": 65
+  },
+  {
+    "id_bible_book": 1057,
+    "name": "यूहन्ना का प्रकाशितवाक्य",
+    "abbreviation": "Ap",
+    "chapters": 22,
+    "book_number": 66
+  }
+]

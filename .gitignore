@@ -8,6 +8,9 @@ dist/
 !/data/json_db/es_bible_book.json
 !/data/json_db/es_bible_version.json
 !/data/json_db/es_bible_catalog.sha256
+# Bíblia multilíngue 15 idiomas (migration 038 / ebible-to-piano):
+# tarballs por idioma + catálogos + checksums + reports — ~26 MB total.
+!/data/json_db/bible_multilingue/
 /media
 /media_community
 coverage/

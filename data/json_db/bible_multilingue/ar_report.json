@@ -1,0 +1,482 @@
+{
+  "lang": "ar",
+  "translation": "الكتاب المقدس فان دايك (Van Dyck 1865)",
+  "abbreviation": "VDY",
+  "id_bible_version": 111,
+  "id_book_base": 926,
+  "license": "PD",
+  "attribution": "Public Domain — Van Dyck 1865",
+  "source_url": "https://ebible.org/find/details.php?id=arb-vd",
+  "note": "",
+  "books": 66,
+  "chapters": 1189,
+  "verses": 31104,
+  "files_written": 1189,
+  "problems": [],
+  "warnings": [],
+  "books_detail": [
+    {
+      "book": 1,
+      "name": "اَلتَّكْوِينُ",
+      "chapters": 50,
+      "verses": 1533,
+      "sha256": "1134f9746a8452353c0be4f9f6bc6b2a743cbe39a106ca528f1fa8460f9cc49d"
+    },
+    {
+      "book": 2,
+      "name": "اَلْخُرُوجُ",
+      "chapters": 40,
+      "verses": 1213,
+      "sha256": "015401495a67ba54e36e83eccfd98f47e9137333bd5a9be8f162fb8925f9f216"
+    },
+    {
+      "book": 3,
+      "name": "اَللَّاوِيِّينَ",
+      "chapters": 27,
+      "verses": 859,
+      "sha256": "0bd7f5e12c489915242a2caa6d6f385d7c55881beafb130156ad8bc5ce29ff80"
+    },
+    {
+      "book": 4,
+      "name": "اَلْعَدَد",
+      "chapters": 36,
+      "verses": 1288,
+      "sha256": "3ab7e7626efff42b9c35647fe1f603f3f7833167ed5445a6ffe29c08485ad4a0"
+    },
+    {
+      "book": 5,
+      "name": "اَلتَّثْنِيَة",
+      "chapters": 34,
+      "verses": 959,
+      "sha256": "438022a1c1ae734373d54c3db685ffa370e32134de44bfdd9dd89734888e9cd3"
+    },
+    {
+      "book": 6,
+      "name": "يَشُوع",
+      "chapters": 24,
+      "verses": 658,
+      "sha256": "588b4f7693feade5b0f9182d5ccbd67eb27c8b1628b082f4ff53287367f47b9d"
+    },
+    {
+      "book": 7,
+      "name": "اَلْقُضَاة",
+      "chapters": 21,
+      "verses": 618,
+      "sha256": "a18c72ba4f0b42591afd0f58852b7471a09ee2875e309bbfa4ab2b81a25cf046"
+    },
+    {
+      "book": 8,
+      "name": "رَاعُوث",
+      "chapters": 4,
+      "verses": 85,
+      "sha256": "43b2c4f5c7f31327adcff020b7e21fa6368774bffac206dea4ddf0055e700515"
+    },
+    {
+      "book": 9,
+      "name": "صَمُوئِيلَ ٱلْأَوَّلُ",
+      "chapters": 31,
+      "verses": 810,
+      "sha256": "ebdbfc8ed09ad49c6a4e55b16bfc4d396b1aab0684eb58761d0be84c1614ccda"
+    },
+    {
+      "book": 10,
+      "name": "صَمُوئِيلَ ٱلثَّانِي",
+      "chapters": 24,
+      "verses": 695,
+      "sha256": "3da8a2387f6820cc9e91f8caf2c97145733f049919b96cb1545bbc9394ab7dec"
+    },
+    {
+      "book": 11,
+      "name": "اَلْمُلُوكِ ٱلْأَوَّلُ",
+      "chapters": 22,
+      "verses": 816,
+      "sha256": "3739f431df21e75162363a0d8ddec1820480bc79e66a726a21f8676b7d30b8cc"
+    },
+    {
+      "book": 12,
+      "name": "اَلْمُلُوكِ ٱلثَّانِي",
+      "chapters": 25,
+      "verses": 719,
+      "sha256": "0f0610acabc2b428783d35bc6895d4e5836e948e58b79f36127292524ec5a87d"
+    },
+    {
+      "book": 13,
+      "name": "أَخْبَارِ ٱلْأَيَّامِ ٱلْأَوَّلُ",
+      "chapters": 29,
+      "verses": 942,
+      "sha256": "94eae41ff0acbfb1644dbb95ed28f6d17bb0e9a357d6fec87091cb4f71c54c79"
+    },
+    {
+      "book": 14,
+      "name": "أَخْبَارِ ٱلْأَيَّامِ ٱلثَّانِي",
+      "chapters": 36,
+      "verses": 822,
+      "sha256": "8381aaf1f893a2d38eb5c6bedef40901affa072a17e377b634f9bddaf226cf4e"
+    },
+    {
+      "book": 15,
+      "name": "عَزْرَا",
+      "chapters": 10,
+      "verses": 280,
+      "sha256": "cfe87fb3e4ac8dad0d2d1c90ac19249173247bc223c6911c62a47ec797399cfb"
+    },
+    {
+      "book": 16,
+      "name": "نَحَمْيَا",
+      "chapters": 13,
+      "verses": 406,
+      "sha256": "d933ee4fbfbf76346c3ac28888c4777010c866d7e0b2843c69c9bdcb1adf3843"
+    },
+    {
+      "book": 17,
+      "name": "أَسْتِير",
+      "chapters": 10,
+      "verses": 167,
+      "sha256": "e6134e2c7f8f90eb6e7089be826cf84bf139120a9039476dc117a28b1839cefa"
+    },
+    {
+      "book": 18,
+      "name": "أَيُّوبَ",
+      "chapters": 42,
+      "verses": 1070,
+      "sha256": "b67532226fa7cf38689e3af823288d98b8ae71872787015d1d98cea49e2a9716"
+    },
+    {
+      "book": 19,
+      "name": "اَلْمَزَامِيرُ",
+      "chapters": 150,
+      "verses": 2461,
+      "sha256": "a3d31111cec8fde4a282f4c3436f4886cc8ac9130f077664c65e070343edb56f"
+    },
+    {
+      "book": 20,
+      "name": "أَمْثَالٌ",
+      "chapters": 31,
+      "verses": 915,
+      "sha256": "fa12352e0efcfa22f4a78fc511fe3e826f333b81d9484052c4eae86cf082e596"
+    },
+    {
+      "book": 21,
+      "name": "اَلْجَامِعَةِ",
+      "chapters": 12,
+      "verses": 222,
+      "sha256": "02ba3a6f3b572f160da59d9f6e0d3af86a56bf01325064e13f026ea3bcc7a409"
+    },
+    {
+      "book": 22,
+      "name": "نَشِيدُ ٱلْأَنْشَادِ",
+      "chapters": 8,
+      "verses": 117,
+      "sha256": "d94381c8acfe4192aa2dbc14adfc39907a1746956ba08709a49506e7946debc1"
+    },
+    {
+      "book": 23,
+      "name": "إِشَعْيَاءَ",
+      "chapters": 66,
+      "verses": 1292,
+      "sha256": "b9bcd129ae9d33e590498c699068f0856142a04a3d6495a9c41dc4e1e67089b6"
+    },
+    {
+      "book": 24,
+      "name": "إِرْمِيَا",
+      "chapters": 52,
+      "verses": 1364,
+      "sha256": "e2a4d6cb31378dbb439cfa4da8112274da38df2e4d33342e321ff7c2d247e5fa"
+    },
+    {
+      "book": 25,
+      "name": "مَرَاثِي إِرْمِيَا",
+      "chapters": 5,
+      "verses": 154,
+      "sha256": "023143d4a87f2e0888880edcfd0b75eb419b9bd89ed5aadeeae4a99835fcb2a0"
+    },
+    {
+      "book": 26,
+      "name": "حِزْقِيَال",
+      "chapters": 48,
+      "verses": 1273,
+      "sha256": "0d677ac3813b0ae77df9c1cc94dfe437579df9bef2cb4f76afc5c3a75924f717"
+    },
+    {
+      "book": 27,
+      "name": "دَانِيآل",
+      "chapters": 12,
+      "verses": 357,
+      "sha256": "0fb7e02da579aeaa93ed167a288ffa37d21fc71fbd08a440754a11f7814997c5"
+    },
+    {
+      "book": 28,
+      "name": "هُوشَع",
+      "chapters": 14,
+      "verses": 197,
+      "sha256": "3ae0a7058477c425b8e4662be8c213c00dbc59f413be3aca144ac064ff6d9e92"
+    },
+    {
+      "book": 29,
+      "name": "يُوئِيل",
+      "chapters": 3,
+      "verses": 73,
+      "sha256": "f856f1b4c9e55abdf62434ca520bdc734a01bf5d40199c207e3d3d154a82e28e"
+    },
+    {
+      "book": 30,
+      "name": "عَامُوس",
+      "chapters": 9,
+      "verses": 146,
+      "sha256": "694a56146c97d7177638a8fa4887ce1b47c26427fa42b91a539a2883e461d0a7"
+    },
+    {
+      "book": 31,
+      "name": "عُوبَدْيَا",
+      "chapters": 1,
+      "verses": 21,
+      "sha256": "2f064fb581be43131cb9d8e5c1046c4f6caaf526bec0a6943eb58c4d5b006589"
+    },
+    {
+      "book": 32,
+      "name": "يُونَان",
+      "chapters": 4,
+      "verses": 48,
+      "sha256": "33e39734769c3767b9107729219165ec153f4d3804dd382b1e84a55c6db27527"
+    },
+    {
+      "book": 33,
+      "name": "مِيخَا",
+      "chapters": 7,
+      "verses": 105,
+      "sha256": "165099ee8a6c594ae3a2b64fcb698e9dda6dbe0153afc24cb61a1dd66697af3f"
+    },
+    {
+      "book": 34,
+      "name": "نَاحُوم",
+      "chapters": 3,
+      "verses": 47,
+      "sha256": "818619ba0714d5741f32ecc6bae66fcbb1a79915ce1c5acfe29a7e81c20e7f5e"
+    },
+    {
+      "book": 35,
+      "name": "حَبَقُّوق",
+      "chapters": 3,
+      "verses": 56,
+      "sha256": "1ebbba919aa2def5abb09ae37904ca245ce4fba91535aba55dd26765ff72e9fa"
+    },
+    {
+      "book": 36,
+      "name": "صَفَنْيَا",
+      "chapters": 3,
+      "verses": 53,
+      "sha256": "e3c081c0c16e95e05d7aada3bc3a5b5d4a9d28685738c97dc4735720b1749831"
+    },
+    {
+      "book": 37,
+      "name": "حَجَّي",
+      "chapters": 2,
+      "verses": 38,
+      "sha256": "ea89685aa7629f38110f58819e3c5dca5a37de7d5553b62a8d0a1192a3c1611d"
+    },
+    {
+      "book": 38,
+      "name": "زَكَريَّا",
+      "chapters": 14,
+      "verses": 211,
+      "sha256": "f9e3694845727cb4b555485362ab525cd45319b914fab02164e18fd12b054876"
+    },
+    {
+      "book": 39,
+      "name": "مَلَاخِي",
+      "chapters": 4,
+      "verses": 55,
+      "sha256": "a5a064190d22ecadb2a9cc4a8f776621d73431b0cac086a34b861bfe1e12a4a4"
+    },
+    {
+      "book": 40,
+      "name": "إِنْجِيلُ مَتَّى",
+      "chapters": 28,
+      "verses": 1071,
+      "sha256": "e56bfb10e482c8a9d762c74fbd51a42eb81db8c0c8967a8708510dda36f9cd10"
+    },
+    {
+      "book": 41,
+      "name": "إِنْجِيلُ مَرْقُسَ",
+      "chapters": 16,
+      "verses": 678,
+      "sha256": "64fe6c595882de60e4021f8bd623a78869ea482d3b93881ba394e0e705f3815a"
+    },
+    {
+      "book": 42,
+      "name": "إِنْجِيلُ لُوقَا",
+      "chapters": 24,
+      "verses": 1151,
+      "sha256": "c64553d189c9d1b00daee874b02f0b3dd80b84dc76d170af1f9b0129f721282b"
+    },
+    {
+      "book": 43,
+      "name": "إِنْجِيلُ يُوحَنَّا",
+      "chapters": 21,
+      "verses": 879,
+      "sha256": "84ecaebcc9d8a036fa38fd0cf7b31e62414cfe45bffe351a3544e08120673fc4"
+    },
+    {
+      "book": 44,
+      "name": "أَعْمَالُ ٱلرُّسُلِ",
+      "chapters": 28,
+      "verses": 1007,
+      "sha256": "f2204207e42f22a0f04b42818bdad88d6cb785429aaf711feefeefd59df3e426"
+    },
+    {
+      "book": 45,
+      "name": "رِسَالَةُ بُولُسَ ٱلرَّسُولِ إِلَى أَهْلِ رُومِيَةَ",
+      "chapters": 16,
+      "verses": 433,
+      "sha256": "f8e88f0f22a5af944921b4bcb5144de479cbb63da34b3d6483a1a24a7c0b437f"
+    },
+    {
+      "book": 46,
+      "name": "رِسَالَةُ بُولُسَ ٱلرَّسُولِ ٱلأُولَى إِلَى أَهْلِ كُورِنْثُوسَ",
+      "chapters": 16,
+      "verses": 437,
+      "sha256": "c7c329bf89316c6597a124c5b0b7cfaa0d1044ff393c2ef1ebe129dbd92f0b73"
+    },
+    {
+      "book": 47,
+      "name": "رِسَالَةُ بُولُسَ ٱلرَّسُولِ ٱلثَّانِيةُ إِلَى أَهْلِ كُورِنْثُوسَ",
+      "chapters": 13,
+      "verses": 257,
+      "sha256": "f107cf4880df0df5a29512aa153d85ae3b66e419f4ecc938b140dbd3f4d56a77"
+    },
+    {
+      "book": 48,
+      "name": "رِسَالَةُ بُولُسَ ٱلرَّسُولِ إِلَى أَهْلِ غَلَاطِيَّةَ",
+      "chapters": 6,
+      "verses": 149,
+      "sha256": "74a7ebb61f4f06567706d7eab46817bc22ea96f32fe5e6ccbc05d02426e4fafe"
+    },
+    {
+      "book": 49,
+      "name": "رِسَالَةُ بُولُسَ ٱلرَّسُولِ إِلَى أَهْلِ أَفَسُسَ",
+      "chapters": 6,
+      "verses": 155,
+      "sha256": "0f4542857c03c33fc3ef44431337b00a8deeb46637d4a6e8e8465df442151199"
+    },
+    {
+      "book": 50,
+      "name": "رِسَالَةُ بُولُسَ ٱلرَّسُولِ إِلَى أَهْلِ فِيلِبِّي",
+      "chapters": 4,
+      "verses": 104,
+      "sha256": "78d28b6a336d8ff1c854fa37f9fa4fcef132174ee98b19580021addb9743c02c"
+    },
+    {
+      "book": 51,
+      "name": "رِسَالَةُ بُولُسَ ٱلرَّسُولِ إِلَى أَهْلِ كُولُوسِّي",
+      "chapters": 4,
+      "verses": 95,
+      "sha256": "68b72bea1c4cf53b1817fa645fb497a5fe7cae06e43f1a8027d7297c50186b30"
+    },
+    {
+      "book": 52,
+      "name": "رِسَالَةُ بُولُسَ ٱلرَّسُولِ ٱلأُولَى إِلَى أَهْلِ تَسَالُونِيكِي",
+      "chapters": 5,
+      "verses": 89,
+      "sha256": "e2de57e56a39670b5e4d1b9f7b7108d225469a75fd9dc5270e95117657ab5380"
+    },
+    {
+      "book": 53,
+      "name": "رِسَالَةُ بُولُسَ ٱلرَّسُولِ ٱلثَّانِيةُ إِلَى أَهْلِ تَسَالُونِيكِي",
+      "chapters": 3,
+      "verses": 47,
+      "sha256": "c39adaa4157b31c6a6410df5f9044152ed071e5ba17c9875ae429a0a1c380c97"
+    },
+    {
+      "book": 54,
+      "name": "رِسَالَةُ بُولُسَ ٱلرَّسُولِ ٱلْأُولَى إِلَى تِيمُوثَاوُسَ",
+      "chapters": 6,
+      "verses": 114,
+      "sha256": "bf13a3ee67d3948e1e53fc20ccfc333c4ad6d203cc77dccb9181b462add4ead1"
+    },
+    {
+      "book": 55,
+      "name": "رِسَالَةُ بُولُسَ ٱلرَّسُولِ ٱلثَّانِيةُ إِلَى تِيمُوثَاوُسَ",
+      "chapters": 4,
+      "verses": 83,
+      "sha256": "bf7f785022b9512da577d183c3411b010cd6e7f8d314f936698188d55282688b"
+    },
+    {
+      "book": 56,
+      "name": "رِسَالَةُ بُولُسَ ٱلرَّسُولِ إِلَى تِيطُسَ",
+      "chapters": 3,
+      "verses": 46,
+      "sha256": "c8c2542b159fa0377dd7b294971571cd221b782cbbdb3407b60a7ae110f86004"
+    },
+    {
+      "book": 57,
+      "name": "رِسَالَةُ بُولُسَ ٱلرَّسُولِ إِلَى فِلِيمُونَ",
+      "chapters": 1,
+      "verses": 25,
+      "sha256": "745f6e545e2e623654c548c05b3bae8748b7ece2921b91bbe19d85d5512b4e83"
+    },
+    {
+      "book": 58,
+      "name": "اَلرِّسَالَةُ إِلَى ٱلْعِبْرَانِيِّينَ",
+      "chapters": 13,
+      "verses": 303,
+      "sha256": "6129b395f70022d94f4c359b208d57a0d21f3697b355239800c92078218c6e46"
+    },
+    {
+      "book": 59,
+      "name": "رِسَالَةُ يَعْقُوبَ",
+      "chapters": 5,
+      "verses": 108,
+      "sha256": "bc32dcb60e2e4639db908bee8542f63b25cd879ce75dfdab59b4e9579efb98dd"
+    },
+    {
+      "book": 60,
+      "name": "رِسَالَةُ بُطْرُسَ ٱلرَّسُولِ ٱلْأُولَى",
+      "chapters": 5,
+      "verses": 105,
+      "sha256": "dd3cc06018e05c4314c466c6e1029e1de382a10d473b13b87a294aa558773cf1"
+    },
+    {
+      "book": 61,
+      "name": "رِسَالَةُ بُطْرُسَ ٱلرَّسُولِ ٱلثَّانِيَةُ",
+      "chapters": 3,
+      "verses": 61,
+      "sha256": "6aba911d010e21bddf6a78fe8b2905fd2c7ca2632ec98bda97cf78f98616b30f"
+    },
+    {
+      "book": 62,
+      "name": "رِسَالَةُ يُوحَنَّا ٱلرَّسُولِ ٱلْأُولَى",
+      "chapters": 5,
+      "verses": 105,
+      "sha256": "c8c137e19f546d118d12f4ba184f66d88fabb3a61805018cbb479d88ba130232"
+    },
+    {
+      "book": 63,
+      "name": "رِسَالَةُ يُوحَنَّا ٱلرَّسُولِ ٱلثَّانِيَةُ",
+      "chapters": 1,
+      "verses": 13,
+      "sha256": "46f4823228a9638c407e0c4ffb1db0d59e44e764305e5bf26940f2335f94713b"
+    },
+    {
+      "book": 64,
+      "name": "رِسَالَةُ يُوحَنَّا ٱلرَّسُولِ ٱلثَّالِثَةُ",
+      "chapters": 1,
+      "verses": 15,
+      "sha256": "3e9875f9f2c81a248daff49035dc9c57a6027f61d9bc3ba7399fa5a64da83f49"
+    },
+    {
+      "book": 65,
+      "name": "رِسَالَةُ يَهُوذَا",
+      "chapters": 1,
+      "verses": 25,
+      "sha256": "c063e4fc6b474489bbca32320a75ba1ff797b414526349a7adc9b0379b83b4b5"
+    },
+    {
+      "book": 66,
+      "name": "رُؤْيَا يُوحَنَّا ٱللَّاهُوتِيِّ",
+      "chapters": 22,
+      "verses": 404,
+      "sha256": "6533ec6b28ed09b461dcb58ba81225080c039e4072fdb538b664df17610e1a3b"
+    }
+  ],
+  "source_sha256": "fd420ac7b224d42be23997fef298c2193d12788d95d2db7103904184cdda766a"
+}

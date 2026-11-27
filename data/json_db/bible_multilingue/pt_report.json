@@ -1,0 +1,482 @@
+{
+  "lang": "pt",
+  "translation": "Bíblia Livre (Almeida 1819 atualizada)",
+  "abbreviation": "LIV",
+  "id_bible_version": 99,
+  "id_book_base": 132,
+  "license": "cc-by",
+  "attribution": "© 2018 Diego Santos et al. — Free Bible (update of 1819 Almeida translation)",
+  "source_url": "https://ebible.org/find/details.php?id=porbr2018",
+  "note": "",
+  "books": 66,
+  "chapters": 1189,
+  "verses": 31102,
+  "files_written": 1189,
+  "problems": [],
+  "warnings": [],
+  "books_detail": [
+    {
+      "book": 1,
+      "name": "Gênesis",
+      "chapters": 50,
+      "verses": 1533,
+      "sha256": "e29b08c845368a0804fc33d81acef5f2258466b0a5e71a8aa3a2e46973b2ee85"
+    },
+    {
+      "book": 2,
+      "name": "Livro do Êxodo",
+      "chapters": 40,
+      "verses": 1213,
+      "sha256": "5613bb1a6cca80292be80d4c91bb3f94e1c7e9081985f111470f145e8d861047"
+    },
+    {
+      "book": 3,
+      "name": "Levítico",
+      "chapters": 27,
+      "verses": 859,
+      "sha256": "054e10232ddaaee2797b38c2e3a86bd0fc99dd007ff3d183d086ba86506f78b7"
+    },
+    {
+      "book": 4,
+      "name": "Números",
+      "chapters": 36,
+      "verses": 1288,
+      "sha256": "64322386ddb05ab8d1522f32837f4c0368f6bfe2ca2f8489b18205d863afaabf"
+    },
+    {
+      "book": 5,
+      "name": "Deuteronômio",
+      "chapters": 34,
+      "verses": 959,
+      "sha256": "56fa0c3c99f1bc91294e5c65ef1a3e7ddb216888ddae0f92b792ff912cd0dd1b"
+    },
+    {
+      "book": 6,
+      "name": "Livro de Josué",
+      "chapters": 24,
+      "verses": 658,
+      "sha256": "16c703a8202969c3c83f49564a46cc6c672aeaf206402110fd04d4675fc685fd"
+    },
+    {
+      "book": 7,
+      "name": "Livro dos Juízes",
+      "chapters": 21,
+      "verses": 618,
+      "sha256": "b4e6b7ee54ad91f059f9256e5691d8513d43b2d195c11e16a303d59bb1b40f41"
+    },
+    {
+      "book": 8,
+      "name": "Rute",
+      "chapters": 4,
+      "verses": 85,
+      "sha256": "03087c46541746162e0cbeaf64a40fe5d504a6a596e99feaa7b1c72a598d9147"
+    },
+    {
+      "book": 9,
+      "name": "Primeiro Livro de Samuel",
+      "chapters": 31,
+      "verses": 810,
+      "sha256": "38e723bfd26065cf54ddbe80ae9f59bba0e4a8211cd5cfbb615e880020a6bbd1"
+    },
+    {
+      "book": 10,
+      "name": "Segundo Livro de Samuel",
+      "chapters": 24,
+      "verses": 695,
+      "sha256": "4d61a042d9cd9915f90b361b32f3d87d4d57ea7bfabd7b9baf933ad5e9586226"
+    },
+    {
+      "book": 11,
+      "name": "Primeiro Livro dos Reis",
+      "chapters": 22,
+      "verses": 816,
+      "sha256": "4758756271359452aaa473caadcee4b174147b731f47739447923608c62db37c"
+    },
+    {
+      "book": 12,
+      "name": "Segundo Livro dos Reis",
+      "chapters": 25,
+      "verses": 719,
+      "sha256": "d90e22c5faa872739ff6642359d9d775a7d492681d225d0aa821373aa1302da5"
+    },
+    {
+      "book": 13,
+      "name": "Primeiro Livro de Crônicas",
+      "chapters": 29,
+      "verses": 942,
+      "sha256": "ad055e1e22aff3022250f38911ff0c2382a0657843392d52c2cedb38dd2033bb"
+    },
+    {
+      "book": 14,
+      "name": "Segundo Livro de Crônicas",
+      "chapters": 36,
+      "verses": 822,
+      "sha256": "ebd404ee42b3c18b150c90519a99112ffb23dc6030964311926c0ae3221ebf8d"
+    },
+    {
+      "book": 15,
+      "name": "Esdras",
+      "chapters": 10,
+      "verses": 280,
+      "sha256": "bc5bf09d4debff483e89a33cadd0cbe07bf0e9ccb2d46f9fd2421bc5c53464e8"
+    },
+    {
+      "book": 16,
+      "name": "Neemias",
+      "chapters": 13,
+      "verses": 406,
+      "sha256": "0c77e19306243bd7d4219f0c31ee84f0a75e598c0ae7984fabbcddbb561b25db"
+    },
+    {
+      "book": 17,
+      "name": "Ester",
+      "chapters": 10,
+      "verses": 167,
+      "sha256": "c83faa8ca6ebddc78bee2d8f4872e712062985486f54327db8b530ecd27a8b35"
+    },
+    {
+      "book": 18,
+      "name": "Jó",
+      "chapters": 42,
+      "verses": 1070,
+      "sha256": "59a1e9c1140992d5650cbd4bf729858b94e28a897057dd3d28f45b62429307b3"
+    },
+    {
+      "book": 19,
+      "name": "Livro dos Salmos",
+      "chapters": 150,
+      "verses": 2461,
+      "sha256": "00c8e7c199d206ffb658efb893d73699a48f84fffa3a2be71f0118f807061cf4"
+    },
+    {
+      "book": 20,
+      "name": "Provérbios de Salomão",
+      "chapters": 31,
+      "verses": 915,
+      "sha256": "4fd907d7619eeaafab983aa055d04669bcb57583372460763551fdcae9830988"
+    },
+    {
+      "book": 21,
+      "name": "Livro do Eclesiastes ou Pregador",
+      "chapters": 12,
+      "verses": 222,
+      "sha256": "dea127fa57891866d01b0e3186e993c946b86ef4b90141c6b7c5c6a4806f4c78"
+    },
+    {
+      "book": 22,
+      "name": "Cantares de Salomão",
+      "chapters": 8,
+      "verses": 117,
+      "sha256": "51b140552a668ce1694fb7242416b228f7353568088499788a44934abd85348d"
+    },
+    {
+      "book": 23,
+      "name": "Isaías",
+      "chapters": 66,
+      "verses": 1292,
+      "sha256": "8fe5a64dac950240f74ec1c469f0e6597fe7706ce5f4be060dfbeafb00a05dc3"
+    },
+    {
+      "book": 24,
+      "name": "Jeremias",
+      "chapters": 52,
+      "verses": 1364,
+      "sha256": "f5b255e90a64a9782e34117b2b04d88c3a581c0497f6f7a1165fec324be8c63c"
+    },
+    {
+      "book": 25,
+      "name": "Lamentações de Jeremias",
+      "chapters": 5,
+      "verses": 154,
+      "sha256": "64ae4382de11e389d1dc7153f799659ed0d092c3370cc25d2bf9a49095af0ac0"
+    },
+    {
+      "book": 26,
+      "name": "Ezequiel",
+      "chapters": 48,
+      "verses": 1273,
+      "sha256": "b1c5bd433124dcdc1aed2ad07dfea0d6a58bca209539fb4e964788b2d3123574"
+    },
+    {
+      "book": 27,
+      "name": "Daniel",
+      "chapters": 12,
+      "verses": 357,
+      "sha256": "1041d71f7c8454654a089c6e418d70c3c340f827b72340a6913bd27b76c99248"
+    },
+    {
+      "book": 28,
+      "name": "Oseias",
+      "chapters": 14,
+      "verses": 197,
+      "sha256": "058386365f9573b02f45939a73f0a209281044be438671947224777f191fe82a"
+    },
+    {
+      "book": 29,
+      "name": "Joel",
+      "chapters": 3,
+      "verses": 73,
+      "sha256": "f9169d0b354395647c0ca9814de739aa651519c9f3bff55a638073a27a50f5fe"
+    },
+    {
+      "book": 30,
+      "name": "Amós",
+      "chapters": 9,
+      "verses": 146,
+      "sha256": "8f6eec15b0208312ac7575065232a7102fb1a3eac6fd5c4c2993faf23c2f905a"
+    },
+    {
+      "book": 31,
+      "name": "Obadias",
+      "chapters": 1,
+      "verses": 21,
+      "sha256": "d2f29e99966da6d3e4be5091ee50cf7c53968f330293ab4675909826f828f151"
+    },
+    {
+      "book": 32,
+      "name": "Jonas",
+      "chapters": 4,
+      "verses": 48,
+      "sha256": "0abe712d3e7cc3a11b3c5aaa110352519864e54e63c8e73edfa068b2c64e1a3b"
+    },
+    {
+      "book": 33,
+      "name": "Miqueias",
+      "chapters": 7,
+      "verses": 105,
+      "sha256": "a9cc6c2861e8980ee1a6752623aa33091ad7b6e5b489cd22a6c7fc9fac8af768"
+    },
+    {
+      "book": 34,
+      "name": "Naum",
+      "chapters": 3,
+      "verses": 47,
+      "sha256": "292d3cc93cbf2df3a91b39b599fc5d814fe0e0df2b0592642694444192952be9"
+    },
+    {
+      "book": 35,
+      "name": "Habacuque",
+      "chapters": 3,
+      "verses": 56,
+      "sha256": "c3fa7131925ad6602d368928cc440566fad011621251267302a28cdeb3fe8e43"
+    },
+    {
+      "book": 36,
+      "name": "Sofonias",
+      "chapters": 3,
+      "verses": 53,
+      "sha256": "fb8cb2a8c41457ca74cbc5fb848bd88ebca1e6c0b3ad84a528af946f0d61e2a5"
+    },
+    {
+      "book": 37,
+      "name": "Ageu",
+      "chapters": 2,
+      "verses": 38,
+      "sha256": "39d80449cb1044759654b5029ae356bf07b11060192473c470624562a9b4352c"
+    },
+    {
+      "book": 38,
+      "name": "Zacarias",
+      "chapters": 14,
+      "verses": 211,
+      "sha256": "b17a2b7c6008fac2f84890b6da6abf99f36f6953a39d3a4f3a79ff32cd49cefb"
+    },
+    {
+      "book": 39,
+      "name": "Malaquias",
+      "chapters": 4,
+      "verses": 55,
+      "sha256": "829a795552454468fcc48c8754e354450f5e4b38f2175ebf996dcfe6a95d8bb9"
+    },
+    {
+      "book": 40,
+      "name": "Evangelho Segundo Mateus",
+      "chapters": 28,
+      "verses": 1071,
+      "sha256": "962b9bb48ed077b746bc2a6cda1473385aa371113e94eb8744919dd8ff63eac1"
+    },
+    {
+      "book": 41,
+      "name": "Evangelho Segundo Marcos",
+      "chapters": 16,
+      "verses": 678,
+      "sha256": "4c4b2cdcf2168aa90aa3147ba91a7d90acd0fce3042c246955d1cd81103d87c0"
+    },
+    {
+      "book": 42,
+      "name": "Evangelho Segundo Lucas",
+      "chapters": 24,
+      "verses": 1151,
+      "sha256": "6435a05a760ab1a86cf6bfec0e8925f64f4025354bf24b9203f30adc3f4dddf4"
+    },
+    {
+      "book": 43,
+      "name": "Evangelho Segundo João",
+      "chapters": 21,
+      "verses": 879,
+      "sha256": "a735e6d6b885e0ce96d5d4e3a1bdec5e1e4ff44c9539f700b4b348a094874537"
+    },
+    {
+      "book": 44,
+      "name": "Atos dos Apóstolos",
+      "chapters": 28,
+      "verses": 1007,
+      "sha256": "0937108cd1ea43e2a5016e4da967e0d4094c6110006cff3bec2475fc611e17b2"
+    },
+    {
+      "book": 45,
+      "name": "Carta de Paulo aos Romanos",
+      "chapters": 16,
+      "verses": 433,
+      "sha256": "8be0cb12f549f9e484314c8d2a45c4498f57a9436c793eb4bb4f6418d08e02fc"
+    },
+    {
+      "book": 46,
+      "name": "Primeira Carta de Paulo aos Coríntios",
+      "chapters": 16,
+      "verses": 437,
+      "sha256": "3e81e6268c7187e83e51e4a9bc190e58ece4a84880998bd8fd7aa3e63ece5631"
+    },
+    {
+      "book": 47,
+      "name": "Segunda Carta de Paulo aos Coríntios",
+      "chapters": 13,
+      "verses": 257,
+      "sha256": "fa0ad874dae043156a09af4046560b7bb4d1879af5cc0b1ffb11b5f1fbbf168b"
+    },
+    {
+      "book": 48,
+      "name": "Carta de Paulo aos Gálatas",
+      "chapters": 6,
+      "verses": 149,
+      "sha256": "1b8372609f6ee8bbf3ac0ec1eb7ec5a10365346ea16b450232cc3431432ad322"
+    },
+    {
+      "book": 49,
+      "name": "Carta de Paulo aos Efésios",
+      "chapters": 6,
+      "verses": 155,
+      "sha256": "6ef0ba43a6441d5ad8a0534c3843e449ea5c7336cfbe6121a25ca340a4e1f6a6"
+    },
+    {
+      "book": 50,
+      "name": "Carta de Paulo aos Filipenses",
+      "chapters": 4,
+      "verses": 104,
+      "sha256": "1ec7b5cf260a24ab7c5f729edc1c7a120636146becd8646df0317a23967e3426"
+    },
+    {
+      "book": 51,
+      "name": "Carta de Paulo aos Colossenses",
+      "chapters": 4,
+      "verses": 95,
+      "sha256": "2caeafa6baf356e2f537fc08c0550b6dae0fa6b557cf473328b4a786ea8876fb"
+    },
+    {
+      "book": 52,
+      "name": "Primeira Carta de Paulo aos Tessalonicenses",
+      "chapters": 5,
+      "verses": 89,
+      "sha256": "43cfedc90408c8feb98bb64e1412f7a79f2eda8aad27b4437bba2156b21613ce"
+    },
+    {
+      "book": 53,
+      "name": "Segunda Carta de Paulo aos Tessalonicenses",
+      "chapters": 3,
+      "verses": 47,
+      "sha256": "fdffa33ca712af5f0c563db44828352091f0512f464756d428ca4d2247825c75"
+    },
+    {
+      "book": 54,
+      "name": "Primeira Carta de Paulo a Timóteo",
+      "chapters": 6,
+      "verses": 113,
+      "sha256": "ce419498d8da464b9b62672e45a1f27ef952b8dd09a42bb50f9e154fcddbe601"
+    },
+    {
+      "book": 55,
+      "name": "Segunda Carta de Paulo a Timóteo",
+      "chapters": 4,
+      "verses": 83,
+      "sha256": "0a102f1e3bd60f2d4807f1ffa1502093d31b5e00e31fcd81c41b9cf7bc780709"
+    },
+    {
+      "book": 56,
+      "name": "Carta de Paulo a Tito",
+      "chapters": 3,
+      "verses": 46,
+      "sha256": "aced184c65620df3e9648c8c662d6c6f47063fe9e2f07388f659495da26d2bff"
+    },
+    {
+      "book": 57,
+      "name": "Carta de Paulo a Filemom",
+      "chapters": 1,
+      "verses": 25,
+      "sha256": "3b2ed065e77249fe4747c07f743c5c55ec9827cdb80990599f06889a809084de"
+    },
+    {
+      "book": 58,
+      "name": "Carta aos Hebreus",
+      "chapters": 13,
+      "verses": 303,
+      "sha256": "4a00d6ea20a097b40e26885d5cbe8d43da72e3a9c430f271648ee968c623756c"
+    },
+    {
+      "book": 59,
+      "name": "Carta Universal de Tiago",
+      "chapters": 5,
+      "verses": 108,
+      "sha256": "81ee032291da5f834ba3c291bedd7ad8594b16b5bd2235b0358f0764f810dd48"
+    },
+    {
+      "book": 60,
+      "name": "Primeira Carta Universal de Pedro",
+      "chapters": 5,
+      "verses": 105,
+      "sha256": "3a2d1fa84e90fba341e34d352528ca3ed923cbc61a66982af730e18b057a1569"
+    },
+    {
+      "book": 61,
+      "name": "Segunda Carta Universal de Pedro",
+      "chapters": 3,
+      "verses": 61,
+      "sha256": "966e6031785abb9aa585255589c0468e0e5a331b0fec4980f0db530973a27367"
+    },
+    {
+      "book": 62,
+      "name": "Primeira Carta Universal de João",
+      "chapters": 5,
+      "verses": 105,
+      "sha256": "30f90eeb54a9b2346abdf3812396b043c3abbd7e7db0c03dc719275efba8731b"
+    },
+    {
+      "book": 63,
+      "name": "Segunda Carta de João",
+      "chapters": 1,
+      "verses": 13,
+      "sha256": "c9ae8cc9b67948a29320ea0a04cf4acfa23f0e8b088099dc49056e2cc06af213"
+    },
+    {
+      "book": 64,
+      "name": "Terceira Carta de João",
+      "chapters": 1,
+      "verses": 14,
+      "sha256": "263b9927a36821981a02555c41f2ecd62a5fcb89a74ff72e0d94203a8af104b8"
+    },
+    {
+      "book": 65,
+      "name": "Carta Universal de Judas",
+      "chapters": 1,
+      "verses": 25,
+      "sha256": "5211ab1637f148bfdf5678e6373ebfa3f223497249afa173e6ce72d26be2d7af"
+    },
+    {
+      "book": 66,
+      "name": "Apocalipse de João",
+      "chapters": 22,
+      "verses": 404,
+      "sha256": "c091b520b6dc9a8a66817b75f2b035eebf0cabaa242c8d4dc13f283fe7e796e1"
+    }
+  ],
+  "source_sha256": "7ca6742fc1a32ca657a9872047c919097bb9af1384dc318c9cc58ab1cfa5bbf9"
+}
