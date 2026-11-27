@@ -401,15 +401,21 @@ export function registerAdminRoutes(
         description: "Lista global com meta de paginação",
       },
       401: {
-        content: { "application/json": { schema: z.object({ error: z.string() }) } },
+        content: {
+          "application/json": { schema: z.object({ error: z.string() }) },
+        },
         description: "Não autenticado",
       },
       403: {
-        content: { "application/json": { schema: z.object({ error: z.string() }) } },
+        content: {
+          "application/json": { schema: z.object({ error: z.string() }) },
+        },
         description: "Sem permissão",
       },
       500: {
-        content: { "application/json": { schema: z.object({ error: z.string() }) } },
+        content: {
+          "application/json": { schema: z.object({ error: z.string() }) },
+        },
         description: "Erro interno",
       },
     },
@@ -476,15 +482,21 @@ export function registerAdminRoutes(
         description: "Lista global com meta de paginação",
       },
       401: {
-        content: { "application/json": { schema: z.object({ error: z.string() }) } },
+        content: {
+          "application/json": { schema: z.object({ error: z.string() }) },
+        },
         description: "Não autenticado",
       },
       403: {
-        content: { "application/json": { schema: z.object({ error: z.string() }) } },
+        content: {
+          "application/json": { schema: z.object({ error: z.string() }) },
+        },
         description: "Sem permissão",
       },
       500: {
-        content: { "application/json": { schema: z.object({ error: z.string() }) } },
+        content: {
+          "application/json": { schema: z.object({ error: z.string() }) },
+        },
         description: "Erro interno",
       },
     },
