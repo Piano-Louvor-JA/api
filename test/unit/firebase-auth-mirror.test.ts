@@ -3,14 +3,19 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // admin-membros v1.0.0 — espelho Auth→community_members/{uid} no login
 
-const { verifyIdTokenMock, getDbMock, fsDocSetMock, fsDocGetMock } = vi.hoisted(
-  () => ({
-    verifyIdTokenMock: vi.fn(),
-    getDbMock: { prepare: vi.fn() },
-    fsDocSetMock: vi.fn(),
-    fsDocGetMock: vi.fn(),
-  }),
-);
+const {
+  verifyIdTokenMock,
+  getDbMock,
+  fsDocSetMock,
+  fsDocCreateMock,
+  fsDocGetMock,
+} = vi.hoisted(() => ({
+  verifyIdTokenMock: vi.fn(),
+  getDbMock: { prepare: vi.fn() },
+  fsDocSetMock: vi.fn(),
+  fsDocCreateMock: vi.fn(),
+  fsDocGetMock: vi.fn(),
+}));
 
 vi.mock("firebase-admin/app", () => ({
   initializeApp: vi.fn(() => ({})),
@@ -25,6 +30,7 @@ vi.mock("firebase-admin/firestore", () => ({
       doc: vi.fn(() => ({
         get: fsDocGetMock,
         set: fsDocSetMock,
+        create: fsDocCreateMock,
       })),
     })),
   })),
@@ -59,6 +65,7 @@ describe("firebaseAuth middleware — espelho community_members (SPEC admin-memb
     vi.stubEnv("FIREBASE_SERVICE_ACCOUNT", JSON.stringify({ project_id: "t" }));
     fsDocGetMock.mockResolvedValue({ exists: false });
     fsDocSetMock.mockResolvedValue(undefined);
+    fsDocCreateMock.mockResolvedValue(undefined);
     verifyIdTokenMock.mockResolvedValue({
       uid: "uid-1",
       email: "novo@teste.dev",
@@ -71,8 +78,8 @@ describe("firebaseAuth middleware — espelho community_members (SPEC admin-memb
   it("AC1/AC4: login de usuário novo → cria doc community_members/{uid} com campos mínimos", async () => {
     const ctx = makeContext({ authorization: "Bearer a.b.c" });
     await callMirror(ctx);
-    expect(fsDocSetMock).toHaveBeenCalledOnce();
-    const data = fsDocSetMock.mock.calls[0][0] as Record<string, unknown>;
+    await vi.waitFor(() => expect(fsDocCreateMock).toHaveBeenCalledOnce());
+    const data = fsDocCreateMock.mock.calls[0][0] as Record<string, unknown>;
     expect(data.uid).toBe("uid-1");
     expect(data.email).toBe("novo@teste.dev");
     expect(data.role).toBe("member");
@@ -80,22 +87,36 @@ describe("firebaseAuth middleware — espelho community_members (SPEC admin-memb
     expect(data.createdAt).toBeInstanceOf(Date);
   });
 
-  it("AC5: login existente → não sobrescreve doc (nunca rebaixar role/status)", async () => {
-    fsDocGetMock.mockResolvedValue({ exists: true });
+  it("AC5: login existente → atualiza perfil preservando role/status", async () => {
+    fsDocGetMock.mockResolvedValue({
+      exists: true,
+      data: () => ({ role: "moderator", status: "banned" }),
+    });
     const ctx = makeContext({ authorization: "Bearer a.b.c" });
     await callMirror(ctx);
-    expect(fsDocSetMock).not.toHaveBeenCalled();
+    await vi.waitFor(() => expect(fsDocSetMock).toHaveBeenCalledOnce());
+    expect(fsDocCreateMock).not.toHaveBeenCalled();
+    expect(fsDocSetMock.mock.calls[0][0]).not.toHaveProperty("role");
+    expect(fsDocSetMock.mock.calls[0][0]).not.toHaveProperty("status");
   });
 
-  it("usuário sem email → doc com email null, nunca undefined", async () => {
+  it("Firestore pendente não bloqueia o login", async () => {
+    fsDocGetMock.mockReturnValue(new Promise(() => {}));
+    const ctx = makeContext({ authorization: "Bearer a.b.c" });
+    await callMirror(ctx);
+    expect(ctx.get("user")).toBeDefined();
+    expect(fsDocCreateMock).not.toHaveBeenCalled();
+  });
+
+  it("usuário sem email → doc com fallback definido", async () => {
     verifyIdTokenMock.mockResolvedValue({
       uid: "uid-anon",
       firebase: { project_id: "t" },
     });
     const ctx = makeContext({ authorization: "Bearer a.b.c" });
     await callMirror(ctx);
-    expect(fsDocSetMock).toHaveBeenCalledOnce();
-    const data = fsDocSetMock.mock.calls[0][0] as Record<string, unknown>;
+    await vi.waitFor(() => expect(fsDocCreateMock).toHaveBeenCalledOnce());
+    const data = fsDocCreateMock.mock.calls[0][0] as Record<string, unknown>;
     expect(data.email).not.toBeUndefined();
   });
 });

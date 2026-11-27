@@ -5,6 +5,7 @@ import { apiReference } from "@scalar/hono-api-reference";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import { getDbStats } from "./db/connection.js";
+import { receiverIdentityScript } from "./lib/receiverIdentity.js";
 import { reportError } from "./lib/telemetry.js";
 import { APP_VERSION } from "./lib/version.js";
 import { antiBotMiddleware } from "./middleware/antiBot.js";
@@ -18,6 +19,7 @@ import { compatRoutes } from "./routes/compat.js";
 import { albumsRoutes } from "./v1/albums/albums.routes.js";
 import { appRoutes } from "./v1/app/app.routes.js";
 import { bibleRoutes } from "./v1/bible/bible.routes.js";
+import { catalogRoutes } from "./v1/catalog/catalog.routes.js";
 import { categoriesRoutes } from "./v1/categories/categories.routes.js";
 import { communityReviewRoutes } from "./v1/custom/community-review.routes.js";
 import { customRoutes } from "./v1/custom/custom.routes.js";
@@ -35,6 +37,7 @@ import {
   setPalcoWs,
 } from "./v1/palco/palco.routes.js";
 import { remoteRoutes } from "./v1/remote/remote.routes.js";
+import { telemetryRoutes } from "./v1/telemetry/telemetry.routes.js";
 // Central de Tickets (B1)
 import { buildTicketsRoutes } from "./v1/tickets/tickets.routes.js";
 
@@ -56,11 +59,22 @@ export function createApp() {
   });
 
   // RF-03: CORS configurável via CORS_ORIGINS (default * para compat com apps)
+  // allowHeaders explícito: Electron/web mandam X-Partner-Key e X-Client-*
+  // (preflight); sem a lista, CORS restrito derruba o OPTIONS.
   const corsOrigins = process.env.CORS_ORIGINS ?? "*";
+  const allowHeaders = [
+    "Content-Type",
+    "Authorization",
+    "X-Partner-Key",
+    "X-Client-Platform",
+    "X-Client-Version",
+    "X-Tenant",
+    "Api-Token",
+  ];
   const corsConfig =
     corsOrigins === "*"
-      ? {}
-      : { origin: corsOrigins.split(",").map((o) => o.trim()) };
+      ? { allowHeaders }
+      : { origin: corsOrigins.split(",").map((o) => o.trim()), allowHeaders };
   app.use("*", cors(corsConfig));
   // SEC-3 (api#124): CSP por rota — a API não serve HTML (default-src 'none'),
   // mas DUAS superfícies servem: /palco (receiver com script inline + WS) e
@@ -183,6 +197,11 @@ export function createApp() {
 
   // WT-5J: receiver desktop/TV browser na mesma origem da API/relay.
   // `index: "index.html"` evita redirect que descartaria ?code= e ?api=.
+  app.get("/palco/client-identity.js", (c) => {
+    c.header("Content-Type", "application/javascript; charset=utf-8");
+    c.header("Cache-Control", "no-store");
+    return c.body(receiverIdentityScript());
+  });
   app.use("/palco", serveStatic({ root: "./static", index: "index.html" }));
   app.use("/palco/", serveStatic({ root: "./static", index: "index.html" }));
   app.use("/palco/*", serveStatic({ root: "./static" }));
@@ -194,6 +213,7 @@ export function createApp() {
   app.route("/", compatRoutes);
 
   app.route("/v1/bible", bibleRoutes);
+  app.route("/v1/catalog", catalogRoutes);
   app.route("/v1/liturgy", liturgyRoutes);
   app.route("/v1/remote", remoteRoutes);
   app.use("/v1/custom/*", tenantMiddleware);
@@ -203,6 +223,7 @@ export function createApp() {
   app.route("/v1/custom", membersRoutes);
   app.route("/v1/geo", geoVisitRoutes);
   app.route("/v1/geo", geoTimeseriesRoutes);
+  app.route("/v1/telemetry", telemetryRoutes);
   app.route("/v1/palco", palcoRoutes);
   // Atualização do apk Android (manifesto + download), sem auth.
   app.route("/v1/app", appRoutes);

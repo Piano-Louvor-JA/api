@@ -36,6 +36,10 @@ try {
   console.error("[purge] falhou (não-fatal):", e);
 }
 
+// Telemetria de dispositivos online: repõe o estado e grava em lote (não-fatal).
+const { bootPresence } = await import("./lib/bootPresence.js");
+await bootPresence();
+
 const server = serve(
   { fetch: app.fetch, port, hostname: "0.0.0.0" },
   (info) => {
