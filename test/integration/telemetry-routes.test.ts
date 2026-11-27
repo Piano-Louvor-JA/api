@@ -308,4 +308,31 @@ describe("/v1/telemetry", () => {
     ).toBe(403);
     expect((await app.router.request("/v1/telemetry/map")).status).toBe(401);
   });
+
+  it("/history|/rankings|/map sem query usam defaults (90d / limit 50 / BR)", async () => {
+    expect((await beat(body())).status).toBe(204);
+    await vi.waitFor(async () => {
+      const json = await (await online(adminToken)).json();
+      expect(json.devices[0]?.city).toBe("Bertioga");
+    });
+    const auth = { authorization: `Bearer ${adminToken}` };
+    const history = await (
+      await app.router.request("/v1/telemetry/history", { headers: auth })
+    ).json();
+    expect(history.period_days).toBe(90);
+
+    const rankings = await (
+      await app.router.request("/v1/telemetry/rankings?by=district", {
+        headers: auth,
+      })
+    ).json();
+    expect(rankings.period_days).toBe(90);
+    expect(Array.isArray(rankings.items)).toBe(true);
+
+    const map = await (
+      await app.router.request("/v1/telemetry/map", { headers: auth })
+    ).json();
+    expect(map.country).toBe("BR");
+    expect(map.period_days).toBe(90);
+  });
 });
