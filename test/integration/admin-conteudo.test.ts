@@ -18,7 +18,6 @@ describe("Admin conteúdo global (collections/musics + owner_name)", () => {
   let aliceToken: string;
   let plebeuId: number;
   const auth = (t: string) => ({ authorization: `Bearer ${t}` });
-  const H = { "X-Tenant": "piano", "content-type": "application/json" };
 
   let aliceColId: number; // privada de outro usuário
   let publicColId: number; // pública de plebeu
@@ -75,8 +74,13 @@ describe("Admin conteúdo global (collections/musics + owner_name)", () => {
   });
 
   it("AC-2: 401 sem sessão; 403 não-admin (fail-closed)", async () => {
-    for (const p of ["/v1/custom/admin/collections", "/v1/custom/admin/musics"]) {
-      const anon = await router.request(p, { headers: { "X-Tenant": "piano" } });
+    for (const p of [
+      "/v1/custom/admin/collections",
+      "/v1/custom/admin/musics",
+    ]) {
+      const anon = await router.request(p, {
+        headers: { "X-Tenant": "piano" },
+      });
       expect(anon.status, `anon ${p}`).toBe(401);
       const nonAdmin = await router.request(p, {
         headers: { ...auth(userToken), "X-Tenant": "piano" },
@@ -130,7 +134,12 @@ describe("Admin conteúdo global (collections/musics + owner_name)", () => {
     );
     const body = await res.json();
     expect(body.data).toHaveLength(1);
-    expect(body.meta).toMatchObject({ total: 3, page: 2, per_page: 2, last_page: 2 });
+    expect(body.meta).toMatchObject({
+      total: 3,
+      page: 2,
+      per_page: 2,
+      last_page: 2,
+    });
   });
 
   it("AC-3: admin vê TODAS as músicas com owner_name/collection_name", async () => {
@@ -180,10 +189,12 @@ describe("Admin conteúdo global (collections/musics + owner_name)", () => {
     });
     const mineBody = await mine.json();
     expect(mineBody.data).toHaveLength(2);
+    expect(mineBody.data.some((c: any) => c.name === "Alice Privada")).toBe(
+      false,
+    );
     expect(
-      mineBody.data.some((c: any) => c.name === "Alice Privada"),
-    ).toBe(false);
-    expect(mineBody.data.find((c: any) => c.id_collection === publicColId).is_owner).toBe(1);
+      mineBody.data.find((c: any) => c.id_collection === publicColId).is_owner,
+    ).toBe(1);
 
     // alice logada: vê a própria privada (não via admin) + owner_name próprio
     const aliceBody = await (
