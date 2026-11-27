@@ -243,10 +243,14 @@ def test_package_book_json_uses_real_chapters(monkeypatch, tmp_path):
     # stub sha256/tarfile p/ não tocar disco
     monkeypatch.setattr(pkg, "sha256", lambda p: "0" * 64)
     import tarfile as _tar
+    class _TI:  # t_1fb85696: tar determinístico usa gettarinfo+addfile
+        mtime = 0; uid = 0; gid = 0; uname = ""; gname = ""
     class _TF:
         def __enter__(self): return self
         def __exit__(self, *a): return False
         def add(self, *a, **k): pass
+        def gettarinfo(self, *a, **k): return _TI()
+        def addfile(self, *a, **k): pass
     monkeypatch.setattr(_tar, "open", lambda *a, **k: _TF())
 
     def fake_dump(obj, *a, **k):
