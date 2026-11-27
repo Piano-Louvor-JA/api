@@ -63,8 +63,10 @@ export async function upsertCommunityMember(
       );
       return profileChanged ? "updated" : "unchanged";
     }
-    await doc.set(
-      {
+    // create() fails atomically when another login/admin created the document
+    // after our read; never overwrite their role/status with initial defaults.
+    try {
+      await doc.create({
         uid: member.uid,
         email: member.email,
         name: member.name,
@@ -72,10 +74,23 @@ export async function upsertCommunityMember(
         status: "active",
         createdAt: now,
         lastLoginAt: now,
-      },
-      { merge: true },
-    );
-    return "created";
+      });
+      return "created";
+    } catch (error) {
+      if (
+        !error ||
+        typeof error !== "object" ||
+        !("code" in error) ||
+        error.code !== 6
+      ) {
+        throw error;
+      }
+      await doc.set(
+        { lastLoginAt: now, email: member.email, name: member.name },
+        { merge: true },
+      );
+      return "updated";
+    }
   } catch (e) {
     console.warn(
       "[communityMirror] upsert falhou (fail-open):",

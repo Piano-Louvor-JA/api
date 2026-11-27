@@ -29,6 +29,13 @@ function fakeFirestore() {
   const db = {
     collection: (name: string) => ({
       doc: (id: string) => ({
+        create: async (data: Doc) => {
+          const key = `${name}/${id}`;
+          if (docs.has(key))
+            throw Object.assign(new Error("already exists"), { code: 6 });
+          docs.set(key, { ...data });
+          return {};
+        },
         get: async () => ({
           exists: docs.has(`${name}/${id}`),
           data: () => docs.get(`${name}/${id}`),

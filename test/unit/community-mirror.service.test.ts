@@ -22,6 +22,14 @@ function fakeFirestore() {
   const ops = { writes: 0, writePaths: [] as string[] };
   const mkDoc = (path: string) => ({
     get: async () => ({ exists: docs.has(path), data: () => docs.get(path) }),
+    create: async (data: Doc) => {
+      if (docs.has(path))
+        throw Object.assign(new Error("already exists"), { code: 6 });
+      ops.writes++;
+      ops.writePaths.push(path);
+      docs.set(path, { ...data });
+      return {};
+    },
     set: async (data: Doc, opts?: { merge?: boolean }) => {
       ops.writes++;
       ops.writePaths.push(path);
@@ -97,6 +105,44 @@ describe("community-mirror.service (SPEC admin-membros v1.0.0)", () => {
     expect(doc?.name).toBe("New");
     expect(doc?.lastLoginAt).toEqual(expect.any(Date));
     expect((doc?.lastLoginAt as Date) > new Date("2020-01-01")).toBe(true);
+  });
+
+  it("AC5: criação concorrente preserva a moderação gravada após a leitura", async () => {
+    let stored: Doc = {};
+    const set = vi.fn(async (data: Doc) => {
+      stored = { ...stored, ...data };
+    });
+    const create = vi.fn(async () => {
+      stored = { role: "moderator", status: "banned" };
+      throw Object.assign(new Error("already exists"), { code: 6 });
+    });
+    setCommunityMemberFirestoreForTests({
+      collection: () => ({
+        doc: () => ({
+          get: async () => ({ exists: false }),
+          create,
+          set,
+        }),
+      }),
+    } as unknown as Parameters<typeof setCommunityMemberFirestoreForTests>[0]);
+
+    await upsertCommunityMember({
+      uid: "concurrent",
+      email: "a@b.com",
+      name: "A",
+    });
+    expect(stored).toMatchObject({
+      role: "moderator",
+      status: "banned",
+      email: "a@b.com",
+      name: "A",
+    });
+    expect(set).toHaveBeenCalledWith(
+      { email: "a@b.com", name: "A", lastLoginAt: expect.any(Date) },
+      { merge: true },
+    );
+    expect(set.mock.calls[0][0]).not.toHaveProperty("role");
+    expect(set.mock.calls[0][0]).not.toHaveProperty("status");
   });
 
   it("AC8: falha de Firestore → NÃO lança (fail-open, espelho best-effort)", async () => {
