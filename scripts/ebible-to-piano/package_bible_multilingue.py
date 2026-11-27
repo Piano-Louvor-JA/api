@@ -105,9 +105,16 @@ def main() -> None:
             fail(f"{lang}: {total} != report chapters {rep['chapters']}")
 
         tar_path = OUT / f"{lang}_bible_chapters.tar.gz"
+        # t_1fb85696: tar determinístico (mtime=0) — regen não deve alterar o sha256
+        # de idiomas cujo conteúdo não mudou (zh/ru/ar/... byte-idênticos).
         with tarfile.open(tar_path, "w:gz") as tf:
             for n in names:
-                tf.add(CACHE / n, arcname=n)
+                ti = tf.gettarinfo(CACHE / n, arcname=n)
+                ti.mtime = 0
+                ti.uid = ti.gid = 0
+                ti.uname = ti.gname = ""
+                with open(CACHE / n, "rb") as fh:
+                    tf.addfile(ti, fh)
 
         # catálogos no shape json_db (compatível com /json_db/{lang}_bible_book)
         (OUT / f"{lang}_bible_book.json").write_text(
