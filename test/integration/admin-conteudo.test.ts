@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
@@ -212,4 +212,62 @@ describe("Admin conteúdo global (collections/musics + owner_name)", () => {
     expect(alicePrivate.owner_name).toBe("alice");
     expect(alicePrivate.is_owner).toBe(1);
   });
+  it.each(["collections", "musics"])(
+    "%s normaliza paginação inválida e limita tamanho",
+    async (resource) => {
+      for (const query of [
+        "page=invalid&per_page=0",
+        "page=0&per_page=invalid",
+      ]) {
+        const response = await router.request(
+          `/v1/custom/admin/${resource}?${query}`,
+          {
+            headers: { ...auth(adminToken), "X-Tenant": "piano" },
+          },
+        );
+        expect(response.status).toBe(200);
+        expect((await response.json()).meta).toMatchObject({
+          page: 1,
+          per_page: 24,
+        });
+      }
+      const capped = await router.request(
+        `/v1/custom/admin/${resource}?per_page=999`,
+        {
+          headers: { ...auth(adminToken), "X-Tenant": "piano" },
+        },
+      );
+      expect((await capped.json()).meta.per_page).toBe(100);
+    },
+  );
+
+  it.each(["collections", "musics"])(
+    "%s retorna erro controlado se banco falhar",
+    async (resource) => {
+      const db = app.getDb();
+      const prepare = db.prepare.bind(db);
+      const spy = vi.spyOn(db, "prepare").mockImplementation((sql: string) => {
+        if (
+          sql.includes("SELECT cc.id_collection") ||
+          sql.includes("SELECT cm.id_music")
+        )
+          throw new Error("database unavailable");
+        return prepare(sql);
+      });
+      try {
+        const response = await router.request(`/v1/custom/admin/${resource}`, {
+          headers: { ...auth(adminToken), "X-Tenant": "piano" },
+        });
+        expect(response.status).toBe(500);
+        expect(await response.json()).toEqual({
+          error:
+            resource === "collections"
+              ? "Erro ao listar coletâneas"
+              : "Erro ao listar músicas",
+        });
+      } finally {
+        spy.mockRestore();
+      }
+    },
+  );
 });
