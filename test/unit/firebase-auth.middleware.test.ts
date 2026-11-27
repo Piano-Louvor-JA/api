@@ -23,8 +23,8 @@ vi.mock("../../src/db/connection.js", () => ({
   getDb: () => getDbMock,
 }));
 
-import { firebaseAuth } from "../../src/v1/custom/firebase-auth.middleware.js";
 import { upsertCommunityMember } from "../../src/v1/custom/community-mirror.service.js";
+import { firebaseAuth } from "../../src/v1/custom/firebase-auth.middleware.js";
 
 vi.mock("../../src/v1/custom/community-mirror.service.js", () => ({
   upsertCommunityMember: vi.fn(async () => {}),
@@ -214,7 +214,8 @@ describe("firebaseAuth middleware (RF-003/RF-004)", () => {
     });
     // conflito: e-mail legacy vinculado a outro firebase_uid → segue anônimo
     getDbMock.prepare.mockImplementation((sql: string) => {
-      if (sql.includes("firebase_uid = ?")) return stmtChain({ get: undefined });
+      if (sql.includes("firebase_uid = ?"))
+        return stmtChain({ get: undefined });
       if (sql.includes("email = ?"))
         return stmtChain({
           get: {

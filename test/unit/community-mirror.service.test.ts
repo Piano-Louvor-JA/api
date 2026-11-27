@@ -104,9 +104,7 @@ describe("community-mirror.service (SPEC admin-membros v1.0.0)", () => {
       collection: () => {
         throw new Error("firestore down");
       },
-    } as unknown as Parameters<
-      typeof setCommunityMemberFirestoreForTests
-    >[0];
+    } as unknown as Parameters<typeof setCommunityMemberFirestoreForTests>[0];
     setCommunityMemberFirestoreForTests(boom);
     await expect(
       upsertCommunityMember({ uid: "uid-3", email: "c@b.com", name: "C" }),

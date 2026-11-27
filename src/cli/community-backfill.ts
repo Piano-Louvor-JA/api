@@ -9,12 +9,11 @@
  * Dev: npm run community-backfill
  */
 import { pathToFileURL } from "node:url";
-
-import { getFirebaseApp } from "../v1/custom/firebase-auth.middleware.js";
 import {
   setCommunityMemberFirestoreForTests,
   upsertCommunityMember,
 } from "../v1/custom/community-mirror.service.js";
+import { getFirebaseApp } from "../v1/custom/firebase-auth.middleware.js";
 
 const USAGE =
   "Uso: community-backfill [--dry-run] [--emails]  # espelho Auth→community_members";
@@ -60,7 +59,9 @@ export async function run(
       if (result === "created") created++;
       else if (result === "updated") updated++;
       else unchanged++;
-      out(`${result === "created" ? "+" : result === "updated" ? "~" : "="} ${label}`);
+      out(
+        `${result === "created" ? "+" : result === "updated" ? "~" : "="} ${label}`,
+      );
     }
     pageToken = page.pageToken;
   } while (pageToken);
@@ -77,9 +78,8 @@ export const __testHooks = { setCommunityMemberFirestoreForTests };
 
 /* istanbul ignore if -- entrypoint do processo; lógica coberta via run() */
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
-  const code = await run(
-    process.argv.slice(2),
-    (line: string) => console.log(line),
+  const code = await run(process.argv.slice(2), (line: string) =>
+    console.log(line),
   );
   process.exit(code);
 }
