@@ -2,6 +2,7 @@ import type { MiddlewareHandler } from "hono";
 import { createMiddleware } from "hono/factory";
 import { getDb } from "../../db/connection.js";
 import type { CustomAuthEnv } from "./auth.middleware.js";
+import { upsertCommunityMember } from "./community-mirror.service.js";
 
 /**
  * RF-003/RF-004 — Login unificado: aceita Firebase ID token como credencial.
@@ -127,6 +128,19 @@ export const firebaseAuth: MiddlewareHandler<CustomAuthEnv> =
           email: user.email,
           display_name: user.display_name,
         });
+        // SPEC admin-membros v1.0.0: espelho best-effort Auth→community_members.
+        // Fire-and-forget, fail-open (erro só gera warn); nunca escreve
+        // role/status; só roda com user resolvido (anônimo/RF-05 → sem espelho).
+        void upsertCommunityMember({
+          uid: decoded.uid,
+          email: user.email,
+          name: user.display_name,
+        }).catch((e) =>
+          console.warn(
+            "[communityMirror] upsert falhou:",
+            e instanceof Error ? e.message : String(e),
+          ),
+        );
       }
     } catch (e) {
       // Token Firebase inválido/expirado → segue anônimo (mesma semântica do optionalAuth)
