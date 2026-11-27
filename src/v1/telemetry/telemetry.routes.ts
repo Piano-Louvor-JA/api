@@ -89,6 +89,7 @@ const OnlineDeviceSchema = z.object({
   region: z.string().nullable(),
   country: z.string().nullable(),
   identified: z.boolean(),
+  source: z.enum(["heartbeat", "passive"]),
   first_seen: z.string(),
   last_seen: z.string(),
 });
@@ -123,6 +124,7 @@ const onlineRoute = createRoute({
             totals: z.object({
               online: z.number(),
               identified: z.number(),
+              unidentified: z.number(),
               by_platform: z.record(z.string(), z.number()),
             }),
             devices: z.array(OnlineDeviceSchema),

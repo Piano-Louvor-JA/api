@@ -22,6 +22,8 @@ export function setMaxDevicesForTests(n: number | null): void {
   maxDevicesCap = n == null ? MAX_DEVICES : Math.max(1, n);
 }
 
+export type PresenceSource = "heartbeat" | "passive";
+
 export interface DeviceHeartbeat {
   installId: string;
   platform: string;
@@ -46,6 +48,8 @@ interface PresenceEntry extends DeviceHeartbeat, GeoInfo {
   firstSeen: number;
   lastSeen: number;
   dirty: boolean;
+  /** heartbeat = app atual; passive = tráfego sem token (app antigo). */
+  source: PresenceSource;
 }
 
 export interface OnlineDevice {
@@ -59,6 +63,7 @@ export interface OnlineDevice {
   region: string | null;
   country: string | null;
   identified: boolean;
+  source: PresenceSource;
   first_seen: string;
   last_seen: string;
 }
@@ -74,6 +79,7 @@ export interface OnlineList {
   totals: {
     online: number;
     identified: number;
+    unidentified: number;
     by_platform: Record<string, number>;
   };
   devices: OnlineDevice[];
@@ -117,6 +123,46 @@ export function recordHeartbeat(hb: DeviceHeartbeat, now = Date.now()): void {
     firstSeen: current?.firstSeen ?? now,
     lastSeen: now,
     dirty: true,
+    source: "heartbeat",
+  });
+}
+
+/**
+ * Presença inferida de tráfego sem X-Partner-Key (apps que ainda não
+ * mandam heartbeat/token). Só memória — não vai pro SQLite (LGPD: ID
+ * sintético diário; some com a janela de online).
+ */
+export function recordPassiveAccess(
+  input: {
+    installId: string;
+    platform: string;
+    appVersion: string | null;
+  },
+  now = Date.now(),
+): void {
+  const current = presence.get(input.installId);
+  // Heartbeat real tem prioridade: não rebaixa pra passive.
+  if (current?.source === "heartbeat") return;
+  if (!current && presence.size >= maxDevicesCap) evictStale(now);
+  presence.set(input.installId, {
+    installId: input.installId,
+    platform: input.platform,
+    appVersion: input.appVersion,
+    osName: null,
+    osRelease: null,
+    osArch: null,
+    locale: null,
+    timezone: null,
+    district: null,
+    church: null,
+    partnerId: null,
+    city: current?.city ?? null,
+    region: current?.region ?? null,
+    country: current?.country ?? null,
+    firstSeen: current?.firstSeen ?? now,
+    lastSeen: now,
+    dirty: false,
+    source: "passive",
   });
 }
 
@@ -206,9 +252,15 @@ export function listOnline(
     byPlatform[e.platform] = (byPlatform[e.platform] ?? 0) + 1;
     if (e.partnerId !== null) identified++;
   }
+  const unidentified = online.length - identified;
 
   return {
-    totals: { online: online.length, identified, by_platform: byPlatform },
+    totals: {
+      online: online.length,
+      identified,
+      unidentified,
+      by_platform: byPlatform,
+    },
     devices: online.map((e) => ({
       install_id_short: e.installId.slice(0, 6),
       platform: e.platform,
@@ -220,6 +272,7 @@ export function listOnline(
       region: e.region,
       country: e.country,
       identified: e.partnerId !== null,
+      source: e.source,
       first_seen: new Date(e.firstSeen).toISOString(),
       last_seen: new Date(e.lastSeen).toISOString(),
     })),
@@ -325,6 +378,7 @@ export function loadRecentPresence(now = Date.now(), db: Db = getDb()): number {
       firstSeen: Date.parse(r.first_seen),
       lastSeen: Date.parse(r.last_seen),
       dirty: false,
+      source: "heartbeat",
     });
   }
   return rows.length;
