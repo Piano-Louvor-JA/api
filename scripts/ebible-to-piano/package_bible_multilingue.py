@@ -58,7 +58,11 @@ def extract_books(migration: str, lang: str) -> list[dict]:
 
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    migration = (ROOT / "src/db/migrations/040_bible_multilingue.sql").read_text()
+    # A migration do repo (040) NÃO contém pt/es (legados via 009/027); o
+    # gerador emite out/migrations/028 com TODOS os 15 idiomas — é a fonte
+    # de ids/nomes do packaging. (rework t_838c6ee4: packaging falhava com
+    # "pt: 0 livros no migration" porque lia o 040 do repo.)
+    migration = (Path(__file__).parent / "out" / "migrations" / "028_bible_multilingue.sql").read_text()
     manifest = {}
     for lang in LANGS:
         rep_path = REPORTS / f"{lang}_report.json"

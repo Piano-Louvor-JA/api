@@ -10,7 +10,7 @@
   "note": "fetch.bible USFM por livro; KJV-versification",
   "books": 66,
   "chapters": 1189,
-  "verses": 30899,
+  "verses": 30374,
   "files_written": 1189,
   "problems": [],
   "warnings": [],
@@ -20,462 +20,462 @@
       "name": "उत्पत्ति",
       "chapters": 50,
       "verses": 1528,
-      "sha256": "dc7f90456ef071d5561964e8be9840fc7dc2e04f50504cadca0c5a2c2c152ba1"
+      "sha256": "6a6582606e7b04b090e7d68583522941c60f82b488d2a3af7864694fc33b0815"
     },
     {
       "book": 2,
       "name": "निर्गमन",
       "chapters": 40,
       "verses": 1213,
-      "sha256": "3d8bc7c4a64931012b272f508bf215e9e44673f8c2cdf10654ebf5e10c0b384d"
+      "sha256": "e4522aecb72c81fa8b5b8e33119b44f8c43c4f381c0d10c844b7d4c9f81c459a"
     },
     {
       "book": 3,
       "name": "लैव्यव्यवस्था",
       "chapters": 27,
       "verses": 859,
-      "sha256": "586c269ba323fa6018573ee0ba1d15b1ef2e9709af01b7d7807e5e051629c76d"
+      "sha256": "e51cbae09dffc847cf366711997e4fc31fd3a032e1b46b000baec4f433fffd5d"
     },
     {
       "book": 4,
       "name": "गिनती",
       "chapters": 36,
       "verses": 1286,
-      "sha256": "c3dad81ff069b0f8effd2f89c21902495f10da6224e8c2ff07ce3f7a8ef30e42"
+      "sha256": "d34684715316b220645d9dcd2c1a72709eba14b9f66e4af3ae39429e3eea5798"
     },
     {
       "book": 5,
       "name": "व्यवस्थाविवरण",
       "chapters": 34,
       "verses": 959,
-      "sha256": "e4d7191c72e85073bf7ecb89f99d3b0d0682cb4d36e9f96c3a110c7134134357"
+      "sha256": "114f7a488c23ff7b4d213616f1726e814c85f44a3a8e6ea9cd809dcd33c5a2d4"
     },
     {
       "book": 6,
       "name": "यहोशू",
       "chapters": 24,
       "verses": 657,
-      "sha256": "7470c5ac153c7e80492f6685a9531276c8efbd8f44bb432598bcf2c6f78668fe"
+      "sha256": "c371f37c25af8ac84afee02593a5e45e8f995ddcde6f3f6dcdd49563a4038f0d"
     },
     {
       "book": 7,
       "name": "न्यायियों",
       "chapters": 21,
       "verses": 618,
-      "sha256": "caec22cb665cc2a7de5323b76936a96ce3b7bbd1d4c7747cb667ac21d621b45d"
+      "sha256": "3cee638f9e744e46cafa90bdbc85af55ca69b7d64bb302397bc489dbab70ebe0"
     },
     {
       "book": 8,
       "name": "रूत",
       "chapters": 4,
       "verses": 84,
-      "sha256": "e021dfcb5aee57eb71fb1410a454f782e9bcf63ae6602b37b469d3254397051e"
+      "sha256": "e2fc43501007b30fc42cd8e5c80dc2f9eea0ba73af2699635b8520bfd3488429"
     },
     {
       "book": 9,
       "name": "शमूएल की पहली पुस्तक",
       "chapters": 31,
       "verses": 808,
-      "sha256": "dcfe29d8b5acab6f5557f8b8764c81c0c34987af5b475e1b9d7a2a3ef0cfd8da"
+      "sha256": "a830fac461f7aa06e34258e8af0cb539869065593aa3dcfee049c66fae59d7aa"
     },
     {
       "book": 10,
       "name": "शमूएल की दूसरी पुस्तक",
       "chapters": 24,
       "verses": 694,
-      "sha256": "7a2fd5fe5c6f66899d4bb73831285effd5a36982b0d57d1f8bb20918486b7e8f"
+      "sha256": "38bfb40fb7787317772efb1f374f31b4c350bd75f27e8f9e74cb67fe1a80dde3"
     },
     {
       "book": 11,
       "name": "राजाओं की पहली पुस्तक",
       "chapters": 22,
       "verses": 815,
-      "sha256": "2138478e53845d3cccb0030dbce3b24acb69a6b7cbd55aa47801e88d908275b9"
+      "sha256": "5806abc8324fc96d5aaa13a6be9828d042490bd12ab16e46e67bc51938416d9c"
     },
     {
       "book": 12,
       "name": "राजाओं की दूसरी पुस्तक",
       "chapters": 25,
       "verses": 719,
-      "sha256": "73dc20041e821f82d905d68a8895fe7439fbd17d83e2c4bcaee31eb2af3701e8"
+      "sha256": "fc2634e827fb29b32605bf979c1ff4dfea0ce9bc20d621e45b1517682a6688cb"
     },
     {
       "book": 13,
       "name": "इतिहास की पहली पुस्तक",
       "chapters": 29,
       "verses": 941,
-      "sha256": "87973d814bdeba361f0695c3cbaed5b7547fd1fc330a82833973ac18fbc5b271"
+      "sha256": "17c1bd8378c0a29a70be05f6fab43e62b0a37efc7d27b1fe2e0ac2d3fd564553"
     },
     {
       "book": 14,
       "name": "इतिहास की दूसरी पुस्तक",
       "chapters": 36,
       "verses": 821,
-      "sha256": "6e52b2a00b1b845e5dd50b1b24632a6e0bca2bc36c4bc70248e0409ecb62f601"
+      "sha256": "551931b48381fb6eaac357575cbbc405cd11a9f5d0f77d6789545b937d3d1869"
     },
     {
       "book": 15,
       "name": "एज्रा",
       "chapters": 10,
       "verses": 280,
-      "sha256": "7014bb95303896b6f759df97fc4a3e3874c9453daf6c8936fa6d2232a5ad304f"
+      "sha256": "6455ca83e27ea67e45dc786700b08971ad97c103f0f671bd1ce1734d0ef97f7a"
     },
     {
       "book": 16,
       "name": "नहेम्याह",
       "chapters": 13,
       "verses": 406,
-      "sha256": "1ae00d117dd24c2b33e60579298b8a2686bf3969502b9a6507b498c493304a61"
+      "sha256": "2a844d2b70746a327e4ebbddc21ad85c92dfcc553d45fe813ad6f2e6a26c30c5"
     },
     {
       "book": 17,
       "name": "एस्तेर",
       "chapters": 10,
       "verses": 166,
-      "sha256": "7f63ad466c2af05c863d03f547bfef2933e4a1ad37526ebda3ed95266d0b1a80"
+      "sha256": "fcc8d8474305b0fb02f0baa8c326ace8e9acb204b9583beb55660b9e16391bbf"
     },
     {
       "book": 18,
       "name": "अय्यूब",
       "chapters": 42,
       "verses": 1070,
-      "sha256": "8f02e207f6f7217da19e4fc8d22abca762cce34b77c5f2868df86296b4fb94d1"
+      "sha256": "9c84fa0d01643d5e0ec158fac18311bcc806dc5a2801db33014dedacf6aeca3e"
     },
     {
       "book": 19,
       "name": "भजन संहिता",
       "chapters": 150,
       "verses": 2461,
-      "sha256": "f08b4be0cfc90e848730acbbe830c1fee712e69c35d5fd7277d6a5edf9b94f8a"
+      "sha256": "84af16c8e98ea4f26a2e0f4e818658c12d34938bd7c9eff31d0277d5b51d7e38"
     },
     {
       "book": 20,
       "name": "नीतिवचन",
       "chapters": 31,
       "verses": 915,
-      "sha256": "8ee8fce9b2b853053d582df849614e0e216b41bb40ffa34deae35b02fe14eecb"
+      "sha256": "810232032f0e82756cd1bd0da62767a83410001025d14f1334dc8cc876b6cdc0"
     },
     {
       "book": 21,
       "name": "सभोपदेशक",
       "chapters": 12,
       "verses": 220,
-      "sha256": "afcbd91dbc8a22504bdb022150bde2e40f07edac55e26f7774f45b1747a24390"
+      "sha256": "a3e5e63114a3628bb298bab2eabb3df99d17d121707f5762366ebaa9e8c349d3"
     },
     {
       "book": 22,
       "name": "श्रेष्ठगीत",
       "chapters": 8,
       "verses": 117,
-      "sha256": "cd530706d46185144b9b188dc6d925e6ef2524e5ad65152aa9d927cdda13758d"
+      "sha256": "2f3abf3c49e2fc7c62639ce0c987dbd55e49b92c74aacaa2ace5ebfa4ce6e06e"
     },
     {
       "book": 23,
       "name": "यशायाह",
       "chapters": 66,
       "verses": 1282,
-      "sha256": "bca730c38093ce11fcae4580f56f4b66ff7fb958e997b767680fb41f0e017c18"
+      "sha256": "388d15774b13f00bdf1ea47e3f5349ea8790bea9f3a4b25d0674d159eec6a228"
     },
     {
       "book": 24,
       "name": "यिर्मयाह",
       "chapters": 52,
       "verses": 1364,
-      "sha256": "a77cdbe0a69d9172f4d5bba3335d7b719c9b1b9ef03206649dbf3587e5aeae16"
+      "sha256": "89638813745283fbb1dc80adc6e7e19de5b572a389b7abb47eb6951d587115c3"
     },
     {
       "book": 25,
       "name": "विलापगीत",
       "chapters": 5,
       "verses": 154,
-      "sha256": "9e02571780730d606f9d92c3ce9cdd08a727d963b015a3d90b6a995d676cddd8"
+      "sha256": "c945d15ffab67a6d7a7f8c27453029eb6b06e958fdaeb23645460ba057cdb9cc"
     },
     {
       "book": 26,
       "name": "यहेजकेल",
       "chapters": 48,
       "verses": 1272,
-      "sha256": "4cfbe2f7825994bea2bc9c53c3c0a310ebefec59e856f5ee20ec56450452f8a9"
+      "sha256": "96da31c84f3cc4396670f0ebd46581732ef67484a80898f990ffc3a9a0f82bbf"
     },
     {
       "book": 27,
       "name": "दानिय्येल",
       "chapters": 12,
       "verses": 354,
-      "sha256": "a4450409fed037dc0a937397f2c5d7cd112ef8527a270836dae34c6c41e2c8bb"
+      "sha256": "32a2217f9d9dc4e3c2036acdb4aa57ebb65d7ef7f253a9067ff1bd366873cbc8"
     },
     {
       "book": 28,
       "name": "होशे",
       "chapters": 14,
       "verses": 193,
-      "sha256": "b49a9b6337b89d360cea0ed15a1f6f1c11a2004d9d381cbf4c86531bb9ff351a"
+      "sha256": "6904aa2eedab011c186394beb3124b79ae20c40f415a1e5844b6a8be84a1125b"
     },
     {
       "book": 29,
       "name": "योएल",
       "chapters": 3,
       "verses": 72,
-      "sha256": "f8e1b7cac45f911c9fd7493f2d75da63f3c6a57dc709606e2211168e7b019287"
+      "sha256": "350c34cbaf551cd68821a5570ecd52bc5241a8f9bc2e85fa209add39de770a5e"
     },
     {
       "book": 30,
       "name": "आमोस",
       "chapters": 9,
       "verses": 146,
-      "sha256": "80cacc3d53b8eb542765ea1a4796145166b913d873b0b6c470562b49dd596820"
+      "sha256": "36d7f5688bffd9710863b93da93b04d2fa20c4811e485eea311e9c8ad0eadc47"
     },
     {
       "book": 31,
       "name": "ओबद्याह",
       "chapters": 1,
       "verses": 21,
-      "sha256": "bd2daba347adbcfb5463406a165461a9da17d62198c3697f2d050519d11df2ed"
+      "sha256": "a009630e52deddadd7f5ce2ec1bc134c9c94659bdcfb12858bf8b7d0b3165af7"
     },
     {
       "book": 32,
       "name": "योना",
       "chapters": 4,
       "verses": 48,
-      "sha256": "b3f7ac4a57a31ecbe972e990e6021386c8f0a0f491adafe9fed352b8b81f0fc9"
+      "sha256": "bde85d91565260ae8dd0f96936924fa971ae76d16247f3fca98e3cd1eb0f4899"
     },
     {
       "book": 33,
       "name": "मीका",
       "chapters": 7,
       "verses": 105,
-      "sha256": "b23f02b226040d566e18e7a66ea9729de342760b74940a11c6416e27d4e51999"
+      "sha256": "a517bc3f44048deabdec385e040f07a005a68208b066a7dd10ad42d1f087a822"
     },
     {
       "book": 34,
       "name": "नहूम",
       "chapters": 3,
       "verses": 47,
-      "sha256": "cc1aed3907f0b0d4f7fb4daa331d1a6cd80d5e1b22f8afbb9ed17ff5611f7ab2"
+      "sha256": "a32feb7d9f487d1093baa33bf636c79471da66681492c65b61a5fee0ee94b29e"
     },
     {
       "book": 35,
       "name": "हबक्कूक",
       "chapters": 3,
       "verses": 55,
-      "sha256": "abe7da8921f01b14f485683c69ca37e0adf6c29f4a877b54d184d5914876ba66"
+      "sha256": "62e96e429c750f1d73bc7b12a8d87bc7cc4d1833107e6738b3b8493d6832fe21"
     },
     {
       "book": 36,
       "name": "सपन्याह",
       "chapters": 3,
       "verses": 53,
-      "sha256": "e3257970a4470a62258dee6324f50478d02a997a0eea3bb80211c6c0274d9c47"
+      "sha256": "d40cf5296efb49fc3c194394e207386fd1b6cf6a6e7c4d59f4b85ba3efc694ab"
     },
     {
       "book": 37,
       "name": "हाग्गै",
       "chapters": 2,
       "verses": 38,
-      "sha256": "7b7c11f5be5a1a60902d4925a5958b781965e3fd7f96c8a20a333548222e5b44"
+      "sha256": "3b6cf73c6fce068af0e7f5ae1008672b0a976d174109d6abf7c1d04b351db332"
     },
     {
       "book": 38,
       "name": "जकर्याह",
       "chapters": 14,
       "verses": 208,
-      "sha256": "074aafce4deb007bad873ea4a6e5288a2c3f2925dd1cf8644fe9c6fd486dee09"
+      "sha256": "f3f0abd44f362648c152ca1c0567b9bd0f252b26b978c4bd5239b19d6ae58632"
     },
     {
       "book": 39,
       "name": "मलाकी",
       "chapters": 4,
       "verses": 55,
-      "sha256": "cfab25b05a4237514f75954be29378f6d2dcca6d58d5b03c1870d398771af389"
+      "sha256": "3efd1f64db79aafe3bfdfd732134369b519e2f5aa2d338fca1e92d99dca29f5f"
     },
     {
       "book": 40,
       "name": "मत्ती रचित सुसमाचार",
       "chapters": 28,
-      "verses": 983,
-      "sha256": "9fbd5bbc015572c2eba06ddb7eea935e2f5872625cec4c47b745ce72c9978ee2"
+      "verses": 966,
+      "sha256": "4f084e8c004b31f20ad7ebc9d74c3e1d9ec15cbe9277e0f474c891bb720fcdd6"
     },
     {
       "book": 41,
       "name": "मरकुस रचित सुसमाचार",
       "chapters": 16,
       "verses": 666,
-      "sha256": "9ac57181e8467b7d7a11df63bdc4c0fffe2f97c4354a491feb1567b7616afaac"
+      "sha256": "d53fae718081a8f06239fcd10c7b5963c9a23a2faf614dad9b41b2d63cb8f6b0"
     },
     {
       "book": 42,
       "name": "लूका रचित सुसमाचार",
       "chapters": 24,
-      "verses": 1110,
-      "sha256": "26be335b179b827adfcc3a56b5e090e16ac375df5c724eb68f3b05d26d28189d"
+      "verses": 1106,
+      "sha256": "a8bd5624e22a2f86695a5e91c0fcf3469d40fa0dec92428e965280129e62cad5"
     },
     {
       "book": 43,
       "name": "यूहन्ना रचित सुसमाचार",
       "chapters": 21,
-      "verses": 862,
-      "sha256": "bce98ad06b7c352862fc695de793b2b266f616bd0a1ae35b8b4fb2ec5b6f9afd"
+      "verses": 812,
+      "sha256": "473899e7bab622d5235e2733f7b203892fa083001434c6eafe89212e1945b77a"
     },
     {
       "book": 44,
       "name": "प्रेरितों के काम",
       "chapters": 28,
-      "verses": 1007,
-      "sha256": "470583dcbc7b3cc56910e57ef4c7aa8b4ada516b555abfff96eedc4bdef06034"
+      "verses": 938,
+      "sha256": "f4cf1d3bda1a835e7abe9451f1792f2524a34e177d33fcf27b0102f447cad0b3"
     },
     {
       "book": 45,
       "name": "रोमियों के नाम पौलुस प्रेरित की पत्री",
       "chapters": 16,
-      "verses": 433,
-      "sha256": "c8cb33828af3aca5c6665885fdc25aa07d4c1b70e57f71855d96de2880467399"
+      "verses": 356,
+      "sha256": "fe9e3928f80509a5009b51e73a316a640f551612df8285655a328e9b4e6b5443"
     },
     {
       "book": 46,
       "name": "कुरिन्थियों के नाम पौलुस प्रेरित की पहली पत्री",
       "chapters": 16,
-      "verses": 437,
-      "sha256": "0b298bf980e80e99454631ab31c0bc79c18dd55449a70e0fd3589ecfc0b027ff"
+      "verses": 368,
+      "sha256": "3dab235b36f24d6fc64daf087d05af639828619ce9b295aa55dfa12c747a5e8b"
     },
     {
       "book": 47,
       "name": "कुरिन्थियों के नाम पौलुस प्रेरित की दूसरी पत्री",
       "chapters": 13,
-      "verses": 257,
-      "sha256": "c30ffbe26fd5c49b93c366c3b89fc21d269be42827198fec370d76291eb88950"
+      "verses": 237,
+      "sha256": "38783b40c6f8f9d3e45af6433cd19ac433c1ad807627a2abfeff68612a9aba27"
     },
     {
       "book": 48,
       "name": "गलातियों के नाम पौलुस प्रेरित की पत्री",
       "chapters": 6,
-      "verses": 149,
-      "sha256": "39b7d7a17b5271f0ae28a72ce8f30c355721c07cf0409e5a6d98d0e2f4c5fd00"
+      "verses": 121,
+      "sha256": "fe37b0d99610411e7c2a55aba7514cd7b9b04fbf44df3a5ec1d7216ce30ebec9"
     },
     {
       "book": 49,
       "name": "इफिसियों के नाम पौलुस प्रेरित की पत्री",
       "chapters": 6,
-      "verses": 155,
-      "sha256": "a6ed24a72a945bae419688487e35a6239ba01a56ef91237efe5412edd39e621b"
+      "verses": 135,
+      "sha256": "663b8a56bc8208f5b8fb3c25046ee537414a433807e8170aff8f54caa741d375"
     },
     {
       "book": 50,
       "name": "फिलिप्पियों के नाम पौलुस प्रेरित की पत्री",
       "chapters": 4,
-      "verses": 104,
-      "sha256": "61c816e008dd5d0b0fd72fa982eb6ca33d450a06932f431abfaab2dd83e8d215"
+      "verses": 65,
+      "sha256": "415523de252b0c8bce6991d7b5c535bd98d550b37cb5052b826db87feb0e6a6e"
     },
     {
       "book": 51,
       "name": "कुलुस्सियों के नाम पौलुस प्रेरित की पत्री",
       "chapters": 4,
-      "verses": 95,
-      "sha256": "cce090a07ccfd13f4e42f2e2ed2c38d0a5246df16eeb6f5c56176227c4f82086"
+      "verses": 65,
+      "sha256": "00e6d02a046ba8db3313aa5a0dfcce512ab3c79b2f2a00f25f007a3ab7d64985"
     },
     {
       "book": 52,
       "name": "थिस्सलुनीकियों के नाम पौलुस प्रेरित की पहली पत्री",
       "chapters": 5,
       "verses": 89,
-      "sha256": "ce0b27fdcd7cee90004d4136d944cb6cc9043568945a38a2f5d64c90142de89e"
+      "sha256": "8bfb241ad5c3751f7fab4a41489cf81ec9c571a2f6f769a95c77bec695845a0d"
     },
     {
       "book": 53,
       "name": "थिस्सलुनीकियों के नाम पौलुस प्रेरित की दूसरी पत्री",
       "chapters": 3,
       "verses": 47,
-      "sha256": "c73423c891f6d00e8db8d8463ebfc8c1ffc65b7bcdcb46a3410c370acc64dbcd"
+      "sha256": "102b5cd4fc175b7b6dc2b011955013e75a411213a9803268ec8d5c34dd167059"
     },
     {
       "book": 54,
       "name": "तीमुथियुस के नाम प्रेरित पौलुस की पहली पत्री",
       "chapters": 6,
-      "verses": 113,
-      "sha256": "e661801d75fd9b604884875a04f966eab10290b1cb8eedf4426451da1dfcdf7c"
+      "verses": 109,
+      "sha256": "360e9b5a8cd2c35b99d1b9304fe509b3eff90b66105bd46a0fcf0d3ec9c63e6a"
     },
     {
       "book": 55,
       "name": "तीमुथियुस के नाम प्रेरित पौलुस की दूसरी पत्री",
       "chapters": 4,
-      "verses": 83,
-      "sha256": "5b287607ff9abbdeb2a5155744f4324f8b74f4b27e3188ea55ed3b9437a8605f"
+      "verses": 67,
+      "sha256": "ab2e1f1d4f4c43d896e76a207c433bd2007d10a6fb6e5fe47b1b1a4b76c6fa82"
     },
     {
       "book": 56,
       "name": "तीतुस के नाम प्रेरित पौलुस की पत्री",
       "chapters": 3,
       "verses": 46,
-      "sha256": "0bf80f20a2a6d64a07c25b5be2255da4b9898da12ac3f02f01571bf2443e1d68"
+      "sha256": "577d3c0822d3f604a8104af26933b198b517990561faa6d485e98df63e8ab6d1"
     },
     {
       "book": 57,
       "name": "फिलेमोन के नाम प्रेरित पौलुस की पत्री",
       "chapters": 1,
       "verses": 25,
-      "sha256": "0643d95eebf930c647bf0f9a448367d4cff8613862315c37862188b09948810d"
+      "sha256": "6b3fb4e1c5725e8071157489486f71871522c58668028391f1c83fd94c3dfbd2"
     },
     {
       "book": 58,
       "name": "इब्रानियों के नाम पत्री",
       "chapters": 13,
-      "verses": 303,
-      "sha256": "2b0f3b16aee64618a8f7d404c49b86f68f27dafa4a12d22c8a6ec7536473bc32"
+      "verses": 289,
+      "sha256": "6853a7202c24bba612bd2b578087e60e64ca7a9673b8139b37a1b923eeac25dc"
     },
     {
       "book": 59,
       "name": "याकूब की पत्री",
       "chapters": 5,
       "verses": 108,
-      "sha256": "610e97e725dc2726ef56616b406def9dc729b6875a0d86812b35e1cfb0a1907f"
+      "sha256": "bd239a74e4ba3756239e14de3e76dc43422592dd8c0e1e26eca4cd7315feff6a"
     },
     {
       "book": 60,
       "name": "पतरस की पहली पत्री",
       "chapters": 5,
       "verses": 105,
-      "sha256": "23aa232d4521c67c7288e00fc0fdba93df5686756fff59f9577a12d4efaccb97"
+      "sha256": "2b888a80315fa58464665fa53ad0495f939679e8042503b82ed572c6fed291ba"
     },
     {
       "book": 61,
       "name": "पतरस की दूसरी पत्री",
       "chapters": 3,
-      "verses": 61,
-      "sha256": "8c22d047e3d5424244f760ebe591c1ee78e1d42fb72e26ffad1452617470bd74"
+      "verses": 42,
+      "sha256": "ebef22bad5e481b3f845305b00c381f66746c35efed4c4fcac419bdfa2ed6d3d"
     },
     {
       "book": 62,
       "name": "यूहन्ना की पहली पत्री",
       "chapters": 5,
-      "verses": 105,
-      "sha256": "d21d2a6ffec0479b3cee3578e8ad56f77f45412cf700a5f30bc09b9de00808f3"
+      "verses": 76,
+      "sha256": "3be5e975a55b7b404ef7050f6ad32743cb775478b99ddb55fb052e90572c845d"
     },
     {
       "book": 63,
       "name": "यूहन्ना की दूसरी पत्री",
       "chapters": 1,
       "verses": 13,
-      "sha256": "ce70a52525a6f4efdcff5ec6cbb92d49d7ba08e436d21823857c9690b880167c"
+      "sha256": "fcb7d56f60762a051065358dcc014708aa0c5271e9c54c51a87227d7f851445d"
     },
     {
       "book": 64,
       "name": "यूहन्ना की तीसरी पत्री",
       "chapters": 1,
       "verses": 15,
-      "sha256": "166bac1b61d8686c33dca8abb26a88b1899df2fb9a94e380782852bf22bb0714"
+      "sha256": "0bda553bdf598597904fd6891577596394fd498aa2befaa74ef01eb9b91c80a3"
     },
     {
       "book": 65,
       "name": "यहूदा की पत्री",
       "chapters": 1,
       "verses": 25,
-      "sha256": "7d7356acfe497217accce0e2186dccc7bdba07d7bd530fa158e85f4ae7c14e98"
+      "sha256": "e48a4e376b7ec53299e28aef2b35e0c692a0cb110347e2ef66781953b132fe44"
     },
     {
       "book": 66,
       "name": "यूहन्ना का प्रकाशितवाक्य",
       "chapters": 22,
-      "verses": 399,
-      "sha256": "6e6f94950243e66b70c1576f3cb6fd77d8739ab59d79d15e0b45ddc81b208912"
+      "verses": 379,
+      "sha256": "7505e6578233b58ed4054957bd94bb9d59941dff664bdbd39d130a49290db78c"
     }
   ],
   "source_sha256": "per-book-fetch.bible"

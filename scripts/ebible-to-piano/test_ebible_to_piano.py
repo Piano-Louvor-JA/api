@@ -269,3 +269,46 @@ def test_package_book_json_uses_real_chapters(monkeypatch, tmp_path):
     assert p1["chapters"] == 4, f"ko 1Pe deve declarar 4 (real), veio {p1['chapters']}"
     gn = [b for b in books if b["book_number"] == 1][0]
     assert gn["chapters"] == 50
+
+
+# ---------- Footnote/cross-ref ABERTA (reviewer t_8dbd1429, rework) ----------
+
+def test_parse_usfm_open_footnote_discarded():
+    """Footnote \\f + ... aberta (sem \\f*) deve sair INTEIRA, sem vazar texto."""
+    raw = "\\id GEN\n\\c 1\n\\v 1 Alpha \\f + \\ft note"
+    parsed = etp.parse_usfm(raw)
+    assert parsed["chapters"] == {"1": {"1": "Alpha"}}, parsed["chapters"]
+
+
+def test_parse_usfm_open_footnote_stops_at_next_verse():
+    """Footnote aberta descarta até o próximo \\v — não engole o verso seguinte."""
+    raw = "\\id GEN\n\\c 1\n\\v 1 Alpha \\f + \\ft nota aberta\n\\v 2 Beta"
+    parsed = etp.parse_usfm(raw)
+    assert parsed["chapters"] == {"1": {"1": "Alpha", "2": "Beta"}}, parsed["chapters"]
+
+
+def test_parse_usfm_open_footnote_stops_at_next_chapter():
+    """Footnote aberta descarta até o próximo \\c — capítulo seguinte intacto."""
+    raw = "\\id GEN\n\\c 1\n\\v 1 Alpha \\f + \\ft nota\n\\c 2\n\\v 1 Beta"
+    parsed = etp.parse_usfm(raw)
+    assert parsed["chapters"] == {"1": {"1": "Alpha"}, "2": {"1": "Beta"}}, parsed["chapters"]
+
+
+def test_parse_usfm_open_crossref_discarded():
+    """Cross-ref \\x ... aberta (sem \\x*) também não vaza conteúdo."""
+    raw = "\\id GEN\n\\c 1\n\\v 1 Alpha \\xo 1.1 \\xt ref aberta"
+    parsed = etp.parse_usfm(raw)
+    assert parsed["chapters"] == {"1": {"1": "Alpha"}}, parsed["chapters"]
+
+
+# ---------- Marcadores +w/+add escapando do _clean (rework: bible_100_241_12) ----------
+
+def test_clean_strips_plus_w_markers():
+    """Marcadores \\\\+w word\\\\+w* (wordlist) não podem sobreviver ao _clean."""
+    raw = "\\+w Prends\\+w* \\+w courage\\+w* !"
+    assert etp._clean(raw) == "Prends courage !"
+
+def test_parse_usfm_luke12_no_plus_w():
+    """Verso real en (Luke 12:2) não pode conter '\\\\+w' no texto servido."""
+    parsed = etp.parse_usfm("\\id LUK\n\\c 12\n\\v 2 \\+w But\\+w* \\+w there\\+w* \\+w is\\+w* nothing covered up.")
+    assert parsed["chapters"]["12"]["2"] == "But there is nothing covered up."

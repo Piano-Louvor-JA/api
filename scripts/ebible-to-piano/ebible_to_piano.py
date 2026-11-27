@@ -98,6 +98,10 @@ def _clean(text: str) -> str:
     # F1 (QA t_dbd7397c/PR #308): atributos interlinear (|strong="..." etc.)
     # DEVEM sair ANTES dos markers — \w Word|strong="H8064"\w* vira 'Word'.
     text = re.sub(r"\|strong=\"[^\"]*\"\*?", "", text)
+    # rework: \+w word\+w* / \+add ... \+add* (wordlist, USFM extended) não podem
+    # sobreviver — removem-se os MARKERS mantendo o TEXTO (bible_100_241_12 tinha
+    # '\\+w But\\+w* \\+w there\\+w*' servido literal).
+    text = re.sub(r"\\\+[a-zA-Z0-9]+(\d*)\*?\s*", " ", text)
     text = re.sub(r"\\f\s+\+.*?\\f\*", "", text, flags=re.S)  # footnotes completos
     text = re.sub(r"\\f\s+[^\\]*(\\f\*)?", "", text)  # \f aberto sem fechar
     text = re.sub(r"\\x\s+[^\\]*(\\x\*)?", "", text)  # cross-refs
@@ -133,6 +137,7 @@ def parse_usfm(raw: str) -> dict:
     cur_ch: str | None = None
     buf: list[str] = []
     verse_num: str | None = None
+    in_open_note = False  # footnote/cross-ref aberta (sem \f*/\x*): descartar até \v/\c/EOF
 
     def flush() -> None:
         nonlocal verse_num, buf
@@ -146,6 +151,20 @@ def parse_usfm(raw: str) -> dict:
         line = line.strip()
         if not line:
             continue
+        # reviewer t_8dbd1429: \f/\x aberta — descarta a nota INTEIRA (até \v/\c/EOF)
+        if in_open_note:
+            if line.startswith(("\\v ", "\\c ")):
+                in_open_note = False  # cai no handler normal abaixo
+            else:
+                continue  # conteúdo da nota: descartado
+        _note_open_re = r"\\[fx](?:\s|o\s|t\s|q\s|k\s|r\s|ot\s|nt\s|dc\s)"
+        _note_closed_re = r"\\[fx]\*"
+        if re.search(_note_open_re, line) and not re.search(_note_closed_re, line):
+            # nota aberta: guarda só o texto antes dela e entra em modo discard
+            in_open_note = True
+            line = re.split(_note_open_re, line, maxsplit=1)[0].strip()
+            if not line:
+                continue
         if line.startswith("\\id "):
             book_id = line.split(None, 1)[1].strip()
         elif line.startswith("\\toc1 "):

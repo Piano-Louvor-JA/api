@@ -41,7 +41,7 @@
       "name": "摩西第四书，通称民数记",
       "chapters": 36,
       "verses": 1288,
-      "sha256": "0a0e945631966d71281ab05499c1c29f94675e387b54e0f01ecd3e30469d7711"
+      "sha256": "4bd06abda19597858b8d5fc1d79b56bc54e10771a01f37f42ed8aaeaf7b50f82"
     },
     {
       "book": 5,
@@ -97,7 +97,7 @@
       "name": "列王纪下",
       "chapters": 25,
       "verses": 719,
-      "sha256": "771db6d3ffb3707a5fcadaf63c265b0ce9d2e336388b2f3ac7abf214cbfbdc4b"
+      "sha256": "27ca95c1d5df56c6a881b0103ff3d65d372bead6b457475bb160881c3dd4e644"
     },
     {
       "book": 13,
@@ -146,7 +146,7 @@
       "name": "诗篇",
       "chapters": 150,
       "verses": 2461,
-      "sha256": "8d12f11b4d954a50a9a6a8dfe68f496aa998a45f9bfd6a1cc2b06c9af5d304e2"
+      "sha256": "3cad7b3046aac5357d8f47be2f5daab27f2a14af5bef5ddfb0da8bc034aabf4a"
     },
     {
       "book": 20,
@@ -258,7 +258,7 @@
       "name": "哈巴谷书",
       "chapters": 3,
       "verses": 56,
-      "sha256": "5946a1765a16c42ba49c2f69ce3ba64f2cd87a23aec235953d183791fa85e1ea"
+      "sha256": "5e341397590206965fa085437af670e87a6f1784bd2df97da513aa8a139efdf9"
     },
     {
       "book": 36,
@@ -293,70 +293,70 @@
       "name": "马太福音",
       "chapters": 28,
       "verses": 1071,
-      "sha256": "c6cec3a13cc949dbfef640979337af062c61fa6590858505e735e354f244bb47"
+      "sha256": "2dea8d640c269f5735fbc12e4641c36eb2cda484aa1be07e2c693e16c589235e"
     },
     {
       "book": 41,
       "name": "马可福音",
       "chapters": 16,
       "verses": 671,
-      "sha256": "6d83208547abe59ce26a8885bfa3696d654116d5a41b16c7a9d32f5c222f34fb"
+      "sha256": "3ba88315d0406a6a72aa5ffac87c60a034d38fafd439e980a19ae8f58c9e83a2"
     },
     {
       "book": 42,
       "name": "路加福音",
       "chapters": 24,
       "verses": 1150,
-      "sha256": "d060b44c1b9165c1874f350b81475a7f567b3d0bec1e219929fec19020a10fd6"
+      "sha256": "8c8c5d4b162d60b064d1a4f9ce60bdeab5b563e3e30c1b5b7101306301c70062"
     },
     {
       "book": 43,
       "name": "约翰所传的福音",
       "chapters": 21,
       "verses": 879,
-      "sha256": "91996eb7d4714e05232906c93d616573c408c7a11bdf3705c4adc40d5644b939"
+      "sha256": "796d0fc0253f61b9079bfa2dc2642104479bfe54ef35e1a800bd2f7b50bb8cdb"
     },
     {
       "book": 44,
       "name": "使徒行传",
       "chapters": 28,
       "verses": 1004,
-      "sha256": "c2b80a41500b271252731d0d4606c6a5860407b62c35116cd288a807d9e0fd95"
+      "sha256": "9a6a1f1106381f8f8b3dc157b96b398eb3dde70765f87b33f9831cf49a7514dd"
     },
     {
       "book": 45,
       "name": "保罗写给罗马人的信",
       "chapters": 16,
       "verses": 433,
-      "sha256": "3b8f01e9d104930d0259e96310a33fb4e09c4e06cedbc380010ac303dee698b7"
+      "sha256": "aea380247efddea91ac7b943825eda18dfdbb1767c7bde1f8f1112cbd2e75764"
     },
     {
       "book": 46,
       "name": "保罗写给哥林多人的第一封信",
       "chapters": 16,
       "verses": 437,
-      "sha256": "755c14b9d37c71b982bae904444277cc82a8ecb1758eac537a1c1ac3492b3b58"
+      "sha256": "c4a14f977e463ee7bee4f4ebad80480a64f267ae8085dba84f58d17f0aaeca48"
     },
     {
       "book": 47,
       "name": "保罗给哥林多人的第二封信",
       "chapters": 13,
       "verses": 257,
-      "sha256": "f6e83eda08d179f7692769242fb4bd40d9a145384eb5144360c364b9ba71c553"
+      "sha256": "2eab86607fd3e4e1b211749693f08aaf31805c0e8236fb5f20f1e1bd2a10d0f8"
     },
     {
       "book": 48,
       "name": "保罗致加拉太人的书信",
       "chapters": 6,
       "verses": 149,
-      "sha256": "30864c94acf8bf489a39a0ec50a70030c6ddcefb699b5ab5eec471ac4e1acfad"
+      "sha256": "a84c2441e1bbcf02843ebb95e15d7b68b95916368140f77da05e375293a04b67"
     },
     {
       "book": 49,
       "name": "保罗给以弗所人的信",
       "chapters": 6,
       "verses": 155,
-      "sha256": "2bc8a807150a5d33206aafbfceacec7be6c84c9714cde68af91e1b1d093a4f38"
+      "sha256": "cef8a99f562e30e97c0b4d5872cc80c5399967730977995d8cd49afae021f4ce"
     },
     {
       "book": 50,
@@ -391,14 +391,14 @@
       "name": "保罗给提摩太的第一封信",
       "chapters": 6,
       "verses": 113,
-      "sha256": "f2fb938bba1eccab9f31abc830916c9fd0b4729a0bb70b9d23daa861431ef67d"
+      "sha256": "1fda6ace3552a263fc9ffde49ea9c7195ebea08d5bfe4928b6b87dd98c229ab2"
     },
     {
       "book": 55,
       "name": "保罗给提摩太的第二封信",
       "chapters": 4,
       "verses": 83,
-      "sha256": "40a81b2f5733482b8c1bccf3e1f2cbc1b288a0657f530cabbf4dd5f193bf3aa1"
+      "sha256": "a4dfabcc5966e888946c258a53df2f1e02455882997bca424a1cbcb9afdb8607"
     },
     {
       "book": 56,
@@ -419,28 +419,28 @@
       "name": "致希伯来人的书信",
       "chapters": 13,
       "verses": 303,
-      "sha256": "5bd6b65fe38d015ab73d4eca58f7c9d1f6063806a8aff6bad20e28ebf040d7ec"
+      "sha256": "0e56e49cfe05b9141ad2e2f0684a37a03cef24176b0eada5d062bcb9fdefbee2"
     },
     {
       "book": 59,
       "name": "雅各的书信",
       "chapters": 5,
       "verses": 108,
-      "sha256": "610b598830d58374269f9c079db57a26077a6263801321ba2f51c569130c54dd"
+      "sha256": "23606dae133948995834aae280855b3fe19ff447db458c27f3e57ab91a9a89f6"
     },
     {
       "book": 60,
       "name": "彼得的第一封信",
       "chapters": 5,
       "verses": 105,
-      "sha256": "5bba162c35e7da3c4c62d7ba9b4383cc8df00c471472e8aebf3abcfd22d99c38"
+      "sha256": "84e6656cff9763bb1b67604a31413ef4521b3276eb214f867bab69fd12f8cb2b"
     },
     {
       "book": 61,
       "name": "彼得的第二封信",
       "chapters": 3,
       "verses": 61,
-      "sha256": "d5c1b0eb8958186605b0bd1619803d8a2bff87c4e102750628eb7abf2bee43d4"
+      "sha256": "2e54803076f2fa15870fe4e6bb65251078282940986c02164f68c5cdf1dc4f94"
     },
     {
       "book": 62,
@@ -475,7 +475,7 @@
       "name": "约翰所得的启示",
       "chapters": 22,
       "verses": 404,
-      "sha256": "4add4309f3c7011f3349a66af132c83b63a2e096f556098dd112ef2a0ca23169"
+      "sha256": "f072fe4bf9b032d774f7c362c2b58fe07fb3eb6bd97afe8f20079790bd14b68f"
     }
   ],
   "source_sha256": "ff36326e7f3d0a0e17f0c0bedb3e94f0c64a2d013f1a5dbf99a104de49475cc6"
