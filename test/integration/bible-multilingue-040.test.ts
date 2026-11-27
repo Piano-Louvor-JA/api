@@ -111,4 +111,19 @@ describe("Bíblia multilíngue 15 idiomas (json_db)", () => {
     const body = await res.json();
     expect(body["1"]).toContain("In the beginning");
   });
+
+  it("idioma sem catálogo populado devolve [] (book e version)", async () => {
+    const { getDb } = await import("../../src/db/connection.js");
+    const db = getDb();
+    db.prepare("DELETE FROM bible_books WHERE id_language = 'hi'").run();
+    db.prepare("DELETE FROM bible_versions WHERE language = 'hi'").run();
+
+    const books = await router.request("/json_db/hi_bible_book");
+    expect(books.status).toBe(200);
+    expect(await books.json()).toEqual([]);
+
+    const versions = await router.request("/json_db/hi_bible_version");
+    expect(versions.status).toBe(200);
+    expect(await versions.json()).toEqual([]);
+  });
 });

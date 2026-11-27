@@ -116,9 +116,10 @@ function dimValue(
       raw = row.os_name;
       break;
   }
+  if (raw == null) return null;
   const key = normalizeName(raw);
   if (!key) return null;
-  return { key, label: (raw ?? "").trim() };
+  return { key, label: raw.trim() };
 }
 
 export interface HistorySummary {
@@ -213,7 +214,7 @@ export function listRankings(
     b.labelCounts.set(v.label, (b.labelCounts.get(v.label) ?? 0) + 1);
     // Mantém o rótulo mais comum.
     let best = b.label;
-    let bestN = b.labelCounts.get(best) ?? 0;
+    let bestN = b.labelCounts.get(best) as number;
     for (const [lab, n] of b.labelCounts) {
       if (n > bestN) {
         best = lab;
@@ -295,7 +296,8 @@ export function listMapPoints(
       b = {
         city,
         region,
-        country: (r.country ?? country).trim() || country,
+        // Filtro acima exige country normalizado igual a countryNorm.
+        country: (r.country as string).trim(),
         devices: 0,
         online: 0,
       };
@@ -368,7 +370,7 @@ export function snapshotDaily(now = Date.now(), db: Db = getDb()): number {
         b.devices++;
         b.labelCounts.set(v.label, (b.labelCounts.get(v.label) ?? 0) + 1);
         let best = b.label;
-        let bestN = b.labelCounts.get(best) ?? 0;
+        let bestN = b.labelCounts.get(best) as number;
         for (const [lab, n] of b.labelCounts) {
           if (n > bestN) {
             best = lab;
