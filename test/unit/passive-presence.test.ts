@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
 import {
   listOnline,
   resetPresenceForTests,
 } from "../../src/lib/devicePresence.js";
+import * as geoIp from "../../src/lib/geoIp.js";
 import {
   resetGeoIpForTests,
   setGeoFetchForTests,
@@ -28,6 +28,7 @@ describe("passivePresence", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
     setGeoFetchForTests(null);
     delete process.env.DEVICE_TELEMETRY_DISABLED;
   });
@@ -144,5 +145,44 @@ describe("passivePresence", () => {
       hasPartner: false,
     });
     expect(listOnline(T0 + 1000).totals.online).toBe(0);
+  });
+  it("reconhece legado /db e caminho vazio sem erro", () => {
+    expect(isPassiveClientPath("/db/catalog?lang=pt", "GET")).toBe(true);
+    expect(isPassiveClientPath("", "GET")).toBe(false);
+  });
+
+  it.each(["1.2.3", "x".repeat(33)])(
+    "presença valida tamanho da versão: %s",
+    async (version) => {
+      vi.spyOn(geoIp, "lookupGeo").mockResolvedValue(null);
+      maybeRecordPassivePresence({
+        path: "/file/a",
+        method: "GET",
+        ip: PUBLIC_IP,
+        platform: "desktop-linux",
+        appVersion: version,
+        hasPartner: false,
+      });
+      await Promise.resolve();
+      expect(listOnline(T0).devices[0]?.app_version).toBe(
+        version.length <= 32 ? version : null,
+      );
+      expect(listOnline(T0).devices[0]?.city).toBeNull();
+    },
+  );
+
+  it("falha assíncrona de geolocalização mantém a presença disponível", async () => {
+    vi.spyOn(geoIp, "lookupGeo").mockRejectedValue(new Error("geo offline"));
+    maybeRecordPassivePresence({
+      path: "/file/a",
+      method: "GET",
+      ip: PUBLIC_IP,
+      platform: "desktop-linux",
+      appVersion: null,
+      hasPartner: false,
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(listOnline(T0).totals.online).toBe(1);
   });
 });

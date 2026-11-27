@@ -174,4 +174,37 @@ describe("community-mirror.service (SPEC admin-membros v1.0.0)", () => {
       "community_members/uid-4",
     ]);
   });
+  it.each([null, "unavailable", {}, { code: 13 }])(
+    "falha de criação não é reportada como sucesso: %j",
+    async (failure) => {
+      const write = vi.fn();
+      setCommunityMemberFirestoreForTests({
+        collection: () => ({
+          doc: () => ({
+            get: async () => ({ exists: false }),
+            create: async () => {
+              throw failure;
+            },
+            set: write,
+          }),
+        }),
+      } as unknown as Parameters<
+        typeof setCommunityMemberFirestoreForTests
+      >[0]);
+      const warning = vi.spyOn(console, "warn").mockImplementation(() => {});
+      try {
+        expect(
+          await upsertCommunityMember({
+            uid: "failed",
+            email: "a@b.com",
+            name: "A",
+          }),
+        ).toBe("unchanged");
+        expect(write).not.toHaveBeenCalled();
+        expect(warning).toHaveBeenCalled();
+      } finally {
+        warning.mockRestore();
+      }
+    },
+  );
 });

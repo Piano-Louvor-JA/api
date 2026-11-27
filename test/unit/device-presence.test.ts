@@ -399,4 +399,21 @@ describe("devicePresence", () => {
       }
     });
   });
+  it("presença passiva expira entrada antiga ao atingir capacidade", () => {
+    resetPresenceForTests();
+    setMaxDevicesForTests(1);
+    recordPassiveAccess(
+      { installId: "old-passive", platform: "desktop-linux", appVersion: null },
+      T0,
+    );
+    const later = T0 + ONLINE_WINDOW_MS + 1;
+    recordPassiveAccess(
+      { installId: "new-passive", platform: "apk-android", appVersion: null },
+      later,
+    );
+    expect(listOnline(later).devices.map((d) => d.platform)).toEqual([
+      "apk-android",
+    ]);
+    expect(listOnline(T0).totals.online).toBe(1);
+  });
 });

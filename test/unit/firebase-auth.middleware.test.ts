@@ -168,43 +168,44 @@ describe("firebaseAuth middleware (RF-003/RF-004)", () => {
     });
   });
 
-  it("T3/AC8: falha do espelho NÃO quebra login — next() roda, warn logado", async () => {
-    verifyIdTokenMock.mockResolvedValue({
-      uid: "fb-uid-10",
-      email: "fail@gmail.com",
-      name: "Fail",
-    });
-    vi.mocked(upsertCommunityMember).mockRejectedValueOnce(
-      new Error("firestore down"),
-    );
-    getDbMock.prepare.mockImplementation((sql: string) => {
-      if (sql.includes("firebase_uid = ?"))
-        return stmtChain({
-          get: { id_user: 10, email: "fail@gmail.com", display_name: "Fail" },
-        });
-      return stmtChain({});
-    });
-    const warning = vi.spyOn(console, "warn").mockImplementation(() => {});
-    try {
-      const ctx = makeContext({ authorization: "Bearer a.b.c" });
-      const next = vi.fn(async () => {});
-      await callMiddleware(ctx, next);
-      expect(next).toHaveBeenCalledOnce();
-      expect(ctx.get("user")).toEqual({
-        id_user: 10,
+  it.each([new Error("firestore down"), "firestore down"])(
+    "T3/AC8: falha do espelho NÃO quebra login — next() roda, warn logado (%s)",
+    async (failure) => {
+      verifyIdTokenMock.mockResolvedValue({
+        uid: "fb-uid-10",
         email: "fail@gmail.com",
-        display_name: "Fail",
+        name: "Fail",
       });
-      expect(warning).toHaveBeenCalledWith(
-        "[communityMirror] upsert falhou:",
-        "firestore down",
-      );
-    } finally {
-      warning.mockRestore();
-      vi.mocked(upsertCommunityMember).mockReset();
-      vi.mocked(upsertCommunityMember).mockResolvedValue(undefined);
-    }
-  });
+      vi.mocked(upsertCommunityMember).mockRejectedValueOnce(failure);
+      getDbMock.prepare.mockImplementation((sql: string) => {
+        if (sql.includes("firebase_uid = ?"))
+          return stmtChain({
+            get: { id_user: 10, email: "fail@gmail.com", display_name: "Fail" },
+          });
+        return stmtChain({});
+      });
+      const warning = vi.spyOn(console, "warn").mockImplementation(() => {});
+      try {
+        const ctx = makeContext({ authorization: "Bearer a.b.c" });
+        const next = vi.fn(async () => {});
+        await callMiddleware(ctx, next);
+        expect(next).toHaveBeenCalledOnce();
+        expect(ctx.get("user")).toEqual({
+          id_user: 10,
+          email: "fail@gmail.com",
+          display_name: "Fail",
+        });
+        expect(warning).toHaveBeenCalledWith(
+          "[communityMirror] upsert falhou:",
+          "firestore down",
+        );
+      } finally {
+        warning.mockRestore();
+        vi.mocked(upsertCommunityMember).mockReset();
+        vi.mocked(upsertCommunityMember).mockResolvedValue(undefined);
+      }
+    },
+  );
 
   it("T3/AC9: sem user resolvido (conflito RF-05/anônimo) → espelho NÃO chamado", async () => {
     verifyIdTokenMock.mockResolvedValue({

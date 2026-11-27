@@ -146,4 +146,24 @@ describe("CLI community-backfill (T4)", () => {
     const withEmails = out.mock.calls.map((c) => String(c[0])).join("\n");
     expect(withEmails).toContain("dois@b.com");
   });
+  it("usuário sem perfil usa email sintético e nome padrão", async () => {
+    listUsersMock.mockResolvedValue({ users: [{ uid: "no-profile" }] });
+    expect(await run([], out)).toBe(0);
+    expect(db.__docs.get("community_members/no-profile")).toMatchObject({
+      email: "no-profile@firebase.local",
+      name: "no-profile",
+    });
+  });
+
+  it("importar sem argv de entrypoint não executa backfill", async () => {
+    const argv = process.argv;
+    try {
+      process.argv = [];
+      vi.resetModules();
+      await import("../../src/cli/community-backfill.js");
+      expect(listUsersMock).not.toHaveBeenCalled();
+    } finally {
+      process.argv = argv;
+    }
+  });
 });
