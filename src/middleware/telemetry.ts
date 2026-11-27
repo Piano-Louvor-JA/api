@@ -27,6 +27,9 @@
 
 import type { Context, Next } from "hono";
 
+import { maybeRecordPassivePresence } from "../lib/passivePresence.js";
+import type { PartnerEnv } from "./partnerKey.js";
+
 /** Chave de baixa cardinalidade: "METHOD rota-registrada" (não URL crua). */
 type RouteKey = string;
 
@@ -122,19 +125,32 @@ export function clientPlatform(c: Context): string {
 /**
  * Middleware log-only. SEMPRE chama next(); depois apenas conta.
  * Qualquer erro interno é engolido — telemetria nunca derruba request.
+ * Também alimenta presença passiva (apps sem token) — ver passivePresence.
  */
 export async function telemetryMiddleware(
-  c: Context,
+  c: Context<PartnerEnv>,
   next: Next,
 ): Promise<Response | undefined> {
   await next();
 
   try {
+    const ip = clientIp(c);
+    const platform = clientPlatform(c);
+    const version = c.req.header("x-client-version")?.trim() || null;
+
+    // Apps sem X-Partner-Key em rotas de catálogo/mídia → card "Sem token".
+    maybeRecordPassivePresence({
+      path: c.req.path,
+      method: c.req.method,
+      ip,
+      platform,
+      appVersion: version,
+      hasPartner: Boolean(c.get("partner")),
+    });
+
     if (disabled) return;
 
     const minute = currentMinuteKey();
-    const ip = clientIp(c);
-    const platform = clientPlatform(c);
     // routePath = pattern registrado (ex: "/v1/musics/:id") → cardinalidade
     // fixa por rota. Fora de handler registrado (compat paths) cai no path cru.
     const route = c.req.routePath || c.req.path;

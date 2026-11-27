@@ -102,6 +102,7 @@ describe("/v1/telemetry", () => {
       online: 1,
       by_platform: { "desktop-windows": 1 },
     });
+    expect(json.totals.unidentified).toBe(1);
     expect(json.devices[0]).toMatchObject({
       install_id_short: "6f1c2b",
       platform: "desktop-windows",
@@ -113,6 +114,7 @@ describe("/v1/telemetry", () => {
       region: "SP",
       country: "BR",
       identified: false,
+      source: "heartbeat",
     });
     const raw = JSON.stringify(json);
     expect(raw).not.toContain(IP);
@@ -186,6 +188,36 @@ describe("/v1/telemetry", () => {
     expect((await beat(body())).status).toBe(204);
     delete process.env.DEVICE_TELEMETRY_DISABLED;
     expect((await (await online(adminToken)).json()).totals.online).toBe(0);
+  });
+
+  it("tráfego /v1/categories sem token aparece como passive/unidentified", async () => {
+    const res = await app.router.request("/v1/categories?lang=pt", {
+      headers: {
+        "x-forwarded-for": IP,
+        "user-agent":
+          "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Electron/28.0.0",
+      },
+    });
+    expect(res.status).toBe(200);
+
+    await vi.waitFor(async () => {
+      const json = await (await online(adminToken)).json();
+      expect(json.totals.unidentified).toBeGreaterThanOrEqual(1);
+      expect(
+        json.devices.some((d: { source: string }) => d.source === "passive"),
+      ).toBe(true);
+    });
+
+    const json = await (await online(adminToken)).json();
+    const passive = json.devices.find(
+      (d: { source: string }) => d.source === "passive",
+    );
+    expect(passive).toMatchObject({
+      identified: false,
+      source: "passive",
+      platform: "desktop-linux",
+    });
+    expect(JSON.stringify(json)).not.toContain(IP);
   });
 
   it("só install_id: campos opcionais viram null e strings vazias são descartadas", async () => {
