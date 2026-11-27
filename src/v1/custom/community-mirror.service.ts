@@ -35,42 +35,52 @@ async function getDb(): Promise<Firestore> {
   return getFirestore(await getFirebaseApp());
 }
 
+export type UpsertResult = "created" | "updated" | "unchanged";
+
 /**
  * Upsert de login: cria doc com role='member'/status='active' (merge) ou,
  * se existe, atualiza APENAS lastLoginAt/email/name. Erros são engolidos
- * (fail-open — AC8) para nunca quebrar o login.
+ * (fail-open — AC8) para nunca quebrar o login. Retorna o resultado
+ * (para report de idempotência do CLI: unchanged = perfil igual).
  */
 export async function upsertCommunityMember(
   member: CommunityMemberInput,
-): Promise<void> {
+): Promise<UpsertResult> {
   try {
     const db = await getDb();
     const doc = db.collection(COLLECTION).doc(member.uid);
     const snap = await doc.get();
     const now = new Date();
-    if (snap.exists) {
+    const existing = snap.exists
+      ? (snap.data() as Record<string, unknown> | undefined)
+      : undefined;
+    if (existing) {
+      const profileChanged =
+        existing.email !== member.email || existing.name !== member.name;
       await doc.set(
         { lastLoginAt: now, email: member.email, name: member.name },
         { merge: true },
       );
-    } else {
-      await doc.set(
-        {
-          uid: member.uid,
-          email: member.email,
-          name: member.name,
-          role: "member",
-          status: "active",
-          createdAt: now,
-          lastLoginAt: now,
-        },
-        { merge: true },
-      );
+      return profileChanged ? "updated" : "unchanged";
     }
+    await doc.set(
+      {
+        uid: member.uid,
+        email: member.email,
+        name: member.name,
+        role: "member",
+        status: "active",
+        createdAt: now,
+        lastLoginAt: now,
+      },
+      { merge: true },
+    );
+    return "created";
   } catch (e) {
     console.warn(
       "[communityMirror] upsert falhou (fail-open):",
       e instanceof Error ? e.message : String(e),
     );
+    return "unchanged";
   }
 }

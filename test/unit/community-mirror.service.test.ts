@@ -110,7 +110,7 @@ describe("community-mirror.service (SPEC admin-membros v1.0.0)", () => {
     setCommunityMemberFirestoreForTests(boom);
     await expect(
       upsertCommunityMember({ uid: "uid-3", email: "c@b.com", name: "C" }),
-    ).resolves.toBeUndefined();
+    ).resolves.toBe("unchanged");
   });
 
   it("AC2 (parcial): 2× upsert = mesmo doc, sem duplicar (merge)", async () => {
