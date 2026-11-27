@@ -95,10 +95,14 @@ _MARKER_RE = re.compile(r"\\[a-zA-Z0-9]+\s*|\s*\\p\b")
 
 def _clean(text: str) -> str:
     """Strip USFM markers, footnotes/refs content, normalize whitespace."""
+    # F1 (QA t_dbd7397c/PR #308): atributos interlinear (|strong="..." etc.)
+    # DEVEM sair ANTES dos markers — \w Word|strong="H8064"\w* vira 'Word'.
+    text = re.sub(r"\|strong=\"[^\"]*\"\*?", "", text)
     text = re.sub(r"\\f\s+\+.*?\\f\*", "", text, flags=re.S)  # footnotes completos
     text = re.sub(r"\\f\s+[^\\]*(\\f\*)?", "", text)  # \f aberto sem fechar
     text = re.sub(r"\\x\s+[^\\]*(\\x\*)?", "", text)  # cross-refs
     text = re.sub(r"\\bdit\s+\([^)]*\)\s*(\\bdit\*)?", "", text)  # refs parênteses
+    text = re.sub(r"\\[a-zA-Z0-9]+(\d*)\*", "", text)  # F1: fechadores \w* etc (sem comer espaço)
     text = re.sub(r"\\[a-zA-Z0-9]+(\d*)\s*", "", text)  # markers
     text = re.sub(r"[ \t]+", " ", text)
     return text.strip()
