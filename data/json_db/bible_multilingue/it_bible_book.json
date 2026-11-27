@@ -1,0 +1,464 @@
+[
+  {
+    "id_bible_book": 464,
+    "name": "Genesi",
+    "abbreviation": "Gn",
+    "chapters": 50,
+    "book_number": 1
+  },
+  {
+    "id_bible_book": 465,
+    "name": "Esodo",
+    "abbreviation": "Ex",
+    "chapters": 40,
+    "book_number": 2
+  },
+  {
+    "id_bible_book": 466,
+    "name": "Levitico",
+    "abbreviation": "Lv",
+    "chapters": 27,
+    "book_number": 3
+  },
+  {
+    "id_bible_book": 467,
+    "name": "Numeri",
+    "abbreviation": "Nm",
+    "chapters": 36,
+    "book_number": 4
+  },
+  {
+    "id_bible_book": 468,
+    "name": "Deuteronomio",
+    "abbreviation": "Dt",
+    "chapters": 34,
+    "book_number": 5
+  },
+  {
+    "id_bible_book": 469,
+    "name": "Giosué",
+    "abbreviation": "Js",
+    "chapters": 24,
+    "book_number": 6
+  },
+  {
+    "id_bible_book": 470,
+    "name": "Giudici",
+    "abbreviation": "Jz",
+    "chapters": 21,
+    "book_number": 7
+  },
+  {
+    "id_bible_book": 471,
+    "name": "Rut",
+    "abbreviation": "Rt",
+    "chapters": 4,
+    "book_number": 8
+  },
+  {
+    "id_bible_book": 472,
+    "name": "1 Samuele",
+    "abbreviation": "1Sm",
+    "chapters": 31,
+    "book_number": 9
+  },
+  {
+    "id_bible_book": 473,
+    "name": "2 Samuele",
+    "abbreviation": "2Sm",
+    "chapters": 24,
+    "book_number": 10
+  },
+  {
+    "id_bible_book": 474,
+    "name": "1 Re",
+    "abbreviation": "1Rs",
+    "chapters": 22,
+    "book_number": 11
+  },
+  {
+    "id_bible_book": 475,
+    "name": "2 Re",
+    "abbreviation": "2Rs",
+    "chapters": 25,
+    "book_number": 12
+  },
+  {
+    "id_bible_book": 476,
+    "name": "1 Cronache",
+    "abbreviation": "1Cr",
+    "chapters": 29,
+    "book_number": 13
+  },
+  {
+    "id_bible_book": 477,
+    "name": "2 Cronache",
+    "abbreviation": "2Cr",
+    "chapters": 36,
+    "book_number": 14
+  },
+  {
+    "id_bible_book": 478,
+    "name": "Esdra",
+    "abbreviation": "Ed",
+    "chapters": 10,
+    "book_number": 15
+  },
+  {
+    "id_bible_book": 479,
+    "name": "Neemia",
+    "abbreviation": "Ne",
+    "chapters": 13,
+    "book_number": 16
+  },
+  {
+    "id_bible_book": 480,
+    "name": "Ester",
+    "abbreviation": "Et",
+    "chapters": 10,
+    "book_number": 17
+  },
+  {
+    "id_bible_book": 481,
+    "name": "Giobbe",
+    "abbreviation": "Jó",
+    "chapters": 42,
+    "book_number": 18
+  },
+  {
+    "id_bible_book": 482,
+    "name": "Salmi",
+    "abbreviation": "Sl",
+    "chapters": 150,
+    "book_number": 19
+  },
+  {
+    "id_bible_book": 483,
+    "name": "Proverbi",
+    "abbreviation": "Pv",
+    "chapters": 31,
+    "book_number": 20
+  },
+  {
+    "id_bible_book": 484,
+    "name": "Ecclesiaste",
+    "abbreviation": "Ec",
+    "chapters": 12,
+    "book_number": 21
+  },
+  {
+    "id_bible_book": 485,
+    "name": "Cantico dei Cantici",
+    "abbreviation": "Ct",
+    "chapters": 8,
+    "book_number": 22
+  },
+  {
+    "id_bible_book": 486,
+    "name": "Isaia",
+    "abbreviation": "Is",
+    "chapters": 66,
+    "book_number": 23
+  },
+  {
+    "id_bible_book": 487,
+    "name": "Geremia",
+    "abbreviation": "Jr",
+    "chapters": 52,
+    "book_number": 24
+  },
+  {
+    "id_bible_book": 488,
+    "name": "Lamentazioni",
+    "abbreviation": "Lm",
+    "chapters": 5,
+    "book_number": 25
+  },
+  {
+    "id_bible_book": 489,
+    "name": "Ezechiele",
+    "abbreviation": "Ez",
+    "chapters": 48,
+    "book_number": 26
+  },
+  {
+    "id_bible_book": 490,
+    "name": "Daniele",
+    "abbreviation": "Dn",
+    "chapters": 12,
+    "book_number": 27
+  },
+  {
+    "id_bible_book": 491,
+    "name": "Osea",
+    "abbreviation": "Os",
+    "chapters": 14,
+    "book_number": 28
+  },
+  {
+    "id_bible_book": 492,
+    "name": "Gioele",
+    "abbreviation": "Jl",
+    "chapters": 3,
+    "book_number": 29
+  },
+  {
+    "id_bible_book": 493,
+    "name": "Amos",
+    "abbreviation": "Am",
+    "chapters": 9,
+    "book_number": 30
+  },
+  {
+    "id_bible_book": 494,
+    "name": "Abdia",
+    "abbreviation": "Ob",
+    "chapters": 1,
+    "book_number": 31
+  },
+  {
+    "id_bible_book": 495,
+    "name": "Giona",
+    "abbreviation": "Jn",
+    "chapters": 4,
+    "book_number": 32
+  },
+  {
+    "id_bible_book": 496,
+    "name": "Michea",
+    "abbreviation": "Mq",
+    "chapters": 7,
+    "book_number": 33
+  },
+  {
+    "id_bible_book": 497,
+    "name": "Nahum",
+    "abbreviation": "Na",
+    "chapters": 3,
+    "book_number": 34
+  },
+  {
+    "id_bible_book": 498,
+    "name": "Abacuc",
+    "abbreviation": "Hc",
+    "chapters": 3,
+    "book_number": 35
+  },
+  {
+    "id_bible_book": 499,
+    "name": "Sofonia",
+    "abbreviation": "Sf",
+    "chapters": 3,
+    "book_number": 36
+  },
+  {
+    "id_bible_book": 500,
+    "name": "Aggeo",
+    "abbreviation": "Ag",
+    "chapters": 2,
+    "book_number": 37
+  },
+  {
+    "id_bible_book": 501,
+    "name": "Zaccaria",
+    "abbreviation": "Zc",
+    "chapters": 14,
+    "book_number": 38
+  },
+  {
+    "id_bible_book": 502,
+    "name": "Malachia",
+    "abbreviation": "Ml",
+    "chapters": 4,
+    "book_number": 39
+  },
+  {
+    "id_bible_book": 503,
+    "name": "Matteo",
+    "abbreviation": "Mt",
+    "chapters": 28,
+    "book_number": 40
+  },
+  {
+    "id_bible_book": 504,
+    "name": "Marco",
+    "abbreviation": "Mc",
+    "chapters": 16,
+    "book_number": 41
+  },
+  {
+    "id_bible_book": 505,
+    "name": "Luca",
+    "abbreviation": "Lc",
+    "chapters": 24,
+    "book_number": 42
+  },
+  {
+    "id_bible_book": 506,
+    "name": "Giovanni",
+    "abbreviation": "Jo",
+    "chapters": 21,
+    "book_number": 43
+  },
+  {
+    "id_bible_book": 507,
+    "name": "Atti",
+    "abbreviation": "At",
+    "chapters": 28,
+    "book_number": 44
+  },
+  {
+    "id_bible_book": 508,
+    "name": "Romani",
+    "abbreviation": "Rm",
+    "chapters": 16,
+    "book_number": 45
+  },
+  {
+    "id_bible_book": 509,
+    "name": "1 Corinzi",
+    "abbreviation": "1Co",
+    "chapters": 16,
+    "book_number": 46
+  },
+  {
+    "id_bible_book": 510,
+    "name": "2 Corinzi",
+    "abbreviation": "2Co",
+    "chapters": 13,
+    "book_number": 47
+  },
+  {
+    "id_bible_book": 511,
+    "name": "Galati",
+    "abbreviation": "Gl",
+    "chapters": 6,
+    "book_number": 48
+  },
+  {
+    "id_bible_book": 512,
+    "name": "Efesini",
+    "abbreviation": "Ef",
+    "chapters": 6,
+    "book_number": 49
+  },
+  {
+    "id_bible_book": 513,
+    "name": "Filippesi",
+    "abbreviation": "Fp",
+    "chapters": 4,
+    "book_number": 50
+  },
+  {
+    "id_bible_book": 514,
+    "name": "Colossesi",
+    "abbreviation": "Cl",
+    "chapters": 4,
+    "book_number": 51
+  },
+  {
+    "id_bible_book": 515,
+    "name": "1 Tessalonicesi",
+    "abbreviation": "1Ts",
+    "chapters": 5,
+    "book_number": 52
+  },
+  {
+    "id_bible_book": 516,
+    "name": "2 Tessalonicesi",
+    "abbreviation": "2Ts",
+    "chapters": 3,
+    "book_number": 53
+  },
+  {
+    "id_bible_book": 517,
+    "name": "1 Timoteo",
+    "abbreviation": "1Tm",
+    "chapters": 6,
+    "book_number": 54
+  },
+  {
+    "id_bible_book": 518,
+    "name": "2 Timoteo",
+    "abbreviation": "2Tm",
+    "chapters": 4,
+    "book_number": 55
+  },
+  {
+    "id_bible_book": 519,
+    "name": "Tito",
+    "abbreviation": "Tt",
+    "chapters": 3,
+    "book_number": 56
+  },
+  {
+    "id_bible_book": 520,
+    "name": "Filemone",
+    "abbreviation": "Fm",
+    "chapters": 1,
+    "book_number": 57
+  },
+  {
+    "id_bible_book": 521,
+    "name": "Ebrei",
+    "abbreviation": "Hb",
+    "chapters": 13,
+    "book_number": 58
+  },
+  {
+    "id_bible_book": 522,
+    "name": "Giacomo",
+    "abbreviation": "Tg",
+    "chapters": 5,
+    "book_number": 59
+  },
+  {
+    "id_bible_book": 523,
+    "name": "1 Pietro",
+    "abbreviation": "1Pe",
+    "chapters": 5,
+    "book_number": 60
+  },
+  {
+    "id_bible_book": 524,
+    "name": "2 Pietro",
+    "abbreviation": "2Pe",
+    "chapters": 3,
+    "book_number": 61
+  },
+  {
+    "id_bible_book": 525,
+    "name": "1 Giovanni",
+    "abbreviation": "1Jo",
+    "chapters": 5,
+    "book_number": 62
+  },
+  {
+    "id_bible_book": 526,
+    "name": "2 Giovanni",
+    "abbreviation": "2Jo",
+    "chapters": 1,
+    "book_number": 63
+  },
+  {
+    "id_bible_book": 527,
+    "name": "3 Giovanni",
+    "abbreviation": "3Jo",
+    "chapters": 1,
+    "book_number": 64
+  },
+  {
+    "id_bible_book": 528,
+    "name": "Giuda",
+    "abbreviation": "Jd",
+    "chapters": 1,
+    "book_number": 65
+  },
+  {
+    "id_bible_book": 529,
+    "name": "Apocalisse",
+    "abbreviation": "Ap",
+    "chapters": 22,
+    "book_number": 66
+  }
+]

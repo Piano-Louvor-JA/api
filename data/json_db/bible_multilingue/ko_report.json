@@ -1,0 +1,484 @@
+{
+  "lang": "ko",
+  "translation": "한국어 성경 (Korean Bible 1910)",
+  "abbreviation": "KOR",
+  "id_bible_version": 109,
+  "id_book_base": 794,
+  "license": "PD",
+  "attribution": "Public Domain — Korean Bible 1910",
+  "source_url": "https://ebible.org/find/details.php?id=kor",
+  "note": "",
+  "books": 66,
+  "chapters": 1188,
+  "verses": 30991,
+  "files_written": 1188,
+  "problems": [],
+  "warnings": [
+    "book 60 (베드로전서): 4 capítulos ≠ canon 5 — upstream divergente (sha256 no relatório detecta re-publicação)"
+  ],
+  "books_detail": [
+    {
+      "book": 1,
+      "name": "창세기",
+      "chapters": 50,
+      "verses": 1520,
+      "sha256": "5ba1b8bb8303550ac6b410b07a8f59b42a4b96c538ec7275a39f7b1a5adcc98e"
+    },
+    {
+      "book": 2,
+      "name": "출애굽기",
+      "chapters": 40,
+      "verses": 1213,
+      "sha256": "fe7212d1fe29e86ea854afa17e5e3835e65cea866dcf649baa084c8f3f77ea5c"
+    },
+    {
+      "book": 3,
+      "name": "레위기",
+      "chapters": 27,
+      "verses": 859,
+      "sha256": "893669fbe1539a7b88ceab282dcf0cb420c654d0642699ba64b8c53b11416bbb"
+    },
+    {
+      "book": 4,
+      "name": "민수기",
+      "chapters": 36,
+      "verses": 1285,
+      "sha256": "7e12445ff317195f11495a234034de44c7ca38d4e64e2e6aa668bc400bb0fac3"
+    },
+    {
+      "book": 5,
+      "name": "신명기",
+      "chapters": 34,
+      "verses": 959,
+      "sha256": "d41543f116c13d838fd61680c0f173732d7232b3486457b830268a7f3308a2a8"
+    },
+    {
+      "book": 6,
+      "name": "여호수아",
+      "chapters": 24,
+      "verses": 655,
+      "sha256": "aebc3f73ef85769789bba1ce249a26a1604d7de6ff7dc906c31cf2012efeb1c6"
+    },
+    {
+      "book": 7,
+      "name": "사사기",
+      "chapters": 21,
+      "verses": 617,
+      "sha256": "e2ef15850a053dc9a0d16d9961b226aea57115326e03d3710e71ac042a994420"
+    },
+    {
+      "book": 8,
+      "name": "룻기",
+      "chapters": 4,
+      "verses": 85,
+      "sha256": "54df65d4ed837144c467c8bed264d4f878975363d92e5b4cc54a71d14ed322b6"
+    },
+    {
+      "book": 9,
+      "name": "사무엘상",
+      "chapters": 31,
+      "verses": 807,
+      "sha256": "7c23f236433fe5164804218c0c13721f3bb723e4a78b2ce06010b61b202d1344"
+    },
+    {
+      "book": 10,
+      "name": "사무엘하",
+      "chapters": 24,
+      "verses": 695,
+      "sha256": "1465085e7400c4b50976ee1d10b78629116282d115ab0e4e73b06f822f3dac06"
+    },
+    {
+      "book": 11,
+      "name": "열왕기상",
+      "chapters": 22,
+      "verses": 814,
+      "sha256": "c5bc8c3f4a01bb878b35bda24903a2242c99ef9efb184f0d6f15edbe89797dbd"
+    },
+    {
+      "book": 12,
+      "name": "열왕기하",
+      "chapters": 25,
+      "verses": 719,
+      "sha256": "85ee974d78b459298ef37e2f84d054478b30628660e7ea7bbeba6f7b2a183d10"
+    },
+    {
+      "book": 13,
+      "name": "역대상",
+      "chapters": 29,
+      "verses": 941,
+      "sha256": "c01fdea04699e17c8722b3893b3c9adb49409fad360d85b2ac3f6b56a92ed0b7"
+    },
+    {
+      "book": 14,
+      "name": "역대하",
+      "chapters": 36,
+      "verses": 821,
+      "sha256": "dc373ae887c48ffc79002ea543ad0f0a84e4b37bce76bb111ca01126dfeb9835"
+    },
+    {
+      "book": 15,
+      "name": "에스라",
+      "chapters": 10,
+      "verses": 280,
+      "sha256": "5a45ab87e2d89cddaa2083e8870796f211f26bf2f14e4980f1c82c087ba5baa3"
+    },
+    {
+      "book": 16,
+      "name": "느헤미야",
+      "chapters": 13,
+      "verses": 406,
+      "sha256": "df77e92bcc6522a93c8479dbf0b66931598f01c454f1f0357ccf1f32923c3d29"
+    },
+    {
+      "book": 17,
+      "name": "에스더",
+      "chapters": 10,
+      "verses": 164,
+      "sha256": "d4439dda762be0b7612f63b28a8a006b045888ac463046ebfbb63a6a2a1f6d37"
+    },
+    {
+      "book": 18,
+      "name": "욥기",
+      "chapters": 42,
+      "verses": 1070,
+      "sha256": "ffe773350d7c0d04a877ce702e12b0acc4ff0ea11ceb42c8dc3dc133e1696420"
+    },
+    {
+      "book": 19,
+      "name": "시편",
+      "chapters": 150,
+      "verses": 2429,
+      "sha256": "8ab3a8cfc8d2070ce78cf7b179b43f7585c5e7dba727f693150d76e45afccee7"
+    },
+    {
+      "book": 20,
+      "name": "잠언",
+      "chapters": 31,
+      "verses": 911,
+      "sha256": "d62116006117c5cd0ea605817d44781aa27e26077614f56cde8fbf0f822fc57c"
+    },
+    {
+      "book": 21,
+      "name": "전도서",
+      "chapters": 12,
+      "verses": 221,
+      "sha256": "340bfb2b83edbaa29dbe839dd5948b0c75ea33c97167e8e8a13d868a6f255260"
+    },
+    {
+      "book": 22,
+      "name": "아가",
+      "chapters": 8,
+      "verses": 117,
+      "sha256": "4cbdb03a18fc8deac803896c18db165b9ed7a29fb83a62920627282c078d3ead"
+    },
+    {
+      "book": 23,
+      "name": "이사야",
+      "chapters": 66,
+      "verses": 1288,
+      "sha256": "99171471ac0d22940e021dbeddebc0ae5d34dd4e88ccae612505645411d8b810"
+    },
+    {
+      "book": 24,
+      "name": "예레미야",
+      "chapters": 52,
+      "verses": 1361,
+      "sha256": "6a9c447ca0bf70d0c87fea898b1a5c55eb52e973e0ef9249ec48cd0ed7caf936"
+    },
+    {
+      "book": 25,
+      "name": "예레미야 애가",
+      "chapters": 5,
+      "verses": 154,
+      "sha256": "9ffeb3cffece5bea12d4ea11c70f65da0f9e054e53b323962d840a86cbbb31c7"
+    },
+    {
+      "book": 26,
+      "name": "에스겔",
+      "chapters": 48,
+      "verses": 1273,
+      "sha256": "61c5e73926bd6d50f236a7f9f1bde63e4d7742d4fcef284d188f9343ff3304be"
+    },
+    {
+      "book": 27,
+      "name": "다니엘",
+      "chapters": 12,
+      "verses": 357,
+      "sha256": "3d4dbd8d7d4f701610fc62e9a15394a92af3054447ef688135e25956cd05b0d3"
+    },
+    {
+      "book": 28,
+      "name": "호세아",
+      "chapters": 14,
+      "verses": 197,
+      "sha256": "45179dd2fa1baf5a6d733131b41be003f961212462b31e9ef007e5750f15e09c"
+    },
+    {
+      "book": 29,
+      "name": "요엘",
+      "chapters": 3,
+      "verses": 73,
+      "sha256": "eea58cc4fc60d9c5e3e0522d573d3a2dac91274fcb84ff44e944c91ee594f53f"
+    },
+    {
+      "book": 30,
+      "name": "아모스",
+      "chapters": 9,
+      "verses": 146,
+      "sha256": "642af2568480ff36de2254d19cb92395f75d1ee4c6c9c85d92a30bab55504bbb"
+    },
+    {
+      "book": 31,
+      "name": "오바댜",
+      "chapters": 1,
+      "verses": 21,
+      "sha256": "8a966eb04f89ade87d6c4b7d04102b2b33a8f89275384f778a1eaa0ba0659f54"
+    },
+    {
+      "book": 32,
+      "name": "요나",
+      "chapters": 4,
+      "verses": 48,
+      "sha256": "5723fb4ce11f88d781990c756375a3c76f45dfdde0186fb2d0bab7b045e5442f"
+    },
+    {
+      "book": 33,
+      "name": "미가",
+      "chapters": 7,
+      "verses": 105,
+      "sha256": "d9c9de90b913d3b68e1cb4f8ec627a65bb5b49f02d3cd028c7a43d093eda475c"
+    },
+    {
+      "book": 34,
+      "name": "나훔",
+      "chapters": 3,
+      "verses": 47,
+      "sha256": "40d71e87170efaee9953e97bce1c5f9b700550d60e5f9c882f89d206d7199fc3"
+    },
+    {
+      "book": 35,
+      "name": "하박국",
+      "chapters": 3,
+      "verses": 56,
+      "sha256": "ba9f031d974841267b22f0067eea91b64c41e767222e04ca34758b24af330315"
+    },
+    {
+      "book": 36,
+      "name": "스바냐",
+      "chapters": 3,
+      "verses": 53,
+      "sha256": "4d440a6873ea15a1f0d7221abb9151ceeb59ca41c48dd1cfba7fe635422aa763"
+    },
+    {
+      "book": 37,
+      "name": "학개",
+      "chapters": 2,
+      "verses": 38,
+      "sha256": "9f0c13583a0ea8e8608200cc392677523f2fa2c6bf973f23d6a3c0bbbd52de39"
+    },
+    {
+      "book": 38,
+      "name": "스가랴",
+      "chapters": 14,
+      "verses": 211,
+      "sha256": "af140ad77b2f128c7e1f571428027b5792c4caf0f8ce13152043215b826498eb"
+    },
+    {
+      "book": 39,
+      "name": "말라기",
+      "chapters": 4,
+      "verses": 55,
+      "sha256": "5bc3bf988ae76f4510487850e167921d480fa3c6dc2449746e2e2c3b4d8c4ffe"
+    },
+    {
+      "book": 40,
+      "name": "마태복음",
+      "chapters": 28,
+      "verses": 1071,
+      "sha256": "3468513aa818b7265e10a44bae40ab08f16a30f5ac397224cd986745d9d0bb07"
+    },
+    {
+      "book": 41,
+      "name": "마가복음",
+      "chapters": 16,
+      "verses": 678,
+      "sha256": "7e43a61de7b9c492bdb2176b448ea23e6ab5694cadd31923d707a9933ae67fa3"
+    },
+    {
+      "book": 42,
+      "name": "누가복음",
+      "chapters": 24,
+      "verses": 1151,
+      "sha256": "636594a4a93cd22426cd2e6fa4f2f01e0d75a9cab1986117fedd7ba85b5d4aab"
+    },
+    {
+      "book": 43,
+      "name": "요한복음",
+      "chapters": 21,
+      "verses": 879,
+      "sha256": "5cd6fe2e17b0f3a8bd1a242301151e8f13089f840801de5f2eace0948f443bf3"
+    },
+    {
+      "book": 44,
+      "name": "사도행전",
+      "chapters": 28,
+      "verses": 1006,
+      "sha256": "9d746ea63a3f51d275a8c3c04338645acd9b626da1946be16084e7ac4607b2e1"
+    },
+    {
+      "book": 45,
+      "name": "로마서",
+      "chapters": 16,
+      "verses": 433,
+      "sha256": "dc75f04391495ca1022e24322849ba2d840f96f431035d3de901c42b9cef00d6"
+    },
+    {
+      "book": 46,
+      "name": "고린도전서",
+      "chapters": 16,
+      "verses": 437,
+      "sha256": "e9a8f4bdcc4da91a6af42d757f84dcc258d721de27e1cf8a96215dad534e51b1"
+    },
+    {
+      "book": 47,
+      "name": "고린도후서",
+      "chapters": 13,
+      "verses": 256,
+      "sha256": "ee231c73e2b3682f3fc6f252daa75eb75d42c88c3407990595c9cf85abcbc931"
+    },
+    {
+      "book": 48,
+      "name": "갈라디아서",
+      "chapters": 6,
+      "verses": 149,
+      "sha256": "9ff067e97f3e90f3efc556480050ca43c00c5d5dedaf5a661809ee5249ba4ff4"
+    },
+    {
+      "book": 49,
+      "name": "에베소서",
+      "chapters": 6,
+      "verses": 155,
+      "sha256": "260d55a32861fb62fe59f2ab81a9934766f4da76c43673aba951360346dca293"
+    },
+    {
+      "book": 50,
+      "name": "빌립보서",
+      "chapters": 4,
+      "verses": 104,
+      "sha256": "d5f3d35589defa9821600cb62c8fea223aaf1d508909e0b338543252ac161d4a"
+    },
+    {
+      "book": 51,
+      "name": "골로새서",
+      "chapters": 4,
+      "verses": 86,
+      "sha256": "4f73bbbe3942cd3b42adfaedd5f598b3daf2a8d037ca4e54e276d64e155daa2d"
+    },
+    {
+      "book": 52,
+      "name": "데살로니가전서",
+      "chapters": 5,
+      "verses": 89,
+      "sha256": "482bbfbadc566d6b061fdb4b928bb5106bb59bb3270bf194c2aec9c245600e8a"
+    },
+    {
+      "book": 53,
+      "name": "데살로니가후서",
+      "chapters": 3,
+      "verses": 47,
+      "sha256": "787b0008c7212f3160d66c441a1d04d35880c629686b4644f4322b718ec8ffcc"
+    },
+    {
+      "book": 54,
+      "name": "디모데전서",
+      "chapters": 6,
+      "verses": 113,
+      "sha256": "c9527b443c25784eb0d40b35537a04823406e032a4906d5ac1951e101b127bfb"
+    },
+    {
+      "book": 55,
+      "name": "디모데후서",
+      "chapters": 4,
+      "verses": 82,
+      "sha256": "29a442e15d10d3519cf42bfe1170d09cda7bc730d3a6fd7762b88d5af0e49047"
+    },
+    {
+      "book": 56,
+      "name": "디도서",
+      "chapters": 3,
+      "verses": 46,
+      "sha256": "60911288e823fdc50dc6b8c03c37fd970195a2741814c50cbde8ce53be3c4d2e"
+    },
+    {
+      "book": 57,
+      "name": "빌레몬서",
+      "chapters": 1,
+      "verses": 25,
+      "sha256": "6f2a2f7fd805e9d86f1e3346bd1d8a6e8e17f0e011a2cde36dabc91c0daf4729"
+    },
+    {
+      "book": 58,
+      "name": "히브리서",
+      "chapters": 13,
+      "verses": 303,
+      "sha256": "23ea57bcf259bb2525a8264a142e36551574b8e69574a6c4393d415ed1ba1746"
+    },
+    {
+      "book": 59,
+      "name": "야고보서",
+      "chapters": 5,
+      "verses": 108,
+      "sha256": "d7a8a9a547c05ba3718f90308cd91fc0c0e9f07ebf931f29ab09fc5f6f36b430"
+    },
+    {
+      "book": 60,
+      "name": "베드로전서",
+      "chapters": 4,
+      "verses": 80,
+      "sha256": "5f1dcdca4988da54db9a8e31b919d6b1468a50d7be181cb68d820fb2faadd9b6"
+    },
+    {
+      "book": 61,
+      "name": "베드로후서",
+      "chapters": 3,
+      "verses": 61,
+      "sha256": "d9bf758d55a068ad79c2305298d70f81274e8ba2066e0fea022596f5991c3899"
+    },
+    {
+      "book": 62,
+      "name": "요한1서",
+      "chapters": 5,
+      "verses": 105,
+      "sha256": "93c844daf81f8da37cac1162039670a573c3c7137678ccd14996d1f1b2c5fdc9"
+    },
+    {
+      "book": 63,
+      "name": "요한2서",
+      "chapters": 1,
+      "verses": 13,
+      "sha256": "3cb2948a37939ce2798eae6d0aff2853089cbc93008471e12f66a154c2e643f2"
+    },
+    {
+      "book": 64,
+      "name": "요한3서",
+      "chapters": 1,
+      "verses": 14,
+      "sha256": "b470703ef0346d4b5247be712a137b2b37913d826137dfa931667dc48c867ada"
+    },
+    {
+      "book": 65,
+      "name": "유다서",
+      "chapters": 1,
+      "verses": 25,
+      "sha256": "233a1c000a73811750c351abf5603b10906f89c4b42dae2e06ce14a3e3276ad5"
+    },
+    {
+      "book": 66,
+      "name": "요한계시록",
+      "chapters": 22,
+      "verses": 404,
+      "sha256": "9fd1eb3b14a8e8abd4d0777c39b8f4a8b784d32275d86ea40772cd370673b9a5"
+    }
+  ],
+  "source_sha256": "287f2192323d34d65e2713a3adb24c4ab0f86e9e85430156cf630c5f1a55602e"
+}

@@ -1,0 +1,464 @@
+[
+  {
+    "id_bible_book": 398,
+    "name": "Перва книга Мойсея",
+    "abbreviation": "Gn",
+    "chapters": 50,
+    "book_number": 1
+  },
+  {
+    "id_bible_book": 399,
+    "name": "Друга книга Мойсея",
+    "abbreviation": "Ex",
+    "chapters": 40,
+    "book_number": 2
+  },
+  {
+    "id_bible_book": 400,
+    "name": "Третя книга Мойсея",
+    "abbreviation": "Lv",
+    "chapters": 27,
+    "book_number": 3
+  },
+  {
+    "id_bible_book": 401,
+    "name": "Четверта книга Мойсея",
+    "abbreviation": "Nm",
+    "chapters": 36,
+    "book_number": 4
+  },
+  {
+    "id_bible_book": 402,
+    "name": "Пята книга Мойсея",
+    "abbreviation": "Dt",
+    "chapters": 34,
+    "book_number": 5
+  },
+  {
+    "id_bible_book": 403,
+    "name": "Книга Ісуса Навина",
+    "abbreviation": "Js",
+    "chapters": 24,
+    "book_number": 6
+  },
+  {
+    "id_bible_book": 404,
+    "name": "Книга Суддїв",
+    "abbreviation": "Jz",
+    "chapters": 21,
+    "book_number": 7
+  },
+  {
+    "id_bible_book": 405,
+    "name": "Книга Рути",
+    "abbreviation": "Rt",
+    "chapters": 4,
+    "book_number": 8
+  },
+  {
+    "id_bible_book": 406,
+    "name": "Перва книга Самуїлова",
+    "abbreviation": "1Sm",
+    "chapters": 31,
+    "book_number": 9
+  },
+  {
+    "id_bible_book": 407,
+    "name": "Друга книга Самуїлова",
+    "abbreviation": "2Sm",
+    "chapters": 24,
+    "book_number": 10
+  },
+  {
+    "id_bible_book": 408,
+    "name": "Перва книга Царів",
+    "abbreviation": "1Rs",
+    "chapters": 22,
+    "book_number": 11
+  },
+  {
+    "id_bible_book": 409,
+    "name": "Друга книга Царів",
+    "abbreviation": "2Rs",
+    "chapters": 25,
+    "book_number": 12
+  },
+  {
+    "id_bible_book": 410,
+    "name": "Перша книга Паралипоменон",
+    "abbreviation": "1Cr",
+    "chapters": 29,
+    "book_number": 13
+  },
+  {
+    "id_bible_book": 411,
+    "name": "Друга книга Паралипоменон",
+    "abbreviation": "2Cr",
+    "chapters": 36,
+    "book_number": 14
+  },
+  {
+    "id_bible_book": 412,
+    "name": "Книга Ездри",
+    "abbreviation": "Ed",
+    "chapters": 10,
+    "book_number": 15
+  },
+  {
+    "id_bible_book": 413,
+    "name": "Книга Неємії",
+    "abbreviation": "Ne",
+    "chapters": 13,
+    "book_number": 16
+  },
+  {
+    "id_bible_book": 414,
+    "name": "Книга Естери",
+    "abbreviation": "Et",
+    "chapters": 10,
+    "book_number": 17
+  },
+  {
+    "id_bible_book": 415,
+    "name": "Книга Йова",
+    "abbreviation": "Jó",
+    "chapters": 42,
+    "book_number": 18
+  },
+  {
+    "id_bible_book": 416,
+    "name": "Псалтир",
+    "abbreviation": "Sl",
+    "chapters": 150,
+    "book_number": 19
+  },
+  {
+    "id_bible_book": 417,
+    "name": "Книга Приповісток Соломонових",
+    "abbreviation": "Pv",
+    "chapters": 31,
+    "book_number": 20
+  },
+  {
+    "id_bible_book": 418,
+    "name": "Книга Екклезіаста",
+    "abbreviation": "Ec",
+    "chapters": 12,
+    "book_number": 21
+  },
+  {
+    "id_bible_book": 419,
+    "name": "Пісня Пісень",
+    "abbreviation": "Ct",
+    "chapters": 8,
+    "book_number": 22
+  },
+  {
+    "id_bible_book": 420,
+    "name": "Книга пророка Ісаїї",
+    "abbreviation": "Is",
+    "chapters": 66,
+    "book_number": 23
+  },
+  {
+    "id_bible_book": 421,
+    "name": "Книга пророка Еремії",
+    "abbreviation": "Jr",
+    "chapters": 52,
+    "book_number": 24
+  },
+  {
+    "id_bible_book": 422,
+    "name": "Книга Плач Еремії",
+    "abbreviation": "Lm",
+    "chapters": 5,
+    "book_number": 25
+  },
+  {
+    "id_bible_book": 423,
+    "name": "Книга пророка Езекиїла",
+    "abbreviation": "Ez",
+    "chapters": 48,
+    "book_number": 26
+  },
+  {
+    "id_bible_book": 424,
+    "name": "Книга пророка Даниїла",
+    "abbreviation": "Dn",
+    "chapters": 12,
+    "book_number": 27
+  },
+  {
+    "id_bible_book": 425,
+    "name": "Книга пророка Осії",
+    "abbreviation": "Os",
+    "chapters": 14,
+    "book_number": 28
+  },
+  {
+    "id_bible_book": 426,
+    "name": "Книга пророка Иоіла",
+    "abbreviation": "Jl",
+    "chapters": 3,
+    "book_number": 29
+  },
+  {
+    "id_bible_book": 427,
+    "name": "Книга пророка Амоса",
+    "abbreviation": "Am",
+    "chapters": 9,
+    "book_number": 30
+  },
+  {
+    "id_bible_book": 428,
+    "name": "Книга пророка Авдія",
+    "abbreviation": "Ob",
+    "chapters": 1,
+    "book_number": 31
+  },
+  {
+    "id_bible_book": 429,
+    "name": "Книга пророка Йони",
+    "abbreviation": "Jn",
+    "chapters": 4,
+    "book_number": 32
+  },
+  {
+    "id_bible_book": 430,
+    "name": "Книга пророка Михея",
+    "abbreviation": "Mq",
+    "chapters": 7,
+    "book_number": 33
+  },
+  {
+    "id_bible_book": 431,
+    "name": "Книга пророка Наума",
+    "abbreviation": "Na",
+    "chapters": 3,
+    "book_number": 34
+  },
+  {
+    "id_bible_book": 432,
+    "name": "Книга пророка Аввакума",
+    "abbreviation": "Hc",
+    "chapters": 3,
+    "book_number": 35
+  },
+  {
+    "id_bible_book": 433,
+    "name": "Книга пророка Софонїї",
+    "abbreviation": "Sf",
+    "chapters": 3,
+    "book_number": 36
+  },
+  {
+    "id_bible_book": 434,
+    "name": "Книга пророка Аггея",
+    "abbreviation": "Ag",
+    "chapters": 2,
+    "book_number": 37
+  },
+  {
+    "id_bible_book": 435,
+    "name": "Книга пророка Захарії",
+    "abbreviation": "Zc",
+    "chapters": 14,
+    "book_number": 38
+  },
+  {
+    "id_bible_book": 436,
+    "name": "Книга пророка Малахія",
+    "abbreviation": "Ml",
+    "chapters": 4,
+    "book_number": 39
+  },
+  {
+    "id_bible_book": 437,
+    "name": "Євангелия від сьв. Маттея",
+    "abbreviation": "Mt",
+    "chapters": 28,
+    "book_number": 40
+  },
+  {
+    "id_bible_book": 438,
+    "name": "Євангелия від сьв. Марка",
+    "abbreviation": "Mc",
+    "chapters": 16,
+    "book_number": 41
+  },
+  {
+    "id_bible_book": 439,
+    "name": "Євангелия від сьв. Луки",
+    "abbreviation": "Lc",
+    "chapters": 24,
+    "book_number": 42
+  },
+  {
+    "id_bible_book": 440,
+    "name": "Євангелия від сьв. Йоана",
+    "abbreviation": "Jo",
+    "chapters": 21,
+    "book_number": 43
+  },
+  {
+    "id_bible_book": 441,
+    "name": "Дїяння сьвятих Апостолів",
+    "abbreviation": "At",
+    "chapters": 28,
+    "book_number": 44
+  },
+  {
+    "id_bible_book": 442,
+    "name": "Посланнє сьв. Ап. Павла до Римлян",
+    "abbreviation": "Rm",
+    "chapters": 16,
+    "book_number": 45
+  },
+  {
+    "id_bible_book": 443,
+    "name": "Перве Посланнє сьв. Ап. Павла до Коринтян",
+    "abbreviation": "1Co",
+    "chapters": 16,
+    "book_number": 46
+  },
+  {
+    "id_bible_book": 444,
+    "name": "Друге Посланнє сьв. Ап. Павла до Коринтян",
+    "abbreviation": "2Co",
+    "chapters": 13,
+    "book_number": 47
+  },
+  {
+    "id_bible_book": 445,
+    "name": "Посланнє cьв. Ап. Павла до Галат",
+    "abbreviation": "Gl",
+    "chapters": 6,
+    "book_number": 48
+  },
+  {
+    "id_bible_book": 446,
+    "name": "Посланнє cьв. Ап. Павла до Єфесян",
+    "abbreviation": "Ef",
+    "chapters": 6,
+    "book_number": 49
+  },
+  {
+    "id_bible_book": 447,
+    "name": "Посланнє cьв. Ап. Павла до Филипян",
+    "abbreviation": "Fp",
+    "chapters": 4,
+    "book_number": 50
+  },
+  {
+    "id_bible_book": 448,
+    "name": "Посланнє cьв. Ап. Павла до Колосян",
+    "abbreviation": "Cl",
+    "chapters": 4,
+    "book_number": 51
+  },
+  {
+    "id_bible_book": 449,
+    "name": "Перве Посланнє cьв. Ап. Павла до Солунян",
+    "abbreviation": "1Ts",
+    "chapters": 5,
+    "book_number": 52
+  },
+  {
+    "id_bible_book": 450,
+    "name": "Друге Посланнє cьв. Ап. Павла до Солунян",
+    "abbreviation": "2Ts",
+    "chapters": 3,
+    "book_number": 53
+  },
+  {
+    "id_bible_book": 451,
+    "name": "Перве Посланнє cьв. Ап. Павла до Тимотея",
+    "abbreviation": "1Tm",
+    "chapters": 6,
+    "book_number": 54
+  },
+  {
+    "id_bible_book": 452,
+    "name": "Друге Посланнє cьв. Ап. Павла до Тимотея",
+    "abbreviation": "2Tm",
+    "chapters": 4,
+    "book_number": 55
+  },
+  {
+    "id_bible_book": 453,
+    "name": "Посланнє cьв. Ап. Павла до Тита",
+    "abbreviation": "Tt",
+    "chapters": 3,
+    "book_number": 56
+  },
+  {
+    "id_bible_book": 454,
+    "name": "Посланнє cьв. Ап. Павла до Филимона",
+    "abbreviation": "Fm",
+    "chapters": 1,
+    "book_number": 57
+  },
+  {
+    "id_bible_book": 455,
+    "name": "Посланнє cьв. Ап. Павла до Жидів",
+    "abbreviation": "Hb",
+    "chapters": 13,
+    "book_number": 58
+  },
+  {
+    "id_bible_book": 456,
+    "name": "Соборне Посланнє cьв. Ап. Якова",
+    "abbreviation": "Tg",
+    "chapters": 5,
+    "book_number": 59
+  },
+  {
+    "id_bible_book": 457,
+    "name": "Перве соборне Посланнє cьв. Ап. Петра",
+    "abbreviation": "1Pe",
+    "chapters": 5,
+    "book_number": 60
+  },
+  {
+    "id_bible_book": 458,
+    "name": "Друге соборне Посланнє cьв. Ап. Петра",
+    "abbreviation": "2Pe",
+    "chapters": 3,
+    "book_number": 61
+  },
+  {
+    "id_bible_book": 459,
+    "name": "Перве соборне Посланнє cьв. Ап. Йоана Богослова",
+    "abbreviation": "1Jo",
+    "chapters": 5,
+    "book_number": 62
+  },
+  {
+    "id_bible_book": 460,
+    "name": "Друге соборне Посланнє cьв. Ап. Йоана Богослова",
+    "abbreviation": "2Jo",
+    "chapters": 1,
+    "book_number": 63
+  },
+  {
+    "id_bible_book": 461,
+    "name": "Третє соборне Посланнє cьв. Ап. Йоана Богослова",
+    "abbreviation": "3Jo",
+    "chapters": 1,
+    "book_number": 64
+  },
+  {
+    "id_bible_book": 462,
+    "name": "Соборне Посланнє cьв. Ап. Юди",
+    "abbreviation": "Jd",
+    "chapters": 1,
+    "book_number": 65
+  },
+  {
+    "id_bible_book": 463,
+    "name": "Одкриттє сьв. Йоана Богослова",
+    "abbreviation": "Ap",
+    "chapters": 22,
+    "book_number": 66
+  }
+]

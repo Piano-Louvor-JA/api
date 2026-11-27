@@ -43,7 +43,8 @@
   "lint-staged": {
     "*.{ts,json}": [
       "biome check --write"
-    ]
+    ],
+    "data/json_db/**": []
   },
   "devDependencies": {
     "@biomejs/biome": "^2.6.8",

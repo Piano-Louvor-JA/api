@@ -1,0 +1,482 @@
+{
+  "lang": "tr",
+  "translation": "Yorumsuz Türkçe Çeviri (YTC)",
+  "abbreviation": "YTC",
+  "id_bible_version": 107,
+  "id_book_base": 662,
+  "license": "cc-by-nd",
+  "attribution": "© 2023-2025 İsmail Serinken + eBible.org — verbatim redistribution only",
+  "source_url": "https://ebible.org/find/details.php?id=turytc",
+  "note": "cc-by-nd: No-Derivatives — texto distribuído verbatim",
+  "books": 66,
+  "chapters": 1189,
+  "verses": 31059,
+  "files_written": 1189,
+  "problems": [],
+  "warnings": [],
+  "books_detail": [
+    {
+      "book": 1,
+      "name": "YARATILIŞ",
+      "chapters": 50,
+      "verses": 1527,
+      "sha256": "1ad72b34e5a1fd5dbb48fc9e8a1a66cfda434e229916ee4cc6ff840a98f981d3"
+    },
+    {
+      "book": 2,
+      "name": "ÇIKIŞ",
+      "chapters": 40,
+      "verses": 1213,
+      "sha256": "47ec6d02818ecca19b037000b1e15c463ce0a128fd005d3afdf4799066020d1f"
+    },
+    {
+      "book": 3,
+      "name": "LEVİLİLER",
+      "chapters": 27,
+      "verses": 859,
+      "sha256": "a3781ac6f33ce12f56d53fea5a8d2e184450e66cf859940e7fa1a1529ae31271"
+    },
+    {
+      "book": 4,
+      "name": "SAYILAR",
+      "chapters": 36,
+      "verses": 1288,
+      "sha256": "3a31a495974c97bd8adfe5cab66e8ed7a5e37754833dce2ee7ce71afc23581af"
+    },
+    {
+      "book": 5,
+      "name": "YASA'NIN TEKRARI",
+      "chapters": 34,
+      "verses": 959,
+      "sha256": "615dda4d31ea202845aad40b74124a78f6a2c540c4f8f2c14abcbae1f8e32c15"
+    },
+    {
+      "book": 6,
+      "name": "YEŞU",
+      "chapters": 24,
+      "verses": 658,
+      "sha256": "7b160a6e3c4e985a6b7b969f2c3033a9761ebebc75b603a183231540491c347c"
+    },
+    {
+      "book": 7,
+      "name": "HÂKİMLER",
+      "chapters": 21,
+      "verses": 618,
+      "sha256": "5446a731f08a456b0fa469933b9b2e4c72c483b1ce93bc1411c4839670894862"
+    },
+    {
+      "book": 8,
+      "name": "RUT",
+      "chapters": 4,
+      "verses": 85,
+      "sha256": "2ff2c7bc0b359c0e601969b8ac74adc001d3a012549991319d8d477e0e56cacf"
+    },
+    {
+      "book": 9,
+      "name": "I. SAMUEL",
+      "chapters": 31,
+      "verses": 810,
+      "sha256": "1ff7586300af895faf67a377fa7229bfa46cb02a0f8b55340e7cd669fdd3d9a7"
+    },
+    {
+      "book": 10,
+      "name": "2. SAMUEL",
+      "chapters": 24,
+      "verses": 695,
+      "sha256": "ec8b37af4b750cc649ae3c180f48ba07d98b0bbdb6ec38f0c51b1e2656ed95e7"
+    },
+    {
+      "book": 11,
+      "name": "1. KRALLAR",
+      "chapters": 22,
+      "verses": 816,
+      "sha256": "3247a06a8c3c92beb8bf5c3b050f70cd88640d037f8fb5ff054f277935f719f1"
+    },
+    {
+      "book": 12,
+      "name": "2. KRALLAR",
+      "chapters": 25,
+      "verses": 719,
+      "sha256": "181264f9402e17f3dd16b0d8d174a4aaff4fb8ccd0560c34cbf24e71585b31d1"
+    },
+    {
+      "book": 13,
+      "name": "1. TARİHLER",
+      "chapters": 29,
+      "verses": 942,
+      "sha256": "77a1e94078cb7c0098774eee981051de851dbb842c34c14c1cd1251309c86721"
+    },
+    {
+      "book": 14,
+      "name": "2. TARİHLER",
+      "chapters": 36,
+      "verses": 822,
+      "sha256": "a8e1b097b12b472095955d9f43e4fbc2735b40e8d6d4662c87dadc5af2b60f42"
+    },
+    {
+      "book": 15,
+      "name": "EZRA",
+      "chapters": 10,
+      "verses": 280,
+      "sha256": "03733f9fef9fc5756cce18260345878ce7532bf177c21d0ef7249574bcb109e9"
+    },
+    {
+      "book": 16,
+      "name": "NEHEMYA",
+      "chapters": 13,
+      "verses": 406,
+      "sha256": "07b96fbf5f88fca032fde613770f896fbb39661da3b03a6da59085b9c733f586"
+    },
+    {
+      "book": 17,
+      "name": "ESTER",
+      "chapters": 10,
+      "verses": 167,
+      "sha256": "bda3ad6c5f0d06716ac1ffbca571dc2e725370c1324659d6d54d54d08a1b9ccf"
+    },
+    {
+      "book": 18,
+      "name": "İYOV",
+      "chapters": 42,
+      "verses": 1070,
+      "sha256": "3d600f99655f6b54754f738b7014af250df4fec2ccdb0fad0817955af4d0bf5a"
+    },
+    {
+      "book": 19,
+      "name": "MEZMURLAR",
+      "chapters": 150,
+      "verses": 2461,
+      "sha256": "319e8ccae2cab07f7aa10818868c2021fd414de8df2769c20637fc275ba9baa2"
+    },
+    {
+      "book": 20,
+      "name": "ÖZDEYİŞLER",
+      "chapters": 31,
+      "verses": 915,
+      "sha256": "027eb7c024b22808e29d4d8f30c81005f88801e38f5a97454c2917e0811e9467"
+    },
+    {
+      "book": 21,
+      "name": "VAİZ",
+      "chapters": 12,
+      "verses": 222,
+      "sha256": "cb6332bdf7b278f6258cb66fc6caa1a7756485be4286b8d984da18de8fd262a1"
+    },
+    {
+      "book": 22,
+      "name": "SOLOMON'UN EZGİSİ",
+      "chapters": 8,
+      "verses": 117,
+      "sha256": "a8830f1bb265d12592db1d6e5b71bae02c10436f668e938deee52b32b72f0571"
+    },
+    {
+      "book": 23,
+      "name": "YEŞAYA",
+      "chapters": 66,
+      "verses": 1292,
+      "sha256": "ffac7fecb8f07c04789bb71dce9239c09dfd495c31d425f4e786d9dd2bc60cde"
+    },
+    {
+      "book": 24,
+      "name": "YEREMYA",
+      "chapters": 52,
+      "verses": 1364,
+      "sha256": "915fff79c29b7a5a22f45cd1cc2280914ac8b272d1b829c15a9add1246814bfe"
+    },
+    {
+      "book": 25,
+      "name": "AĞITLAR",
+      "chapters": 5,
+      "verses": 154,
+      "sha256": "e7aa632bd95f54585bf7426a0bdcc0e2b8a1613781b99aa06833ae1c9f0975d1"
+    },
+    {
+      "book": 26,
+      "name": "HEZEKİEL",
+      "chapters": 48,
+      "verses": 1273,
+      "sha256": "682db9d8906b9a2c897c2a81ed04251ecc1242ed05e42fd07bd31fb222a96213"
+    },
+    {
+      "book": 27,
+      "name": "DANİEL",
+      "chapters": 12,
+      "verses": 357,
+      "sha256": "01296d829913bc258843d0dc57844f4793f529dbbc9e8ca7d62fb65034344da1"
+    },
+    {
+      "book": 28,
+      "name": "HOŞEA",
+      "chapters": 14,
+      "verses": 197,
+      "sha256": "2a1e3d11bc009d4f6b4097ae19e354d709e06ed30e11725b145927f73ed552ac"
+    },
+    {
+      "book": 29,
+      "name": "YOEL",
+      "chapters": 3,
+      "verses": 73,
+      "sha256": "b0fa95941d98354442d9f4c50ffba8c3c0fdb56d1c05ad083854051c499c6c53"
+    },
+    {
+      "book": 30,
+      "name": "AMOS",
+      "chapters": 9,
+      "verses": 146,
+      "sha256": "e9b0ef8377c985f99ea5718296606f9cf6e7678f84760193ad0e3559cd0822bb"
+    },
+    {
+      "book": 31,
+      "name": "OVADYA",
+      "chapters": 1,
+      "verses": 21,
+      "sha256": "fc728c2a85fca68c15b823c8e955bbe56c195d41d1f8d281f9856d7de95016da"
+    },
+    {
+      "book": 32,
+      "name": "YONA",
+      "chapters": 4,
+      "verses": 48,
+      "sha256": "7f3be0ea5c75e3a1606017a06c71b7fd0c26c49bb58f09f15920736f0e7a73cf"
+    },
+    {
+      "book": 33,
+      "name": "MİKA",
+      "chapters": 7,
+      "verses": 105,
+      "sha256": "4962cb2c8b4688a9359e08ff6dfda137c3a76776d4ea392ed6c9d89311c94995"
+    },
+    {
+      "book": 34,
+      "name": "NAHUM",
+      "chapters": 3,
+      "verses": 47,
+      "sha256": "7445caf9864a9325b1e4ab8ba28376bf4da2426e47a9e77f1ebe320f22f3bd05"
+    },
+    {
+      "book": 35,
+      "name": "HABAKKUK",
+      "chapters": 3,
+      "verses": 56,
+      "sha256": "719321626f5401cf83f66e4dbfa250f6a84cd5c082f6f64398fe9db0f196364a"
+    },
+    {
+      "book": 36,
+      "name": "SEFANYA",
+      "chapters": 3,
+      "verses": 53,
+      "sha256": "e5a7b162e49c27e83a1e9dd98588ceb33d577ba17fe9d8e988737fbc5b9b3ac9"
+    },
+    {
+      "book": 37,
+      "name": "HAGAY",
+      "chapters": 2,
+      "verses": 38,
+      "sha256": "838271675082122a4543c7ad11316d1bac82b9bdf80f8717473049aa821d1a0a"
+    },
+    {
+      "book": 38,
+      "name": "ZEKARiYA",
+      "chapters": 14,
+      "verses": 211,
+      "sha256": "d9d6fb0d46ecb1c1735bb291d43ca77884d057cd074abcf489a2fe78302c49f8"
+    },
+    {
+      "book": 39,
+      "name": "MALAKİ",
+      "chapters": 4,
+      "verses": 55,
+      "sha256": "d2ea92bbc394568f6340f656f2e4004eed52547ae564fe8111c7a4f8ae80e7a6"
+    },
+    {
+      "book": 40,
+      "name": "MATTA",
+      "chapters": 28,
+      "verses": 1071,
+      "sha256": "ed6d91ab1d2bcd4407482b5ce967d8500f01ba200173f5fa334f283fc2072a2e"
+    },
+    {
+      "book": 41,
+      "name": "MARKOS",
+      "chapters": 16,
+      "verses": 678,
+      "sha256": "05fea9da864895b3340bf827dcdd3b99ee92fdac6bf41472a10b26689fe543bb"
+    },
+    {
+      "book": 42,
+      "name": "LUKA",
+      "chapters": 24,
+      "verses": 1150,
+      "sha256": "8c53e7919af0b08ef241dc0cdac354393f1bc0dc29679206f9e3a4e547d7ef8f"
+    },
+    {
+      "book": 43,
+      "name": "YUHANNA",
+      "chapters": 21,
+      "verses": 879,
+      "sha256": "0ddd595e2844ab8c103b2bb9b8567caeef4ea72cc55b1aa0f8819c714ea64d0e"
+    },
+    {
+      "book": 44,
+      "name": "ELÇİLERİN İŞLERİ",
+      "chapters": 28,
+      "verses": 1004,
+      "sha256": "1b151fd36f544c0d2c0c9e6d04ec4ac6e05e3efb3c120a4679f8af352ee48dfb"
+    },
+    {
+      "book": 45,
+      "name": "ROMALILAR",
+      "chapters": 16,
+      "verses": 432,
+      "sha256": "ece75314e18289621edd337ed8855004c8666fb0d1a9b36141a855de74859a26"
+    },
+    {
+      "book": 46,
+      "name": "1. KORİNTLİLER",
+      "chapters": 16,
+      "verses": 437,
+      "sha256": "825573c51700adc45d859821414fcf5761400d79669aad54939cb18bdc456e17"
+    },
+    {
+      "book": 47,
+      "name": "2. KORİNTLİLER",
+      "chapters": 13,
+      "verses": 257,
+      "sha256": "04437f59b97d1599c7690f51244e108f185945366f33faa6deecff8b3261e4a2"
+    },
+    {
+      "book": 48,
+      "name": "GALATYALILAR",
+      "chapters": 6,
+      "verses": 148,
+      "sha256": "ad469326f4d3e2b7772d32b3905a1d230699f24d245a09c63641df8c6c028e50"
+    },
+    {
+      "book": 49,
+      "name": "EFESLİLER",
+      "chapters": 6,
+      "verses": 146,
+      "sha256": "71ad480a9df54d624a80a854bdd3d39f98362f74c5e138a8fff541036274c16c"
+    },
+    {
+      "book": 50,
+      "name": "FİLİPİLİLER",
+      "chapters": 4,
+      "verses": 103,
+      "sha256": "c847e39603b80ad22e1c9734f7729e2117f2fa5cc7984ecb0a8d6e91ce57b2b1"
+    },
+    {
+      "book": 51,
+      "name": "KOLOSELİLER",
+      "chapters": 4,
+      "verses": 95,
+      "sha256": "fac34261518fd0bce98e62989c558829dc4ca85eb179881125f01430685a5915"
+    },
+    {
+      "book": 52,
+      "name": "1. SELANİKLİLER",
+      "chapters": 5,
+      "verses": 88,
+      "sha256": "8f3f41c3baf471de3ed23683572b1affa708dfb60d29a93e55708429a64e3f3c"
+    },
+    {
+      "book": 53,
+      "name": "2. SELANİKLİLER",
+      "chapters": 3,
+      "verses": 45,
+      "sha256": "48d0ef60b0a6368fc7df1a4254beb47548b344fd6570e46f6b50315934ab9d74"
+    },
+    {
+      "book": 54,
+      "name": "1. TİMOTEOS",
+      "chapters": 6,
+      "verses": 112,
+      "sha256": "46e4a0ac73dba300dae7524126e86d2b51117ca1c2ddddef9a89cfaa2e6daacc"
+    },
+    {
+      "book": 55,
+      "name": "2. TİMOTEOS",
+      "chapters": 4,
+      "verses": 83,
+      "sha256": "bef47df1aaf6ee41a386f1fbd530d539adb430fcc74a4d9dd68efb0e3611cc35"
+    },
+    {
+      "book": 56,
+      "name": "TİTUS",
+      "chapters": 3,
+      "verses": 44,
+      "sha256": "7e97257f21dc7b131996a95127d12eb3692da04e472a8614cd2e2f7778cd136f"
+    },
+    {
+      "book": 57,
+      "name": "FİLİMON",
+      "chapters": 1,
+      "verses": 24,
+      "sha256": "51547061a945dd7966b90f96be7fbf134bccb642d3c29d1a5d0a86780499974a"
+    },
+    {
+      "book": 58,
+      "name": "İBRANİLER",
+      "chapters": 13,
+      "verses": 296,
+      "sha256": "28286d4c1faef30c37c7f3f4044cf30bba16b78df4b9800f4051dda72126848c"
+    },
+    {
+      "book": 59,
+      "name": "YAKOV",
+      "chapters": 5,
+      "verses": 108,
+      "sha256": "4446693806117ed759ff421f167541f19b023af250452fdc6425cd717d2a5b96"
+    },
+    {
+      "book": 60,
+      "name": "1. PETRUS",
+      "chapters": 5,
+      "verses": 101,
+      "sha256": "ca0a0c9047f27e77f714f70aa8fc5779e7feec14073ed698e17642382124716a"
+    },
+    {
+      "book": 61,
+      "name": "2. PETRUS",
+      "chapters": 3,
+      "verses": 61,
+      "sha256": "3da30e8baa78fd65b9971788e8b0a17c0961c7900b462c3092bd4a432b603e4d"
+    },
+    {
+      "book": 62,
+      "name": "1. YUHANNA",
+      "chapters": 5,
+      "verses": 104,
+      "sha256": "461f82ea729485b4534c63855a74f73376be5de48e3509e6dfd58de28c663381"
+    },
+    {
+      "book": 63,
+      "name": "2. YUHANNA",
+      "chapters": 1,
+      "verses": 13,
+      "sha256": "71a791d6076d5ac2625cd887ed74e2495a01ece89cd228e6a59185eb43713d13"
+    },
+    {
+      "book": 64,
+      "name": "3. YUHANNA",
+      "chapters": 1,
+      "verses": 14,
+      "sha256": "7dfa8fb344e4cc9d608adc8076f6ffb711804f2bdebaae4c7b4eaa44a136f5bd"
+    },
+    {
+      "book": 65,
+      "name": "YAHUDA",
+      "chapters": 1,
+      "verses": 25,
+      "sha256": "c7c70b6ad0c701fd1799b0080d6b773e8ee8bf700e0eb9255bc6be7e8ce17989"
+    },
+    {
+      "book": 66,
+      "name": "VAHİY",
+      "chapters": 22,
+      "verses": 402,
+      "sha256": "736ad534ccbd802384483050389ae0e2ad1524d0a69073a4194a64dc18aaa346"
+    }
+  ],
+  "source_sha256": "873dbc73fb5a6ff10f7da923bc674829ad57eba251c5f9d73b4ef0aec9432b6a"
+}

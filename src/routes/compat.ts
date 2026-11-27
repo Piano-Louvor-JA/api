@@ -177,15 +177,49 @@ compatRoutes.get("/json_db", (c) => {
       path: "/db/es_bible_version",
       hash: "static",
     },
+    ...[
+      "en",
+      "fr",
+      "ru",
+      "uk",
+      "it",
+      "nl",
+      "pl",
+      "tr",
+      "ja",
+      "ko",
+      "zh",
+      "ar",
+      "hi",
+    ].flatMap((lang) => [
+      {
+        file: `${lang}_bible_book.json`,
+        table: `${lang}_bible_book`,
+        path: `/db/${lang}_bible_book`,
+        hash: "static",
+      },
+      {
+        file: `${lang}_bible_version.json`,
+        table: `${lang}_bible_version`,
+        path: `/db/${lang}_bible_version`,
+        hash: "static",
+      },
+    ]),
   ]);
 });
 
 // ==============================================
 // GET /json_db/:file — router generico que faz parse do filename
 // ==============================================
+// Idiomas da Bíblia multilíngue (migration 040, ebible-to-piano).
+// pt/es têm tratamento legacy (fallbacks do ecossistema); os demais são
+// servidos direto do banco após a migration.
+const BIBLE_LANGS = "pt|es|en|fr|ru|uk|it|nl|pl|tr|ja|ko|zh|ar|hi";
+
 // Listas do catálogo cujo GET monta um JSON pesado a partir do banco.
-const JSON_DB_LIST_RE =
-  /^(pt|es|en)_(musics|categories|hymnal|hymnal_1996|bible_book|bible_version)$/;
+const JSON_DB_LIST_RE = new RegExp(
+  `^(${BIBLE_LANGS})_(musics|categories|hymnal|hymnal_1996|bible_book|bible_version)$`,
+);
 
 compatRoutes.get("/json_db/:file", async (c) => {
   const file = c.req.param("file");
@@ -386,8 +420,8 @@ compatRoutes.get("/json_db/:file", async (c) => {
     return handleAlbumDetail(c, db, idAlbum);
   }
 
-  // pt_bible_book / es_bible_book
-  const bookLangMatch = file.match(/^(pt|es)_bible_book$/);
+  // {lang}_bible_book — catálogo por idioma (15 langs, migration 040)
+  const bookLangMatch = file.match(new RegExp(`^(${BIBLE_LANGS})_bible_book$`));
   if (bookLangMatch) {
     const lang = bookLangMatch[1];
     const books = db
@@ -400,11 +434,14 @@ compatRoutes.get("/json_db/:file", async (c) => {
     // ES: se o catálogo ainda não estiver populado (migration 027), usa o
     // fallback do ecossistema em vez de devolver [] (issue api#76).
     if (books.length > 0 || lang === "pt") return c.json(books);
-    return await serveEsBibleBookFallback(c);
+    if (lang === "es") return await serveEsBibleBookFallback(c);
+    return c.json([]); // idioma novo sem migration aplicada
   }
 
-  // pt_bible_version / es_bible_version
-  const versionLangMatch = file.match(/^(pt|es)_bible_version$/);
+  // {lang}_bible_version — catálogo por idioma (15 langs, migration 040)
+  const versionLangMatch = file.match(
+    new RegExp(`^(${BIBLE_LANGS})_bible_version$`),
+  );
   if (versionLangMatch) {
     const lang = versionLangMatch[1];
     const versions = db
@@ -414,7 +451,8 @@ compatRoutes.get("/json_db/:file", async (c) => {
       .all(lang)
       .map((row) => withVersionAbbreviation(row as Record<string, unknown>));
     if (versions.length > 0 || lang === "pt") return c.json(versions);
-    return c.json(ES_BIBLE_VERSIONS_FALLBACK);
+    if (lang === "es") return c.json(ES_BIBLE_VERSIONS_FALLBACK);
+    return c.json([]);
   }
 
   // bible_{version}_{book}_{chapter} — lazy proxy

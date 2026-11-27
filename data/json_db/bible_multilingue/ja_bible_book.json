@@ -1,0 +1,464 @@
+[
+  {
+    "id_bible_book": 728,
+    "name": "創世記",
+    "abbreviation": "Gn",
+    "chapters": 50,
+    "book_number": 1
+  },
+  {
+    "id_bible_book": 729,
+    "name": "出エジプト記",
+    "abbreviation": "Ex",
+    "chapters": 40,
+    "book_number": 2
+  },
+  {
+    "id_bible_book": 730,
+    "name": "モーセの第三の書、通称レビ記",
+    "abbreviation": "Lv",
+    "chapters": 27,
+    "book_number": 3
+  },
+  {
+    "id_bible_book": 731,
+    "name": "モーセの第四の書、通称民数記",
+    "abbreviation": "Nm",
+    "chapters": 36,
+    "book_number": 4
+  },
+  {
+    "id_bible_book": 732,
+    "name": "モーセの第五の書、通称申命記",
+    "abbreviation": "Dt",
+    "chapters": 34,
+    "book_number": 5
+  },
+  {
+    "id_bible_book": 733,
+    "name": "ヨシュア記",
+    "abbreviation": "Js",
+    "chapters": 24,
+    "book_number": 6
+  },
+  {
+    "id_bible_book": 734,
+    "name": "士師記",
+    "abbreviation": "Jz",
+    "chapters": 21,
+    "book_number": 7
+  },
+  {
+    "id_bible_book": 735,
+    "name": "ルツ記",
+    "abbreviation": "Rt",
+    "chapters": 4,
+    "book_number": 8
+  },
+  {
+    "id_bible_book": 736,
+    "name": "サムエル記第一",
+    "abbreviation": "1Sm",
+    "chapters": 31,
+    "book_number": 9
+  },
+  {
+    "id_bible_book": 737,
+    "name": "サムエル記第二",
+    "abbreviation": "2Sm",
+    "chapters": 24,
+    "book_number": 10
+  },
+  {
+    "id_bible_book": 738,
+    "name": "列王記第一",
+    "abbreviation": "1Rs",
+    "chapters": 22,
+    "book_number": 11
+  },
+  {
+    "id_bible_book": 739,
+    "name": "列王記第二",
+    "abbreviation": "2Rs",
+    "chapters": 25,
+    "book_number": 12
+  },
+  {
+    "id_bible_book": 740,
+    "name": "歴代誌上",
+    "abbreviation": "1Cr",
+    "chapters": 29,
+    "book_number": 13
+  },
+  {
+    "id_bible_book": 741,
+    "name": "歴代誌 第二",
+    "abbreviation": "2Cr",
+    "chapters": 36,
+    "book_number": 14
+  },
+  {
+    "id_bible_book": 742,
+    "name": "エズラ記",
+    "abbreviation": "Ed",
+    "chapters": 10,
+    "book_number": 15
+  },
+  {
+    "id_bible_book": 743,
+    "name": "ネヘミヤ記",
+    "abbreviation": "Ne",
+    "chapters": 13,
+    "book_number": 16
+  },
+  {
+    "id_bible_book": 744,
+    "name": "エステル記",
+    "abbreviation": "Et",
+    "chapters": 10,
+    "book_number": 17
+  },
+  {
+    "id_bible_book": 745,
+    "name": "ヨブ記",
+    "abbreviation": "Jó",
+    "chapters": 42,
+    "book_number": 18
+  },
+  {
+    "id_bible_book": 746,
+    "name": "詩篇",
+    "abbreviation": "Sl",
+    "chapters": 150,
+    "book_number": 19
+  },
+  {
+    "id_bible_book": 747,
+    "name": "箴言",
+    "abbreviation": "Pv",
+    "chapters": 31,
+    "book_number": 20
+  },
+  {
+    "id_bible_book": 748,
+    "name": "伝道者の書、または伝道者",
+    "abbreviation": "Ec",
+    "chapters": 12,
+    "book_number": 21
+  },
+  {
+    "id_bible_book": 749,
+    "name": "ソロモンの雅歌",
+    "abbreviation": "Ct",
+    "chapters": 8,
+    "book_number": 22
+  },
+  {
+    "id_bible_book": 750,
+    "name": "イザヤ書",
+    "abbreviation": "Is",
+    "chapters": 66,
+    "book_number": 23
+  },
+  {
+    "id_bible_book": 751,
+    "name": "エレミヤ書",
+    "abbreviation": "Jr",
+    "chapters": 52,
+    "book_number": 24
+  },
+  {
+    "id_bible_book": 752,
+    "name": "エレミヤの哀歌",
+    "abbreviation": "Lm",
+    "chapters": 5,
+    "book_number": 25
+  },
+  {
+    "id_bible_book": 753,
+    "name": "エゼキエル書",
+    "abbreviation": "Ez",
+    "chapters": 48,
+    "book_number": 26
+  },
+  {
+    "id_bible_book": 754,
+    "name": "ダニエル書",
+    "abbreviation": "Dn",
+    "chapters": 12,
+    "book_number": 27
+  },
+  {
+    "id_bible_book": 755,
+    "name": "ホセア書",
+    "abbreviation": "Os",
+    "chapters": 14,
+    "book_number": 28
+  },
+  {
+    "id_bible_book": 756,
+    "name": "ヨエル書",
+    "abbreviation": "Jl",
+    "chapters": 3,
+    "book_number": 29
+  },
+  {
+    "id_bible_book": 757,
+    "name": "アモス書",
+    "abbreviation": "Am",
+    "chapters": 9,
+    "book_number": 30
+  },
+  {
+    "id_bible_book": 758,
+    "name": "オバデヤ書",
+    "abbreviation": "Ob",
+    "chapters": 1,
+    "book_number": 31
+  },
+  {
+    "id_bible_book": 759,
+    "name": "ヨナ書",
+    "abbreviation": "Jn",
+    "chapters": 4,
+    "book_number": 32
+  },
+  {
+    "id_bible_book": 760,
+    "name": "ミカ書",
+    "abbreviation": "Mq",
+    "chapters": 7,
+    "book_number": 33
+  },
+  {
+    "id_bible_book": 761,
+    "name": "ナホム書",
+    "abbreviation": "Na",
+    "chapters": 3,
+    "book_number": 34
+  },
+  {
+    "id_bible_book": 762,
+    "name": "ハバクク書",
+    "abbreviation": "Hc",
+    "chapters": 3,
+    "book_number": 35
+  },
+  {
+    "id_bible_book": 763,
+    "name": "ゼパニヤ書",
+    "abbreviation": "Sf",
+    "chapters": 3,
+    "book_number": 36
+  },
+  {
+    "id_bible_book": 764,
+    "name": "ハガイ書",
+    "abbreviation": "Ag",
+    "chapters": 2,
+    "book_number": 37
+  },
+  {
+    "id_bible_book": 765,
+    "name": "ゼカリヤ書",
+    "abbreviation": "Zc",
+    "chapters": 14,
+    "book_number": 38
+  },
+  {
+    "id_bible_book": 766,
+    "name": "マラキ書",
+    "abbreviation": "Ml",
+    "chapters": 4,
+    "book_number": 39
+  },
+  {
+    "id_bible_book": 767,
+    "name": "マタイによる福音書",
+    "abbreviation": "Mt",
+    "chapters": 28,
+    "book_number": 40
+  },
+  {
+    "id_bible_book": 768,
+    "name": "マルコによる福音書",
+    "abbreviation": "Mc",
+    "chapters": 16,
+    "book_number": 41
+  },
+  {
+    "id_bible_book": 769,
+    "name": "ルカによる福音書",
+    "abbreviation": "Lc",
+    "chapters": 24,
+    "book_number": 42
+  },
+  {
+    "id_bible_book": 770,
+    "name": "ヨハネによる福音書",
+    "abbreviation": "Jo",
+    "chapters": 21,
+    "book_number": 43
+  },
+  {
+    "id_bible_book": 771,
+    "name": "使徒の働き",
+    "abbreviation": "At",
+    "chapters": 28,
+    "book_number": 44
+  },
+  {
+    "id_bible_book": 772,
+    "name": "パウロのローマ人への手紙",
+    "abbreviation": "Rm",
+    "chapters": 16,
+    "book_number": 45
+  },
+  {
+    "id_bible_book": 773,
+    "name": "パウロのコリント人への第一の手紙",
+    "abbreviation": "1Co",
+    "chapters": 16,
+    "book_number": 46
+  },
+  {
+    "id_bible_book": 774,
+    "name": "パウロのコリント人への第二の手紙",
+    "abbreviation": "2Co",
+    "chapters": 13,
+    "book_number": 47
+  },
+  {
+    "id_bible_book": 775,
+    "name": "パウロのガラテヤ人への手紙",
+    "abbreviation": "Gl",
+    "chapters": 6,
+    "book_number": 48
+  },
+  {
+    "id_bible_book": 776,
+    "name": "パウロのエペソ人への手紙",
+    "abbreviation": "Ef",
+    "chapters": 6,
+    "book_number": 49
+  },
+  {
+    "id_bible_book": 777,
+    "name": "パウロのピリピ人への手紙",
+    "abbreviation": "Fp",
+    "chapters": 4,
+    "book_number": 50
+  },
+  {
+    "id_bible_book": 778,
+    "name": "パウロのコロサイ人への手紙",
+    "abbreviation": "Cl",
+    "chapters": 4,
+    "book_number": 51
+  },
+  {
+    "id_bible_book": 779,
+    "name": "パウロのテサロニケ人への第一の手紙",
+    "abbreviation": "1Ts",
+    "chapters": 5,
+    "book_number": 52
+  },
+  {
+    "id_bible_book": 780,
+    "name": "テサロニケ人へのパウロの第二の手紙",
+    "abbreviation": "2Ts",
+    "chapters": 3,
+    "book_number": 53
+  },
+  {
+    "id_bible_book": 781,
+    "name": "パウロのテモテへの手紙第一",
+    "abbreviation": "1Tm",
+    "chapters": 6,
+    "book_number": 54
+  },
+  {
+    "id_bible_book": 782,
+    "name": "パウロのテモテへの第二の手紙",
+    "abbreviation": "2Tm",
+    "chapters": 4,
+    "book_number": 55
+  },
+  {
+    "id_bible_book": 783,
+    "name": "パウロのテトスへの手紙",
+    "abbreviation": "Tt",
+    "chapters": 3,
+    "book_number": 56
+  },
+  {
+    "id_bible_book": 784,
+    "name": "フィレモンへのパウロの手紙",
+    "abbreviation": "Fm",
+    "chapters": 1,
+    "book_number": 57
+  },
+  {
+    "id_bible_book": 785,
+    "name": "ヘブル人への手紙",
+    "abbreviation": "Hb",
+    "chapters": 13,
+    "book_number": 58
+  },
+  {
+    "id_bible_book": 786,
+    "name": "ヤコブの手紙",
+    "abbreviation": "Tg",
+    "chapters": 5,
+    "book_number": 59
+  },
+  {
+    "id_bible_book": 787,
+    "name": "ペテロの手紙第一",
+    "abbreviation": "1Pe",
+    "chapters": 5,
+    "book_number": 60
+  },
+  {
+    "id_bible_book": 788,
+    "name": "ペテロの第二の手紙",
+    "abbreviation": "2Pe",
+    "chapters": 3,
+    "book_number": 61
+  },
+  {
+    "id_bible_book": 789,
+    "name": "ヨハネの手紙第一",
+    "abbreviation": "1Jo",
+    "chapters": 5,
+    "book_number": 62
+  },
+  {
+    "id_bible_book": 790,
+    "name": "ヨハネの手紙第二",
+    "abbreviation": "2Jo",
+    "chapters": 1,
+    "book_number": 63
+  },
+  {
+    "id_bible_book": 791,
+    "name": "ヨハネの手紙第三",
+    "abbreviation": "3Jo",
+    "chapters": 1,
+    "book_number": 64
+  },
+  {
+    "id_bible_book": 792,
+    "name": "ユダの手紙",
+    "abbreviation": "Jd",
+    "chapters": 1,
+    "book_number": 65
+  },
+  {
+    "id_bible_book": 793,
+    "name": "ヨハネの黙示録",
+    "abbreviation": "Ap",
+    "chapters": 22,
+    "book_number": 66
+  }
+]

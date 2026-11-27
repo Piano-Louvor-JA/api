@@ -54,13 +54,13 @@ describe("GET /v1/catalog/status", () => {
       .prepare(
         "INSERT OR IGNORE INTO languages (id_language, name) VALUES (?, ?)",
       )
-      .run("it", "Italiano");
+      .run("de", "Deutsch");
 
-    const res = await router.request("/v1/catalog/status?lang=it");
+    const res = await router.request("/v1/catalog/status?lang=de");
     expect(res.status).toBe(200);
     const body = await res.json();
 
-    expect(body.lang).toBe("it");
+    expect(body.lang).toBe("de");
     expect(body.has_albums).toBe(false);
     expect(body.has_musics).toBe(false);
     expect(body.has_bible).toBe(false);
