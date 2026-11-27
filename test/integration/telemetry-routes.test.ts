@@ -256,4 +256,56 @@ describe("/v1/telemetry", () => {
       spy.mockRestore();
     }
   });
+
+  it("/history, /rankings e /map: admin 200; comum 403; sem token 401", async () => {
+    expect((await beat(body())).status).toBe(204);
+    await vi.waitFor(async () => {
+      const json = await (await online(adminToken)).json();
+      expect(json.devices[0]?.city).toBe("Bertioga");
+    });
+
+    const history = await app.router.request("/v1/telemetry/history?days=90", {
+      headers: { authorization: `Bearer ${adminToken}` },
+    });
+    expect(history.status).toBe(200);
+    const histJson = await history.json();
+    expect(histJson.totals.seen).toBeGreaterThanOrEqual(1);
+    expect(histJson.period_days).toBe(90);
+
+    const rankings = await app.router.request(
+      "/v1/telemetry/rankings?by=church&days=90",
+      { headers: { authorization: `Bearer ${adminToken}` } },
+    );
+    expect(rankings.status).toBe(200);
+    const rankJson = await rankings.json();
+    expect(rankJson.by).toBe("church");
+    expect(
+      rankJson.items.some((i: { label: string }) => i.label === "Rio da Praia"),
+    ).toBe(true);
+
+    const map = await app.router.request(
+      "/v1/telemetry/map?country=BR&days=90",
+      {
+        headers: { authorization: `Bearer ${adminToken}` },
+      },
+    );
+    expect(map.status).toBe(200);
+    const mapJson = await map.json();
+    expect(mapJson.points[0]).toMatchObject({
+      city: "Bertioga",
+      region: "SP",
+      is_online: true,
+    });
+    expect(JSON.stringify(mapJson)).not.toContain(IP);
+    expect(JSON.stringify(mapJson)).not.toContain(INSTALL_ID);
+
+    expect(
+      (
+        await app.router.request("/v1/telemetry/history", {
+          headers: { authorization: `Bearer ${userToken}` },
+        })
+      ).status,
+    ).toBe(403);
+    expect((await app.router.request("/v1/telemetry/map")).status).toBe(401);
+  });
 });
