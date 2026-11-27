@@ -24,6 +24,12 @@ vi.mock("../../src/db/connection.js", () => ({
 }));
 
 import { firebaseAuth } from "../../src/v1/custom/firebase-auth.middleware.js";
+import { upsertCommunityMember } from "../../src/v1/custom/community-mirror.service.js";
+
+vi.mock("../../src/v1/custom/community-mirror.service.js", () => ({
+  upsertCommunityMember: vi.fn(async () => {}),
+  setCommunityMemberFirestoreForTests: vi.fn(),
+}));
 
 type User = { id_user: number; email: string; display_name: string };
 
@@ -133,6 +139,97 @@ describe("firebaseAuth middleware (RF-003/RF-004)", () => {
       email: "novo@gmail.com",
       display_name: "Novo",
     });
+    expect(upsertCommunityMember).toHaveBeenCalledWith({
+      uid: "fb-uid-1",
+      email: "novo@gmail.com",
+      name: "Novo",
+    });
+  });
+
+  it("T3: login válido chama espelho community_members 1× (AC1/AC7)", async () => {
+    verifyIdTokenMock.mockResolvedValue({
+      uid: "fb-uid-9",
+      email: "esp@gmail.com",
+      name: "Esp",
+    });
+    getDbMock.prepare.mockImplementation((sql: string) => {
+      if (sql.includes("firebase_uid = ?"))
+        return stmtChain({
+          get: { id_user: 9, email: "esp@gmail.com", display_name: "Esp" },
+        });
+      return stmtChain({});
+    });
+    const ctx = makeContext({ authorization: "Bearer a.b.c" });
+    await callMiddleware(ctx, async () => {});
+    expect(upsertCommunityMember).toHaveBeenCalledExactlyOnceWith({
+      uid: "fb-uid-9",
+      email: "esp@gmail.com",
+      name: "Esp",
+    });
+  });
+
+  it("T3/AC8: falha do espelho NÃO quebra login — next() roda, warn logado", async () => {
+    verifyIdTokenMock.mockResolvedValue({
+      uid: "fb-uid-10",
+      email: "fail@gmail.com",
+      name: "Fail",
+    });
+    vi.mocked(upsertCommunityMember).mockRejectedValueOnce(
+      new Error("firestore down"),
+    );
+    getDbMock.prepare.mockImplementation((sql: string) => {
+      if (sql.includes("firebase_uid = ?"))
+        return stmtChain({
+          get: { id_user: 10, email: "fail@gmail.com", display_name: "Fail" },
+        });
+      return stmtChain({});
+    });
+    const warning = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const ctx = makeContext({ authorization: "Bearer a.b.c" });
+      const next = vi.fn(async () => {});
+      await callMiddleware(ctx, next);
+      expect(next).toHaveBeenCalledOnce();
+      expect(ctx.get("user")).toEqual({
+        id_user: 10,
+        email: "fail@gmail.com",
+        display_name: "Fail",
+      });
+      expect(warning).toHaveBeenCalledWith(
+        "[communityMirror] upsert falhou:",
+        "firestore down",
+      );
+    } finally {
+      warning.mockRestore();
+      vi.mocked(upsertCommunityMember).mockReset();
+      vi.mocked(upsertCommunityMember).mockResolvedValue(undefined);
+    }
+  });
+
+  it("T3/AC9: sem user resolvido (conflito RF-05/anônimo) → espelho NÃO chamado", async () => {
+    verifyIdTokenMock.mockResolvedValue({
+      uid: "fb-uid-11",
+      email: "conflict@gmail.com",
+      name: "C",
+    });
+    // conflito: e-mail legacy vinculado a outro firebase_uid → segue anônimo
+    getDbMock.prepare.mockImplementation((sql: string) => {
+      if (sql.includes("firebase_uid = ?")) return stmtChain({ get: undefined });
+      if (sql.includes("email = ?"))
+        return stmtChain({
+          get: {
+            id_user: 11,
+            email: "conflict@gmail.com",
+            display_name: "C",
+            firebase_uid: "outro-uid",
+          },
+        });
+      return stmtChain({});
+    });
+    const ctx = makeContext({ authorization: "Bearer a.b.c" });
+    await callMiddleware(ctx, async () => {});
+    expect(ctx.get("user")).toBeUndefined();
+    expect(upsertCommunityMember).not.toHaveBeenCalled();
   });
 
   it("ID token com email já existente (legacy) → vincula firebase_uid ao id_user existente", async () => {
