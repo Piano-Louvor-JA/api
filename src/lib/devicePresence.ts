@@ -158,6 +158,40 @@ function matches(entry: PresenceEntry, filters: OnlineFilters): boolean {
   return true;
 }
 
+/** IDs ainda na janela de online (para cruzar com histórico/mapa). */
+export function listOnlineIds(now = Date.now()): Set<string> {
+  const ids = new Set<string>();
+  for (const e of presence.values()) {
+    if (now - e.lastSeen <= ONLINE_WINDOW_MS) ids.add(e.installId);
+  }
+  return ids;
+}
+
+/** Snapshot read-only do Map (histórico mescla com SQLite antes do flush). */
+export function listPresenceSnapshot(): ReadonlyArray<{
+  installId: string;
+  platform: string;
+  osName: string | null;
+  district: string | null;
+  church: string | null;
+  city: string | null;
+  region: string | null;
+  country: string | null;
+  lastSeen: number;
+}> {
+  return [...presence.values()].map((e) => ({
+    installId: e.installId,
+    platform: e.platform,
+    osName: e.osName,
+    district: e.district,
+    church: e.church,
+    city: e.city,
+    region: e.region,
+    country: e.country,
+    lastSeen: e.lastSeen,
+  }));
+}
+
 export function listOnline(
   now = Date.now(),
   filters: OnlineFilters = {},
@@ -314,6 +348,12 @@ export function startPresencePersistence(
     } catch (e) {
       console.error("[presence] flush falhou (não-fatal):", e);
     }
+    // Snapshot diário + purge 100d (histórico 90d no painel).
+    void import("./devicePresenceHistory.js")
+      .then((m) => m.maintainHistory(Date.now(), db ?? getDb()))
+      .catch((e) =>
+        console.error("[presence] histórico falhou (não-fatal):", e),
+      );
   };
 
   try {
