@@ -84,6 +84,9 @@ def main() -> None:
         rep_ch = {b["book"]: b["chapters"] for b in rep["books_detail"]}
         for b in books:
             real = rep_ch.get(b["book_number"], b["chapters"])
+            # F2 (QA t_dbd7397c/PR #308): o catálogo declara o CONTEÚDO REAL
+            # (maior capítulo presente no tar), não o cânon — ko 1Pe: 4, não 5.
+            b["chapters"] = real
             for ch in range(1, real + 1):
                 n = f"bible_{v}_{b['id_bible_book']}_{ch}.json"
                 p = CACHE / n
