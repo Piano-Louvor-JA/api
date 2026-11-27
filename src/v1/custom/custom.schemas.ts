@@ -17,7 +17,65 @@ export const CustomCollectionSchema = z.object({
   updated_at_ms: z.number().nullable().optional(),
   is_owner: z.number().optional(),
   musics_count: z.number().optional(),
+  // SPEC admin-conteudo-global v1.1.0 RF-03 (D6): aditivo, retro-compat.
+  owner_name: z.string().nullable().optional(),
   tenant_id: z.string().openapi({ readOnly: true }).optional(),
+});
+
+// SPEC admin-conteudo-global v1.1.0 (D2/D3): payloads admin congelados
+export const AdminCollectionSchema = z.object({
+  id_collection: z.number(),
+  name: z.string(),
+  description: z.string().nullable(),
+  cover_url: z.string().nullable(),
+  visibility: z.enum(["public", "private"]),
+  owner_id: z.number().nullable(),
+  author_name: z.string().nullable(),
+  owner_name: z.string().nullable(),
+  musics_count: z.number(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+export const AdminMusicSchema = z.object({
+  id_music: z.number(),
+  id_collection: z.number(),
+  name: z.string().nullable(),
+  lyric: z.string().nullable(),
+  auxiliary_lyric: z.string().nullable(),
+  id_file_audio: z.number().nullable(),
+  id_file_instrumental: z.number().nullable(),
+  id_file_image: z.number().nullable(),
+  duration: z.number().nullable(),
+  official_music_id: z.number().nullable(),
+  owner_id: z.number().nullable(),
+  client_uuid: z.string().nullable(),
+  created_at: z.string(),
+  updated_at: z.string(),
+  owner_name: z.string().nullable(),
+  collection_name: z.string(),
+  collection_visibility: z.enum(["public", "private"]),
+  audio_url: z.string().nullable(),
+  instrumental_url: z.string().nullable(),
+  image_url: z.string().nullable(),
+});
+
+// D4: meta uniforme page (padrão do schema de coletâneas)
+export const AdminListMetaSchema = z.object({
+  total: z.number(),
+  page: z.number(),
+  per_page: z.number(),
+  last_page: z.number(),
+});
+
+export const AdminCollectionsListResponseSchema = z.object({
+  data: z.array(AdminCollectionSchema),
+  meta: AdminListMetaSchema,
+});
+
+export const AdminMusicsListResponseSchema = z.object({
+  data: z.array(AdminMusicSchema),
+  meta: AdminListMetaSchema,
 });
 
 export const CustomCollectionsListResponseSchema = z.object({

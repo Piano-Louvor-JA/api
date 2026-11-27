@@ -19,6 +19,7 @@ import {
   normalizeName,
   ONLINE_WINDOW_MS,
   recordHeartbeat,
+  recordPassiveAccess,
   resetPresenceForTests,
   setMaxDevicesForTests,
   setPresenceGeo,
@@ -109,11 +110,56 @@ describe("devicePresence", () => {
       }),
       T0,
     );
-    const { totals } = listOnline(T0 + 1000);
+    const { totals, devices } = listOnline(T0 + 1000);
     expect(totals).toEqual({
       online: 2,
       identified: 1,
+      unidentified: 1,
       by_platform: { "desktop-windows": 1, "apk-android": 1 },
+    });
+    expect(devices.every((d) => d.source === "heartbeat")).toBe(true);
+  });
+
+  it("presença passiva entra como sem token e não grava no SQLite", () => {
+    recordPassiveAccess(
+      {
+        installId: "aaaaaaaa-bbbb-4ccc-addd-eeeeeeeeeeee",
+        platform: "desktop-linux",
+        appVersion: null,
+      },
+      T0,
+    );
+    const { totals, devices } = listOnline(T0 + 1000);
+    expect(totals).toEqual({
+      online: 1,
+      identified: 0,
+      unidentified: 1,
+      by_platform: { "desktop-linux": 1 },
+    });
+    expect(devices[0]).toMatchObject({
+      identified: false,
+      source: "passive",
+      app_version: null,
+      church: null,
+    });
+    expect(flushPresence(db)).toBe(0);
+  });
+
+  it("passive não rebaixa um heartbeat do mesmo install_id", () => {
+    recordHeartbeat(hb({ partnerId: 1 }), T0);
+    recordPassiveAccess(
+      {
+        installId: hb().installId,
+        platform: "desktop-windows",
+        appVersion: "0.0.1",
+      },
+      T0 + 1000,
+    );
+    const [device] = listOnline(T0 + 2000).devices;
+    expect(device).toMatchObject({
+      identified: true,
+      source: "heartbeat",
+      app_version: "1.38.0",
     });
   });
 
@@ -352,5 +398,22 @@ describe("devicePresence", () => {
         vi.useRealTimers();
       }
     });
+  });
+  it("presença passiva expira entrada antiga ao atingir capacidade", () => {
+    resetPresenceForTests();
+    setMaxDevicesForTests(1);
+    recordPassiveAccess(
+      { installId: "old-passive", platform: "desktop-linux", appVersion: null },
+      T0,
+    );
+    const later = T0 + ONLINE_WINDOW_MS + 1;
+    recordPassiveAccess(
+      { installId: "new-passive", platform: "apk-android", appVersion: null },
+      later,
+    );
+    expect(listOnline(later).devices.map((d) => d.platform)).toEqual([
+      "apk-android",
+    ]);
+    expect(listOnline(T0).totals.online).toBe(1);
   });
 });
