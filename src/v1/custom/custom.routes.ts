@@ -191,9 +191,11 @@ customRoutes.openapi(listCollectionsRoute, (c) => {
     const params: unknown[] = [];
     const query = `
       SELECT cc.*, COUNT(cm.id_music) as musics_count,
+             cu.display_name as owner_name,
              ${user ? "CASE WHEN cc.owner_id = ? THEN 1 ELSE 0 END" : "0"} as is_owner
       FROM custom_collections cc
       LEFT JOIN custom_musics cm ON cm.id_collection = cc.id_collection
+      LEFT JOIN custom_users cu ON cu.id_user = cc.owner_id
       WHERE cc.tenant_id = ?
         AND ${user ? "(cc.visibility = 'public' OR cc.owner_id = ?)" : "cc.visibility = 'public'"}
         AND NOT EXISTS (

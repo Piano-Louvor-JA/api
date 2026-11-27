@@ -18,6 +18,10 @@ import { createRoute, z } from "@hono/zod-openapi";
 
 import { getDb } from "../../db/connection.js";
 import { type AdminEnv, adminAuth } from "./admin.middleware.js";
+import {
+  AdminCollectionsListResponseSchema,
+  AdminMusicsListResponseSchema,
+} from "./custom.schemas.js";
 import { activeTaskDefs, type WeeklyTaskDef } from "./weekly-tasks.service.js";
 
 // ============================================
@@ -65,6 +69,44 @@ type EventRow = {
   starts_at: string;
   ends_at: string;
   active: number;
+};
+
+// SPEC admin-conteudo-global v1.1.0 (D2/D3): shape das rows admin
+type AdminCollectionRow = {
+  id_collection: number;
+  name: string;
+  description: string | null;
+  cover_url: string | null;
+  visibility: "public" | "private";
+  owner_id: number | null;
+  author_name: string | null;
+  owner_name: string | null;
+  musics_count: number;
+  created_at: string;
+  updated_at: string;
+};
+
+type AdminMusicRow = {
+  id_music: number;
+  id_collection: number;
+  name: string | null;
+  lyric: string | null;
+  auxiliary_lyric: string | null;
+  id_file_audio: number | null;
+  id_file_instrumental: number | null;
+  id_file_image: number | null;
+  duration: number | null;
+  official_music_id: number | null;
+  owner_id: number | null;
+  client_uuid: string | null;
+  created_at: string;
+  updated_at: string;
+  owner_name: string | null;
+  collection_name: string;
+  collection_visibility: "public" | "private";
+  audio_url: string | null;
+  instrumental_url: string | null;
+  image_url: string | null;
 };
 
 function rowToEvent(r: EventRow) {
@@ -337,5 +379,176 @@ export function registerAdminRoutes(
     );
     const rows = activeTaskDefs(db) as WeeklyTaskDef[];
     return c.json({ data: rows }, 200);
+  });
+
+  // ---- Admin conteúdo global (SPEC admin-conteudo-global v1.1.0) ----
+  // RF-01: TODAS as coletâneas (sem filtro de visibilidade) + owner_name
+  // via LEFT JOIN custom_users.display_name. Leitura pura (D5, sem audit).
+  const listAdminCollectionsRoute = createRoute({
+    method: "get",
+    path: "/admin/collections",
+    tags: ["custom"],
+    description:
+      "Admin: lista TODAS as coletâneas (públicas + privadas de qualquer dono) com owner_name",
+    middleware: [adminAuth] as const,
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: AdminCollectionsListResponseSchema,
+          },
+        },
+        description: "Lista global com meta de paginação",
+      },
+      401: {
+        content: {
+          "application/json": { schema: z.object({ error: z.string() }) },
+        },
+        description: "Não autenticado",
+      },
+      403: {
+        content: {
+          "application/json": { schema: z.object({ error: z.string() }) },
+        },
+        description: "Sem permissão",
+      },
+      500: {
+        content: {
+          "application/json": { schema: z.object({ error: z.string() }) },
+        },
+        description: "Erro interno",
+      },
+    },
+  });
+
+  customRoutes.openapi(listAdminCollectionsRoute, (c) => {
+    try {
+      const db = getDb();
+      const rows = db
+        .prepare(
+          `SELECT cc.id_collection, cc.name, cc.description, cc.cover_url,
+                  cc.visibility, cc.owner_id, cc.author_name,
+                  cu.display_name as owner_name,
+                  COUNT(cm.id_music) as musics_count,
+                  cc.created_at, cc.updated_at
+           FROM custom_collections cc
+           LEFT JOIN custom_musics cm ON cm.id_collection = cc.id_collection
+           LEFT JOIN custom_users cu ON cu.id_user = cc.owner_id
+           WHERE cc.tenant_id = ?
+           GROUP BY cc.id_collection
+           ORDER BY cc.updated_at DESC`,
+        )
+        .all(c.get("tenantId")) as AdminCollectionRow[];
+
+      // D4: paginação idêntica à rota pública (default 24, cap 100)
+      const page = Math.max(1, Number(c.req.query("page") ?? 1) || 1);
+      const perPageRaw = Number(c.req.query("per_page") ?? 24) || 24;
+      const perPage = Math.min(100, Math.max(1, perPageRaw));
+      const start = (page - 1) * perPage;
+      const pageItems = rows.slice(start, start + perPage);
+
+      return c.json(
+        {
+          data: pageItems,
+          meta: {
+            total: rows.length,
+            page,
+            per_page: perPage,
+            last_page: Math.max(1, Math.ceil(rows.length / perPage)),
+          },
+        },
+        200,
+      );
+    } catch (error) {
+      console.error(error);
+      return c.json({ error: "Erro ao listar coletâneas" }, 500);
+    }
+  });
+
+  // RF-02: TODAS as músicas (incl. de coleções privadas) com owner_name e
+  // nome/visibilidade da coleção. Mesmos JOINs da listAllMusicsRoute + users.
+  const listAdminMusicsRoute = createRoute({
+    method: "get",
+    path: "/admin/musics",
+    tags: ["custom"],
+    description:
+      "Admin: lista TODAS as músicas custom (incl. de coletâneas privadas) com dono e coleção",
+    middleware: [adminAuth] as const,
+    responses: {
+      200: {
+        content: {
+          "application/json": { schema: AdminMusicsListResponseSchema },
+        },
+        description: "Lista global com meta de paginação",
+      },
+      401: {
+        content: {
+          "application/json": { schema: z.object({ error: z.string() }) },
+        },
+        description: "Não autenticado",
+      },
+      403: {
+        content: {
+          "application/json": { schema: z.object({ error: z.string() }) },
+        },
+        description: "Sem permissão",
+      },
+      500: {
+        content: {
+          "application/json": { schema: z.object({ error: z.string() }) },
+        },
+        description: "Erro interno",
+      },
+    },
+  });
+
+  customRoutes.openapi(listAdminMusicsRoute, (c) => {
+    try {
+      const db = getDb();
+      const rows = db
+        .prepare(
+          `SELECT cm.id_music, cm.id_collection, cm.name, cm.lyric,
+                  cm.auxiliary_lyric, cm.id_file_audio, cm.id_file_instrumental,
+                  cm.id_file_image, cm.duration, cm.official_music_id,
+                  cm.owner_id, cm.client_uuid, cm.created_at, cm.updated_at,
+                  cu.display_name as owner_name,
+                  cc.name as collection_name,
+                  cc.visibility as collection_visibility,
+                  f_audio.url as audio_url,
+                  f_inst.url as instrumental_url,
+                  f_img.url as image_url
+           FROM custom_musics cm
+           INNER JOIN custom_collections cc ON cm.id_collection = cc.id_collection
+           LEFT JOIN custom_users cu ON cu.id_user = cm.owner_id
+           LEFT JOIN files f_audio ON cm.id_file_audio = f_audio.id_file
+           LEFT JOIN files f_inst ON cm.id_file_instrumental = f_inst.id_file
+           LEFT JOIN files f_img ON cm.id_file_image = f_img.id_file
+           WHERE cc.tenant_id = ?
+           ORDER BY cm.name`,
+        )
+        .all(c.get("tenantId")) as AdminMusicRow[];
+
+      const page = Math.max(1, Number(c.req.query("page") ?? 1) || 1);
+      const perPageRaw = Number(c.req.query("per_page") ?? 24) || 24;
+      const perPage = Math.min(100, Math.max(1, perPageRaw));
+      const start = (page - 1) * perPage;
+      const pageItems = rows.slice(start, start + perPage);
+
+      return c.json(
+        {
+          data: pageItems,
+          meta: {
+            total: rows.length,
+            page,
+            per_page: perPage,
+            last_page: Math.max(1, Math.ceil(rows.length / perPage)),
+          },
+        },
+        200,
+      );
+    } catch (error) {
+      console.error(error);
+      return c.json({ error: "Erro ao listar músicas" }, 500);
+    }
   });
 }
