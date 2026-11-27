@@ -211,6 +211,8 @@ def test_package_book_json_uses_real_chapters(monkeypatch, tmp_path):
         def write_text(self, *a, **k): pass
         def mkdir(self, *a, **k): pass
         def exists(self): return True
+        def read_bytes(self): return b""  # t_1fb85696: tar determinístico lê bytes
+        def __fspath__(self): return str(self)  # open(FakeP) funciona
         def __getattr__(self, name): return FakeP(str(self))
 
     src = {}

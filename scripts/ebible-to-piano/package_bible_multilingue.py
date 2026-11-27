@@ -5,7 +5,9 @@ Por idioma: {lang}_bible_chapters.tar.gz (JSONs bible_{v}_{b}_{c}.json),
 {lang}_bible_book.json, {lang}_bible_version.json, {lang}_bible_catalog.sha256,
 {lang}_report.json. Falha alto se contagem de arquivos divergir do report.
 """
+import gzip
 import hashlib
+import io
 import json
 import re
 import sys
@@ -107,14 +109,16 @@ def main() -> None:
         tar_path = OUT / f"{lang}_bible_chapters.tar.gz"
         # t_1fb85696: tar determinístico (mtime=0) — regen não deve alterar o sha256
         # de idiomas cujo conteúdo não mudou (zh/ru/ar/... byte-idênticos).
-        with tarfile.open(tar_path, "w:gz") as tf:
+        tar_bytes = io.BytesIO()
+        with tarfile.open(fileobj=tar_bytes, mode="w") as tf:
             for n in names:
                 ti = tf.gettarinfo(CACHE / n, arcname=n)
                 ti.mtime = 0
                 ti.uid = ti.gid = 0
                 ti.uname = ti.gname = ""
-                with open(CACHE / n, "rb") as fh:
-                    tf.addfile(ti, fh)
+                tf.addfile(ti, io.BytesIO((CACHE / n).read_bytes()))
+        with gzip.GzipFile(filename="", mode="wb", fileobj=open(tar_path, "wb"), mtime=0) as gz:
+            gz.write(tar_bytes.getvalue())
 
         # catálogos no shape json_db (compatível com /json_db/{lang}_bible_book)
         (OUT / f"{lang}_bible_book.json").write_text(
