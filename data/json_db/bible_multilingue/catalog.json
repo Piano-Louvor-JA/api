@@ -1,0 +1,122 @@
+{
+  "pt": {
+    "id_bible_version": 99,
+    "books": 66,
+    "chapters": 1189,
+    "verses": 31102,
+    "tar": "pt_bible_chapters.tar.gz",
+    "sha256": "2584f18e8870477f62dfb2d6ed0362799f0a90f17a7c892f987016cd79696d6e"
+  },
+  "es": {
+    "id_bible_version": 98,
+    "books": 66,
+    "chapters": 1189,
+    "verses": 31084,
+    "tar": "es_bible_chapters.tar.gz",
+    "sha256": "e06ec24b4d2694b40edc597250d8f37b5d0e437fe026bb35fd2dd6efe0cc75df"
+  },
+  "en": {
+    "id_bible_version": 100,
+    "books": 66,
+    "chapters": 1189,
+    "verses": 31098,
+    "tar": "en_bible_chapters.tar.gz",
+    "sha256": "f0cc051c3f65c95c6529ed2fb5d22723d756d923e0abb73481ce9f5a78af5448"
+  },
+  "fr": {
+    "id_bible_version": 101,
+    "books": 66,
+    "chapters": 1189,
+    "verses": 31098,
+    "tar": "fr_bible_chapters.tar.gz",
+    "sha256": "0c0d11135b5ba2f45214fac56a20e86b7e001b795224c16cdc686353b57afa73"
+  },
+  "ru": {
+    "id_bible_version": 102,
+    "books": 66,
+    "chapters": 1189,
+    "verses": 31169,
+    "tar": "ru_bible_chapters.tar.gz",
+    "sha256": "d42fac53cc7681720c66c430bea9c004605f94f5f054751f0d8f3b4bc293e6e6"
+  },
+  "uk": {
+    "id_bible_version": 103,
+    "books": 66,
+    "chapters": 1189,
+    "verses": 31082,
+    "tar": "uk_bible_chapters.tar.gz",
+    "sha256": "e35fc8e3260e05bbadffe5b06c8db154eee107b365afbf4e85e9328902c7185a"
+  },
+  "it": {
+    "id_bible_version": 104,
+    "books": 66,
+    "chapters": 1189,
+    "verses": 31102,
+    "tar": "it_bible_chapters.tar.gz",
+    "sha256": "b672e1572f242755374f4d13994f1bceb107b163e6ac8719ef9bd503280ac479"
+  },
+  "nl": {
+    "id_bible_version": 105,
+    "books": 66,
+    "chapters": 1189,
+    "verses": 31102,
+    "tar": "nl_bible_chapters.tar.gz",
+    "sha256": "821b9b7a7692950991a25d8d2ccd70de1847eb6b46d6c716e975c2a149d11db2"
+  },
+  "pl": {
+    "id_bible_version": 106,
+    "books": 66,
+    "chapters": 1189,
+    "verses": 31102,
+    "tar": "pl_bible_chapters.tar.gz",
+    "sha256": "c3d2afaf633dbbddaee651b218e69f27f193ef14b0c0b1d26dd55f6b929071d7"
+  },
+  "tr": {
+    "id_bible_version": 107,
+    "books": 66,
+    "chapters": 1189,
+    "verses": 31059,
+    "tar": "tr_bible_chapters.tar.gz",
+    "sha256": "4d2f4a427f175e14c592925ec17d3ff03b0f348195d552c7c5ab9ebb7381be88"
+  },
+  "ja": {
+    "id_bible_version": 108,
+    "books": 66,
+    "chapters": 1189,
+    "verses": 31098,
+    "tar": "ja_bible_chapters.tar.gz",
+    "sha256": "e4207e30a381afeb99f8af85f811415dd49d54f5312571e818e4e2affd5d61f6"
+  },
+  "ko": {
+    "id_bible_version": 109,
+    "books": 66,
+    "chapters": 1188,
+    "verses": 30991,
+    "tar": "ko_bible_chapters.tar.gz",
+    "sha256": "0570ad9462134762dbb776b08a1351c687d7876ec71913686eae8df7573db909"
+  },
+  "zh": {
+    "id_bible_version": 110,
+    "books": 66,
+    "chapters": 1189,
+    "verses": 31091,
+    "tar": "zh_bible_chapters.tar.gz",
+    "sha256": "47c93b60f573b16e6e9b083733453bb469f1af8f9ec4995b1bff371884935c90"
+  },
+  "ar": {
+    "id_bible_version": 111,
+    "books": 66,
+    "chapters": 1189,
+    "verses": 31104,
+    "tar": "ar_bible_chapters.tar.gz",
+    "sha256": "19be513ea0e6b64d30a992f6afb38656fae7b5e995f8166d1935737f1698f049"
+  },
+  "hi": {
+    "id_bible_version": 112,
+    "books": 66,
+    "chapters": 1189,
+    "verses": 30899,
+    "tar": "hi_bible_chapters.tar.gz",
+    "sha256": "b2796a21a4747b49085a02ea39365b24ac990a0b99c230eca633ea367de0f41e"
+  }
+}

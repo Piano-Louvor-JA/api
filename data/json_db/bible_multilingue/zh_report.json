@@ -1,0 +1,482 @@
+{
+  "lang": "zh",
+  "translation": "世界中文圣经 (World Chinese Bible)",
+  "abbreviation": "WCB",
+  "id_bible_version": 110,
+  "id_book_base": 860,
+  "license": "PD",
+  "attribution": "Public Domain — rascunho em revisão",
+  "source_url": "https://ebible.org/find/details.php?id=cmnswcb",
+  "note": "draft translation in proofread",
+  "books": 66,
+  "chapters": 1189,
+  "verses": 31091,
+  "files_written": 1189,
+  "problems": [],
+  "warnings": [],
+  "books_detail": [
+    {
+      "book": 1,
+      "name": "摩西第一卷，通常称为创世记",
+      "chapters": 50,
+      "verses": 1533,
+      "sha256": "82255cccef8394c8afdcff3378149a159f4b72076353c2c2fa7dc5cf12215089"
+    },
+    {
+      "book": 2,
+      "name": "摩西第二书，通常称为出埃及记",
+      "chapters": 40,
+      "verses": 1213,
+      "sha256": "724a6c5421a5a4e11ddb925d37216921ea61e01c712df4cbd33d4e1db76fb8a0"
+    },
+    {
+      "book": 3,
+      "name": "摩西第三卷，通称利未记",
+      "chapters": 27,
+      "verses": 859,
+      "sha256": "1ac26f2bb9af23fd23931f1e5eca4141a5284ee26d804d7c077253bd175a186e"
+    },
+    {
+      "book": 4,
+      "name": "摩西第四书，通称民数记",
+      "chapters": 36,
+      "verses": 1288,
+      "sha256": "0a0e945631966d71281ab05499c1c29f94675e387b54e0f01ecd3e30469d7711"
+    },
+    {
+      "book": 5,
+      "name": "摩西五经第五卷，通称申命记",
+      "chapters": 34,
+      "verses": 959,
+      "sha256": "3d87d5d6098c3ea4bf2a6b0194a03b67998ae23a83c68e69c722e59cbd234288"
+    },
+    {
+      "book": 6,
+      "name": "约书亚记",
+      "chapters": 24,
+      "verses": 658,
+      "sha256": "97ae4b5bc4c83c9856bcab9888b928995079d086c378cd0fc419bae7f9dbdd46"
+    },
+    {
+      "book": 7,
+      "name": "士师记",
+      "chapters": 21,
+      "verses": 618,
+      "sha256": "b069567926b13000c37f55068bf84bce9b601240eb55a9a896ecd6fd03e53e84"
+    },
+    {
+      "book": 8,
+      "name": "路得记",
+      "chapters": 4,
+      "verses": 85,
+      "sha256": "cc01dd7c86575ce200a5ba02e18b5fd1cdbf74cb3c8d07da31ede6d509a8a6f9"
+    },
+    {
+      "book": 9,
+      "name": "撒母耳记上",
+      "chapters": 31,
+      "verses": 810,
+      "sha256": "4b98e432fa176165779d9d3645bd9f3685cd19de510ad861d1350935d98729f3"
+    },
+    {
+      "book": 10,
+      "name": "撒母耳记下",
+      "chapters": 24,
+      "verses": 695,
+      "sha256": "6d67353d99b3c63b5e4db70a8a654d9e35a85da35445143841083483ee535fff"
+    },
+    {
+      "book": 11,
+      "name": "列王纪上",
+      "chapters": 22,
+      "verses": 816,
+      "sha256": "9e24632ab332408a52b85dd85ba77abe9dc4a7ed1fbed27c2ccd474a52672e6b"
+    },
+    {
+      "book": 12,
+      "name": "列王纪下",
+      "chapters": 25,
+      "verses": 719,
+      "sha256": "771db6d3ffb3707a5fcadaf63c265b0ce9d2e336388b2f3ac7abf214cbfbdc4b"
+    },
+    {
+      "book": 13,
+      "name": "历代志上",
+      "chapters": 29,
+      "verses": 942,
+      "sha256": "82711ad588025b0f29b602aa636f4eace2b4bc9ed06a03f668330b59c7ae3a5b"
+    },
+    {
+      "book": 14,
+      "name": "历代志下",
+      "chapters": 36,
+      "verses": 822,
+      "sha256": "f88b77d43f5ec1dca789c885639cef8cd9b7136dd3608bbfce30dc8bc1f99c32"
+    },
+    {
+      "book": 15,
+      "name": "以斯拉记",
+      "chapters": 10,
+      "verses": 280,
+      "sha256": "9117f55966ffef61b82e4df97e5b10710943029b5fede230657eb267b842956e"
+    },
+    {
+      "book": 16,
+      "name": "尼希米记",
+      "chapters": 13,
+      "verses": 406,
+      "sha256": "84dc1aa5d9af8161d8ec11a0623a69300cf790db1fcc9aab5666e6235b71c44a"
+    },
+    {
+      "book": 17,
+      "name": "以斯帖记",
+      "chapters": 10,
+      "verses": 167,
+      "sha256": "34201cbf751d1b7d5ecbe2e136214c01cae1b0815a23a40b15ba891d1c257f48"
+    },
+    {
+      "book": 18,
+      "name": "约伯记",
+      "chapters": 42,
+      "verses": 1070,
+      "sha256": "8e9cfa86ee0710d953a1d3f9f09be9fbf2703d9c2366a3e0393dfbfade5a423d"
+    },
+    {
+      "book": 19,
+      "name": "诗篇",
+      "chapters": 150,
+      "verses": 2461,
+      "sha256": "8d12f11b4d954a50a9a6a8dfe68f496aa998a45f9bfd6a1cc2b06c9af5d304e2"
+    },
+    {
+      "book": 20,
+      "name": "箴言",
+      "chapters": 31,
+      "verses": 915,
+      "sha256": "0eac796a6c13fc8c6cdae55c096e0788409098b05140c832f63286a13aa978c8"
+    },
+    {
+      "book": 21,
+      "name": "传道书，或《传道者》",
+      "chapters": 12,
+      "verses": 222,
+      "sha256": "bbfa16e9ee0eac7e7379cc25b2a8f530132ba6ef076007dca99f11575406fabd"
+    },
+    {
+      "book": 22,
+      "name": "所罗门之歌",
+      "chapters": 8,
+      "verses": 117,
+      "sha256": "b1577b68ded1f3230729fc43ef14625d7ee2f57c834f550fb4d11e441511467a"
+    },
+    {
+      "book": 23,
+      "name": "以赛亚书",
+      "chapters": 66,
+      "verses": 1292,
+      "sha256": "c6cef2b3069ac3019214377d963d4eece8bfeb0e3b73eb1aed2222c6e93bf5a8"
+    },
+    {
+      "book": 24,
+      "name": "耶利米书",
+      "chapters": 52,
+      "verses": 1364,
+      "sha256": "d5fa7e704b5f45ca7400724f658124c45da54276635e28df4792b491cda81e20"
+    },
+    {
+      "book": 25,
+      "name": "耶利米哀歌",
+      "chapters": 5,
+      "verses": 154,
+      "sha256": "59aa811f4961eb3b62279ceaf9e8773ae0cccde6bbedbcb8d1d4e0b8ba5cbb2b"
+    },
+    {
+      "book": 26,
+      "name": "以西结书",
+      "chapters": 48,
+      "verses": 1273,
+      "sha256": "e7ce7e57ec1136aff985b0723220bbdb4599898a095028695f81fc43a6720e1b"
+    },
+    {
+      "book": 27,
+      "name": "但以理书",
+      "chapters": 12,
+      "verses": 357,
+      "sha256": "f43405648da72f5001f627aa35a20d92385b6b04542b7f0a5c9875ac46b514d0"
+    },
+    {
+      "book": 28,
+      "name": "何西阿书",
+      "chapters": 14,
+      "verses": 197,
+      "sha256": "28058cdbda1b5dd0d933d3742f423e3a23d1427f27e30b7445081d8d2d20be7b"
+    },
+    {
+      "book": 29,
+      "name": "约珥书",
+      "chapters": 3,
+      "verses": 73,
+      "sha256": "f22d5384a04eedb86ccaa81e739da9dc272b1de8168a022eaa5bd2d9ecf013f7"
+    },
+    {
+      "book": 30,
+      "name": "阿摩司书",
+      "chapters": 9,
+      "verses": 146,
+      "sha256": "468ef39dd346f5318930022438bacadf90aa8716a0436db63da0fc54c1a6b671"
+    },
+    {
+      "book": 31,
+      "name": "俄巴底亚书",
+      "chapters": 1,
+      "verses": 21,
+      "sha256": "1b3cc40e4f2b93796f18b67009da3991d959d978bd46d8273e233adfd812c4aa"
+    },
+    {
+      "book": 32,
+      "name": "约拿书",
+      "chapters": 4,
+      "verses": 48,
+      "sha256": "d99560cf7bd55a15030a10b300b5a8b498ffc2d3dc0e833822e41563a4b5a6f3"
+    },
+    {
+      "book": 33,
+      "name": "弥迦书",
+      "chapters": 7,
+      "verses": 105,
+      "sha256": "942eec0a69e07601fdab8d75eb823c3fb24b81ff0738dcab01c42e3342b76cba"
+    },
+    {
+      "book": 34,
+      "name": "那鸿书",
+      "chapters": 3,
+      "verses": 47,
+      "sha256": "5019814d364657ccd77480b5d648ea469583b8586b2d08156e4b993df4546bfd"
+    },
+    {
+      "book": 35,
+      "name": "哈巴谷书",
+      "chapters": 3,
+      "verses": 56,
+      "sha256": "5946a1765a16c42ba49c2f69ce3ba64f2cd87a23aec235953d183791fa85e1ea"
+    },
+    {
+      "book": 36,
+      "name": "西番雅书",
+      "chapters": 3,
+      "verses": 53,
+      "sha256": "36e2aa8123fd14cbd2c1297e90ead2fe3a99e703942b9502e8fec3597955d4ec"
+    },
+    {
+      "book": 37,
+      "name": "哈该书",
+      "chapters": 2,
+      "verses": 38,
+      "sha256": "eee16c105f8c19b1dd6344dc2c753a2883900d9d1b584d6d1438dfeeba6dd053"
+    },
+    {
+      "book": 38,
+      "name": "撒迦利亚书",
+      "chapters": 14,
+      "verses": 211,
+      "sha256": "1f28466d6c72677297568364286bfb21772d68edf6867f77ca2c45170dec844f"
+    },
+    {
+      "book": 39,
+      "name": "玛拉基书",
+      "chapters": 4,
+      "verses": 55,
+      "sha256": "b0615f5bfce5ef36328fbfd8ded68202862d2781a9afbd7d42369320308baa5f"
+    },
+    {
+      "book": 40,
+      "name": "马太福音",
+      "chapters": 28,
+      "verses": 1071,
+      "sha256": "c6cec3a13cc949dbfef640979337af062c61fa6590858505e735e354f244bb47"
+    },
+    {
+      "book": 41,
+      "name": "马可福音",
+      "chapters": 16,
+      "verses": 671,
+      "sha256": "6d83208547abe59ce26a8885bfa3696d654116d5a41b16c7a9d32f5c222f34fb"
+    },
+    {
+      "book": 42,
+      "name": "路加福音",
+      "chapters": 24,
+      "verses": 1150,
+      "sha256": "d060b44c1b9165c1874f350b81475a7f567b3d0bec1e219929fec19020a10fd6"
+    },
+    {
+      "book": 43,
+      "name": "约翰所传的福音",
+      "chapters": 21,
+      "verses": 879,
+      "sha256": "91996eb7d4714e05232906c93d616573c408c7a11bdf3705c4adc40d5644b939"
+    },
+    {
+      "book": 44,
+      "name": "使徒行传",
+      "chapters": 28,
+      "verses": 1004,
+      "sha256": "c2b80a41500b271252731d0d4606c6a5860407b62c35116cd288a807d9e0fd95"
+    },
+    {
+      "book": 45,
+      "name": "保罗写给罗马人的信",
+      "chapters": 16,
+      "verses": 433,
+      "sha256": "3b8f01e9d104930d0259e96310a33fb4e09c4e06cedbc380010ac303dee698b7"
+    },
+    {
+      "book": 46,
+      "name": "保罗写给哥林多人的第一封信",
+      "chapters": 16,
+      "verses": 437,
+      "sha256": "755c14b9d37c71b982bae904444277cc82a8ecb1758eac537a1c1ac3492b3b58"
+    },
+    {
+      "book": 47,
+      "name": "保罗给哥林多人的第二封信",
+      "chapters": 13,
+      "verses": 257,
+      "sha256": "f6e83eda08d179f7692769242fb4bd40d9a145384eb5144360c364b9ba71c553"
+    },
+    {
+      "book": 48,
+      "name": "保罗致加拉太人的书信",
+      "chapters": 6,
+      "verses": 149,
+      "sha256": "30864c94acf8bf489a39a0ec50a70030c6ddcefb699b5ab5eec471ac4e1acfad"
+    },
+    {
+      "book": 49,
+      "name": "保罗给以弗所人的信",
+      "chapters": 6,
+      "verses": 155,
+      "sha256": "2bc8a807150a5d33206aafbfceacec7be6c84c9714cde68af91e1b1d093a4f38"
+    },
+    {
+      "book": 50,
+      "name": "保罗写给腓立比人的信",
+      "chapters": 4,
+      "verses": 104,
+      "sha256": "e636d8994c819e3ded29a3bb0357324719e19f24fff16b348d1d82e5faa6b992"
+    },
+    {
+      "book": 51,
+      "name": "保罗写给歌罗西人的信",
+      "chapters": 4,
+      "verses": 95,
+      "sha256": "e915eafb28dcdd14c60bbd744153d6a48d899ba78bb6115c94a7b6b656ca6147"
+    },
+    {
+      "book": 52,
+      "name": "保罗写给帖撒罗尼迦人的第一封信",
+      "chapters": 5,
+      "verses": 89,
+      "sha256": "6c925d89024f066ca5603f5b9e028f5a033a069d643bc4c4862a7080dbd43800"
+    },
+    {
+      "book": 53,
+      "name": "保罗写给帖撒罗尼迦人的第二封信",
+      "chapters": 3,
+      "verses": 47,
+      "sha256": "7360a734dbd460e563d09ca0b98336fd077955e3bd4e00f994ed00e707a70caa"
+    },
+    {
+      "book": 54,
+      "name": "保罗给提摩太的第一封信",
+      "chapters": 6,
+      "verses": 113,
+      "sha256": "f2fb938bba1eccab9f31abc830916c9fd0b4729a0bb70b9d23daa861431ef67d"
+    },
+    {
+      "book": 55,
+      "name": "保罗给提摩太的第二封信",
+      "chapters": 4,
+      "verses": 83,
+      "sha256": "40a81b2f5733482b8c1bccf3e1f2cbc1b288a0657f530cabbf4dd5f193bf3aa1"
+    },
+    {
+      "book": 56,
+      "name": "保罗给提多的信",
+      "chapters": 3,
+      "verses": 46,
+      "sha256": "6fb5c86bc48432a34ce56be38c98c744428a26f700354ae89da80e486c92767f"
+    },
+    {
+      "book": 57,
+      "name": "保罗致腓利门的书信",
+      "chapters": 1,
+      "verses": 25,
+      "sha256": "a01ab47e7065f061b6c2ef8c672007415a9eb7bd0c3ef246d124be28ac46ce6e"
+    },
+    {
+      "book": 58,
+      "name": "致希伯来人的书信",
+      "chapters": 13,
+      "verses": 303,
+      "sha256": "5bd6b65fe38d015ab73d4eca58f7c9d1f6063806a8aff6bad20e28ebf040d7ec"
+    },
+    {
+      "book": 59,
+      "name": "雅各的书信",
+      "chapters": 5,
+      "verses": 108,
+      "sha256": "610b598830d58374269f9c079db57a26077a6263801321ba2f51c569130c54dd"
+    },
+    {
+      "book": 60,
+      "name": "彼得的第一封信",
+      "chapters": 5,
+      "verses": 105,
+      "sha256": "5bba162c35e7da3c4c62d7ba9b4383cc8df00c471472e8aebf3abcfd22d99c38"
+    },
+    {
+      "book": 61,
+      "name": "彼得的第二封信",
+      "chapters": 3,
+      "verses": 61,
+      "sha256": "d5c1b0eb8958186605b0bd1619803d8a2bff87c4e102750628eb7abf2bee43d4"
+    },
+    {
+      "book": 62,
+      "name": "约翰第一封书信",
+      "chapters": 5,
+      "verses": 105,
+      "sha256": "a34fa509a9e49248d5e526257e88878c31f5f6d594766d32d80f79159aa76405"
+    },
+    {
+      "book": 63,
+      "name": "约翰二书",
+      "chapters": 1,
+      "verses": 13,
+      "sha256": "296bd8f91eac353a1437e74d549342a05c57fdcefe8c19d79a680a873c2f5d6f"
+    },
+    {
+      "book": 64,
+      "name": "约翰第三封书信",
+      "chapters": 1,
+      "verses": 14,
+      "sha256": "ae4affcc86f85216f1e412ad734941ef5e011980314e1c7529b41b85c39f1d0d"
+    },
+    {
+      "book": 65,
+      "name": "犹大的书信",
+      "chapters": 1,
+      "verses": 25,
+      "sha256": "780c449162f7284c5614c4fdf9fdf2d0a71b5c19da5a19564d12439415e8255e"
+    },
+    {
+      "book": 66,
+      "name": "约翰所得的启示",
+      "chapters": 22,
+      "verses": 404,
+      "sha256": "4add4309f3c7011f3349a66af132c83b63a2e096f556098dd112ef2a0ca23169"
+    }
+  ],
+  "source_sha256": "ff36326e7f3d0a0e17f0c0bedb3e94f0c64a2d013f1a5dbf99a104de49475cc6"
+}

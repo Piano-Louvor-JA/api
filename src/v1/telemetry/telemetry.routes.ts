@@ -1,12 +1,10 @@
 /**
- * Telemetria de dispositivos online (app/.planning/telemetria-dispositivos).
+ * Telemetria de dispositivos online (app/.planning/telemetria-dispositivos)
+ * + histórico 90d / rankings / mapa (api/.planning/telemetria-historico).
  *
- * - POST /v1/telemetry/heartbeat — público, chamado pelos clientes a cada
- *   5 min. SEMPRE 204: corpo inválido é ignorado e campo podre é descartado
- *   (nunca 4xx para o app). Geo por IP resolve fora do caminho da resposta.
- * - GET /v1/telemetry/online — admin (ADMIN_EMAILS, fail-closed): quem
- *   mandou sinal nos últimos 11 min, com totais e filtros. Sem IP e sem o
- *   install_id completo.
+ * - POST /v1/telemetry/heartbeat — público, sempre 204.
+ * - GET /v1/telemetry/online — admin: janela 11 min.
+ * - GET /v1/telemetry/history|rankings|map — admin: janela 90d.
  *
  * Kill switch: DEVICE_TELEMETRY_DISABLED=true → heartbeat 204 sem gravar.
  */
@@ -20,6 +18,12 @@ import {
   recordHeartbeat,
   setPresenceGeo,
 } from "../../lib/devicePresence.js";
+import {
+  HISTORY_WINDOW_DAYS,
+  listMapPoints,
+  listRankings,
+  summarizeHistory,
+} from "../../lib/devicePresenceHistory.js";
 import { lookupGeo } from "../../lib/geoIp.js";
 import type { PartnerEnv } from "../../middleware/partnerKey.js";
 import {
@@ -182,9 +186,127 @@ telemetryRoutes.openapi(heartbeatRoute, async (c) => {
   return c.body(null, 204);
 });
 
+const periodQuery = z.object({
+  days: z.coerce.number().int().min(1).max(HISTORY_WINDOW_DAYS).optional(),
+});
+
+const historyRoute = createRoute({
+  method: "get",
+  path: "/history",
+  tags: ["telemetry"],
+  description:
+    "Resumo do histórico de presença (até 90 dias). Gate ADMIN_EMAILS.",
+  request: { query: periodQuery },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            period_days: z.number(),
+            generated_at: z.string(),
+            online_window_min: z.number(),
+            totals: z.object({
+              seen: z.number(),
+              online: z.number(),
+              offline_seen: z.number(),
+              with_church: z.number(),
+              with_geo: z.number(),
+              by_platform: z.record(z.string(), z.number()),
+            }),
+          }),
+        },
+      },
+      description: "Resumo do período",
+    },
+    401: { ...errorSchema, description: "Não autenticado" },
+    403: { ...errorSchema, description: "Sem permissão" },
+  },
+});
+
+const rankingsRoute = createRoute({
+  method: "get",
+  path: "/rankings",
+  tags: ["telemetry"],
+  description:
+    "Ranking de dispositivos no período (igreja, distrito, cidade, UF, país, SO).",
+  request: {
+    query: periodQuery.extend({
+      by: z.enum(["church", "district", "city", "region", "country", "os"]),
+      limit: z.coerce.number().int().min(1).max(200).optional(),
+    }),
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            period_days: z.number(),
+            by: z.string(),
+            generated_at: z.string(),
+            items: z.array(
+              z.object({
+                key: z.string(),
+                label: z.string(),
+                devices: z.number(),
+                online: z.number(),
+              }),
+            ),
+          }),
+        },
+      },
+      description: "Itens do ranking",
+    },
+    401: { ...errorSchema, description: "Não autenticado" },
+    403: { ...errorSchema, description: "Sem permissão" },
+  },
+});
+
+const mapRoute = createRoute({
+  method: "get",
+  path: "/map",
+  tags: ["telemetry"],
+  description:
+    "Pontos do mapa (país): verde=online agora, cinza=viu no período e offline.",
+  request: {
+    query: periodQuery.extend({
+      country: z.string().trim().min(2).max(2).optional(),
+    }),
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            period_days: z.number(),
+            country: z.string(),
+            generated_at: z.string(),
+            online_window_min: z.number(),
+            points: z.array(
+              z.object({
+                city: z.string().nullable(),
+                region: z.string(),
+                country: z.string(),
+                devices: z.number(),
+                online: z.number(),
+                is_online: z.boolean(),
+              }),
+            ),
+          }),
+        },
+      },
+      description: "Pontos agregados por cidade/UF",
+    },
+    401: { ...errorSchema, description: "Não autenticado" },
+    403: { ...errorSchema, description: "Sem permissão" },
+  },
+});
+
 // /v1/telemetry não passa pelos middlewares de sessão do /v1/custom:
 // resolve o usuário (token opaco ou Firebase) antes do gate de admin.
 telemetryRoutes.use("/online", optionalAuth, firebaseAuth, adminAuth);
+telemetryRoutes.use("/history", optionalAuth, firebaseAuth, adminAuth);
+telemetryRoutes.use("/rankings", optionalAuth, firebaseAuth, adminAuth);
+telemetryRoutes.use("/map", optionalAuth, firebaseAuth, adminAuth);
 
 telemetryRoutes.openapi(onlineRoute, (c) => {
   const { platform, region, district, q } = c.req.valid("query");
@@ -202,6 +324,30 @@ telemetryRoutes.openapi(onlineRoute, (c) => {
       totals,
       devices,
     },
+    200,
+  );
+});
+
+telemetryRoutes.openapi(historyRoute, (c) => {
+  const { days } = c.req.valid("query");
+  c.header("Cache-Control", "no-store");
+  return c.json(summarizeHistory(days ?? HISTORY_WINDOW_DAYS), 200);
+});
+
+telemetryRoutes.openapi(rankingsRoute, (c) => {
+  const { days, by, limit } = c.req.valid("query");
+  c.header("Cache-Control", "no-store");
+  return c.json(
+    listRankings(by, days ?? HISTORY_WINDOW_DAYS, limit ?? 50),
+    200,
+  );
+});
+
+telemetryRoutes.openapi(mapRoute, (c) => {
+  const { days, country } = c.req.valid("query");
+  c.header("Cache-Control", "no-store");
+  return c.json(
+    listMapPoints(days ?? HISTORY_WINDOW_DAYS, country ?? "BR"),
     200,
   );
 });

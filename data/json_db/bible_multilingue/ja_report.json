@@ -1,0 +1,482 @@
+{
+  "lang": "ja",
+  "translation": "フリーダム・バイブル (Freedom Bible)",
+  "abbreviation": "JFM",
+  "id_bible_version": 108,
+  "id_book_base": 728,
+  "license": "PD",
+  "attribution": "Public Domain — Freedom Bible",
+  "source_url": "https://ebible.org/find/details.php?id=jpnm",
+  "note": "",
+  "books": 66,
+  "chapters": 1189,
+  "verses": 31098,
+  "files_written": 1189,
+  "problems": [],
+  "warnings": [],
+  "books_detail": [
+    {
+      "book": 1,
+      "name": "創世記",
+      "chapters": 50,
+      "verses": 1533,
+      "sha256": "cce846a235dbd6c929f661d44af157d6a77bd33232c2522f2b9115e2168d0aa0"
+    },
+    {
+      "book": 2,
+      "name": "出エジプト記",
+      "chapters": 40,
+      "verses": 1213,
+      "sha256": "a89d273e6a9f1117d8570f556604118b2ee29195be64233f5e2e89d6745a2b48"
+    },
+    {
+      "book": 3,
+      "name": "モーセの第三の書、通称レビ記",
+      "chapters": 27,
+      "verses": 859,
+      "sha256": "5dd03773e6db65af56d69c4004fdd7ab6afa9ebc01d0367ad82d0f35f1c54c1c"
+    },
+    {
+      "book": 4,
+      "name": "モーセの第四の書、通称民数記",
+      "chapters": 36,
+      "verses": 1288,
+      "sha256": "17fbf5267dff0d6de1ab429b5e6e6aa1f4d1bac2850f9d5397911eef7de46cdc"
+    },
+    {
+      "book": 5,
+      "name": "モーセの第五の書、通称申命記",
+      "chapters": 34,
+      "verses": 959,
+      "sha256": "8d7ea00abce83ee43d005e76d71070a37699645265317b9dc1050b93f2ded2bb"
+    },
+    {
+      "book": 6,
+      "name": "ヨシュア記",
+      "chapters": 24,
+      "verses": 658,
+      "sha256": "a8283f2436e29552284893b3b36428ae6cc6db24e9c11dde07faf450f4e461b8"
+    },
+    {
+      "book": 7,
+      "name": "士師記",
+      "chapters": 21,
+      "verses": 618,
+      "sha256": "1cacb9f3ee88157f2efdbfa6cf59ec0c294da3bebcc1f3ecfd678683ae016663"
+    },
+    {
+      "book": 8,
+      "name": "ルツ記",
+      "chapters": 4,
+      "verses": 85,
+      "sha256": "704a039bf61c52dd829866ecb300b4193c3614ddb96742cc83849cd9fd27a87a"
+    },
+    {
+      "book": 9,
+      "name": "サムエル記第一",
+      "chapters": 31,
+      "verses": 810,
+      "sha256": "daa38f9d27eadf19871570b76e29928b4e20b37604494813818adc98e3117150"
+    },
+    {
+      "book": 10,
+      "name": "サムエル記第二",
+      "chapters": 24,
+      "verses": 695,
+      "sha256": "42e94f2f9bf06b517087e00ea3a4e3c32b6cca32804321256e73fafb070c2b66"
+    },
+    {
+      "book": 11,
+      "name": "列王記第一",
+      "chapters": 22,
+      "verses": 816,
+      "sha256": "0c8aad8d93fce352964328f00ffd35c8b4dbfaf0515e32b27c8180757e59eb63"
+    },
+    {
+      "book": 12,
+      "name": "列王記第二",
+      "chapters": 25,
+      "verses": 719,
+      "sha256": "6ca47b7970a2bc68fc23ca602c4b0c18c167ac75d0af67425aad087cf1687fb8"
+    },
+    {
+      "book": 13,
+      "name": "歴代誌上",
+      "chapters": 29,
+      "verses": 942,
+      "sha256": "23e7dffd4d421c338c2e0b0c92d3354109b595162ea4bbc8543aa0b65d4bdad9"
+    },
+    {
+      "book": 14,
+      "name": "歴代誌 第二",
+      "chapters": 36,
+      "verses": 822,
+      "sha256": "9909c4ec72379b9348fe80d0bf99103b27b023b85f2d77865782050bd9902987"
+    },
+    {
+      "book": 15,
+      "name": "エズラ記",
+      "chapters": 10,
+      "verses": 280,
+      "sha256": "55637bc3adf1d64d300ce503b2c940d40b2faa1d9cba5023ac6a0dd6f0a6e5e3"
+    },
+    {
+      "book": 16,
+      "name": "ネヘミヤ記",
+      "chapters": 13,
+      "verses": 406,
+      "sha256": "eabfbaebe3ae925f46175a47d52c05285cfddda3dc9eb3eddc60bb21bfcdd6fa"
+    },
+    {
+      "book": 17,
+      "name": "エステル記",
+      "chapters": 10,
+      "verses": 167,
+      "sha256": "0ea8f3b6b8b4edba843b75304bc14a13ee76e5c62153e90ee2722a4ac28d5c14"
+    },
+    {
+      "book": 18,
+      "name": "ヨブ記",
+      "chapters": 42,
+      "verses": 1070,
+      "sha256": "78ed8dff1ac0e4367b52c7aff250914dc371999a14b1953d333d644bf1a3056c"
+    },
+    {
+      "book": 19,
+      "name": "詩篇",
+      "chapters": 150,
+      "verses": 2461,
+      "sha256": "aa222babfd28ccd5f504daf28340a0f107abe35492f0102441f355ce88ece578"
+    },
+    {
+      "book": 20,
+      "name": "箴言",
+      "chapters": 31,
+      "verses": 915,
+      "sha256": "ab7c58f01c5f93de88a5abef8e826e4bd98e4ed0092757617c4abd120e8178d7"
+    },
+    {
+      "book": 21,
+      "name": "伝道者の書、または伝道者",
+      "chapters": 12,
+      "verses": 222,
+      "sha256": "4e9f7cd0291f4232eb1ec4c37f83cb68dc2bdf9acd137c8bc79f8c53e4f01362"
+    },
+    {
+      "book": 22,
+      "name": "ソロモンの雅歌",
+      "chapters": 8,
+      "verses": 117,
+      "sha256": "df059ce2daaea598d387ecb60b814938819c3caaf612dc29185005b9c618fc0b"
+    },
+    {
+      "book": 23,
+      "name": "イザヤ書",
+      "chapters": 66,
+      "verses": 1292,
+      "sha256": "9047c6fc887e18df30a989aa348368e74121ea706272e6e18ab82f75d22ac0cf"
+    },
+    {
+      "book": 24,
+      "name": "エレミヤ書",
+      "chapters": 52,
+      "verses": 1364,
+      "sha256": "0074fe0144a647114ba6aae9b3618ced206945c2f0ff5542f16f5c095d00d9d9"
+    },
+    {
+      "book": 25,
+      "name": "エレミヤの哀歌",
+      "chapters": 5,
+      "verses": 154,
+      "sha256": "b695547e4c99b4924b2558742d1b1c2f9ac38c5706616997cad3db397c585baf"
+    },
+    {
+      "book": 26,
+      "name": "エゼキエル書",
+      "chapters": 48,
+      "verses": 1273,
+      "sha256": "4db00f50224c45ede34d979b2c36d228853b83361b49a28c9279003148f629ff"
+    },
+    {
+      "book": 27,
+      "name": "ダニエル書",
+      "chapters": 12,
+      "verses": 357,
+      "sha256": "1e7f3dab725c89cb035e512399f14b45c0252835b3d97a67dc112ea4da1fc418"
+    },
+    {
+      "book": 28,
+      "name": "ホセア書",
+      "chapters": 14,
+      "verses": 197,
+      "sha256": "8532273270f0721f57184314ef2552a59f67788caf04998e87b0967ab628abab"
+    },
+    {
+      "book": 29,
+      "name": "ヨエル書",
+      "chapters": 3,
+      "verses": 73,
+      "sha256": "0624f2d488e2b9b2eb357e9ccdb5fd407e1254ca6db43d27bad426872c36fba6"
+    },
+    {
+      "book": 30,
+      "name": "アモス書",
+      "chapters": 9,
+      "verses": 146,
+      "sha256": "1d2b8fc728b4efa9207b9619e6572e3bcb561b35c061d68e407cede9c6a761c3"
+    },
+    {
+      "book": 31,
+      "name": "オバデヤ書",
+      "chapters": 1,
+      "verses": 21,
+      "sha256": "f30538e17d20b7a3b908f0a266a2c650f931bc17e9865a24a39659c34eda8bfb"
+    },
+    {
+      "book": 32,
+      "name": "ヨナ書",
+      "chapters": 4,
+      "verses": 48,
+      "sha256": "35853330701c01ae2cc85f060c3a43f859f54bac43e94183035a81b8540001ba"
+    },
+    {
+      "book": 33,
+      "name": "ミカ書",
+      "chapters": 7,
+      "verses": 105,
+      "sha256": "f4499a357160e9d07632c7fdcd22004a77b120ce2950402e28c4fa1a529b67e8"
+    },
+    {
+      "book": 34,
+      "name": "ナホム書",
+      "chapters": 3,
+      "verses": 47,
+      "sha256": "ad30efd2a9d2430e1923eb50a0e62080f4e2c6a5daeb841ab84fb7d30e96d975"
+    },
+    {
+      "book": 35,
+      "name": "ハバクク書",
+      "chapters": 3,
+      "verses": 56,
+      "sha256": "42bbdbffb41b3ee60095abfdd1cba1802ec095f674d7cd7a62bf884312fc530b"
+    },
+    {
+      "book": 36,
+      "name": "ゼパニヤ書",
+      "chapters": 3,
+      "verses": 53,
+      "sha256": "451393ffbaf675ec2de4d84201da2b3c6455660249f86992e968bea9e20dd978"
+    },
+    {
+      "book": 37,
+      "name": "ハガイ書",
+      "chapters": 2,
+      "verses": 38,
+      "sha256": "f22590622ab792f014fe77733ab2f1c7eba22cd9c774676a149a411aff520532"
+    },
+    {
+      "book": 38,
+      "name": "ゼカリヤ書",
+      "chapters": 14,
+      "verses": 211,
+      "sha256": "f1a101f322982b8ac36e827f2556e5f3bac3e58aa40cfadbfc0ad940c1048fec"
+    },
+    {
+      "book": 39,
+      "name": "マラキ書",
+      "chapters": 4,
+      "verses": 55,
+      "sha256": "1296e4c791bfd91c16682b5bbb2d6ae201aa659b30369ce7ae78cf7d22d7f1be"
+    },
+    {
+      "book": 40,
+      "name": "マタイによる福音書",
+      "chapters": 28,
+      "verses": 1071,
+      "sha256": "f39ecae33931eb9cc9abb2efcb4bb6db2c814239fb87346cdad87c8a41aa9d5e"
+    },
+    {
+      "book": 41,
+      "name": "マルコによる福音書",
+      "chapters": 16,
+      "verses": 678,
+      "sha256": "497feaf107b5e24cf6b246018624a84a313f45e413f5a4bdf19fb52203cb296a"
+    },
+    {
+      "book": 42,
+      "name": "ルカによる福音書",
+      "chapters": 24,
+      "verses": 1150,
+      "sha256": "26a696cd4b657c462d43e779794b46a8536019e8b3c9193ccd31c027c4b1661b"
+    },
+    {
+      "book": 43,
+      "name": "ヨハネによる福音書",
+      "chapters": 21,
+      "verses": 879,
+      "sha256": "a98a9286d53da6592db62a87f1b521aa5800492d335e43eed46f108c304c3bc1"
+    },
+    {
+      "book": 44,
+      "name": "使徒の働き",
+      "chapters": 28,
+      "verses": 1004,
+      "sha256": "eaa99926210839f79630f953a3d5211679d3428b791263d291f94e1cc2ff4f57"
+    },
+    {
+      "book": 45,
+      "name": "パウロのローマ人への手紙",
+      "chapters": 16,
+      "verses": 433,
+      "sha256": "b3df2e6ec0b37ce1d04536bf50df8a3a9299a31cdb7ff949014a9c9773cf1c08"
+    },
+    {
+      "book": 46,
+      "name": "パウロのコリント人への第一の手紙",
+      "chapters": 16,
+      "verses": 437,
+      "sha256": "8e39b5bd88c257e17ac276efeb406070c9b48b4e333f56f01d5fd6efc0b98d8c"
+    },
+    {
+      "book": 47,
+      "name": "パウロのコリント人への第二の手紙",
+      "chapters": 13,
+      "verses": 257,
+      "sha256": "dfd49b880a3a83bcfcfcf5710ea6f0e34901da905fe08adc11007b0fe00de028"
+    },
+    {
+      "book": 48,
+      "name": "パウロのガラテヤ人への手紙",
+      "chapters": 6,
+      "verses": 149,
+      "sha256": "c9d02f3a52a3f671ae0c22d7b94f52371e7a2580a48d30d2a1f5e10f3c3fe75a"
+    },
+    {
+      "book": 49,
+      "name": "パウロのエペソ人への手紙",
+      "chapters": 6,
+      "verses": 155,
+      "sha256": "1c5590a15500f6eadeb23b247c8f684fde2904248a8c7bda13b3bbfd79e643ea"
+    },
+    {
+      "book": 50,
+      "name": "パウロのピリピ人への手紙",
+      "chapters": 4,
+      "verses": 104,
+      "sha256": "07282d74fc48175e376ee323e13865f3c980f716e58e4032bb1aed1683fb2353"
+    },
+    {
+      "book": 51,
+      "name": "パウロのコロサイ人への手紙",
+      "chapters": 4,
+      "verses": 95,
+      "sha256": "051229a7e8263c6adb34ee54247e8ef98c59b914963d033e82f420d6a9947485"
+    },
+    {
+      "book": 52,
+      "name": "パウロのテサロニケ人への第一の手紙",
+      "chapters": 5,
+      "verses": 89,
+      "sha256": "af80f910ac3dc97506cfbe9abbe8a710d50b9a2f442123f8b1952fcea54b46b0"
+    },
+    {
+      "book": 53,
+      "name": "テサロニケ人へのパウロの第二の手紙",
+      "chapters": 3,
+      "verses": 47,
+      "sha256": "5cfacb7cd2f3582d685464f1407c5a68c1d1097f727969edc0bd99b9a227e392"
+    },
+    {
+      "book": 54,
+      "name": "パウロのテモテへの手紙第一",
+      "chapters": 6,
+      "verses": 113,
+      "sha256": "6034a9b090485315ef18b922c9791f759553c8ace2d6a12e6210b98d76251666"
+    },
+    {
+      "book": 55,
+      "name": "パウロのテモテへの第二の手紙",
+      "chapters": 4,
+      "verses": 83,
+      "sha256": "f137a083ff56720d92644e35c08168b2769e6c378d2dc6170c9de980b72be027"
+    },
+    {
+      "book": 56,
+      "name": "パウロのテトスへの手紙",
+      "chapters": 3,
+      "verses": 46,
+      "sha256": "64f15680c13f07adfbc6d6aaf63c8629e06b39cfa294b58b3df90afe190e0d7c"
+    },
+    {
+      "book": 57,
+      "name": "フィレモンへのパウロの手紙",
+      "chapters": 1,
+      "verses": 25,
+      "sha256": "fabbff03f68f982b04575a9669e3d68a890618533e3bfee2096aacf3a761d23f"
+    },
+    {
+      "book": 58,
+      "name": "ヘブル人への手紙",
+      "chapters": 13,
+      "verses": 303,
+      "sha256": "45c22696a812a9227ae183f02bc114140082f5a7d697703ae16d5aae1a17b28c"
+    },
+    {
+      "book": 59,
+      "name": "ヤコブの手紙",
+      "chapters": 5,
+      "verses": 108,
+      "sha256": "7013f08a0161b0db43f81b11ccaac4645261caaebfa97d53f39809f6b60c2eb0"
+    },
+    {
+      "book": 60,
+      "name": "ペテロの手紙第一",
+      "chapters": 5,
+      "verses": 105,
+      "sha256": "6a03c3f6ea4282de02e2e2e2101ea8e7984c2d5105129c25697a2713dff6f33c"
+    },
+    {
+      "book": 61,
+      "name": "ペテロの第二の手紙",
+      "chapters": 3,
+      "verses": 61,
+      "sha256": "40cff1ba972671b3140a2d5365c7c53e3ab52d29e271f10f5588fd7440cf1ba3"
+    },
+    {
+      "book": 62,
+      "name": "ヨハネの手紙第一",
+      "chapters": 5,
+      "verses": 105,
+      "sha256": "c023a3837e9e89223c1e1e6180893841a4038381ffcb9abe94dbe1d3fc9e42cb"
+    },
+    {
+      "book": 63,
+      "name": "ヨハネの手紙第二",
+      "chapters": 1,
+      "verses": 13,
+      "sha256": "b28f00a3cc45eaaed635f3233e3a42473822e19f118a6841a6b612f9542d0859"
+    },
+    {
+      "book": 64,
+      "name": "ヨハネの手紙第三",
+      "chapters": 1,
+      "verses": 14,
+      "sha256": "ee48f4c43e7c69f79e2bf10a656a4dddfe790e2c95fa2225154cfb61f55bbae1"
+    },
+    {
+      "book": 65,
+      "name": "ユダの手紙",
+      "chapters": 1,
+      "verses": 25,
+      "sha256": "34ebb0cd9675414cc4f1977044ace92eeee21529f739335c33c1bd46a5497665"
+    },
+    {
+      "book": 66,
+      "name": "ヨハネの黙示録",
+      "chapters": 22,
+      "verses": 404,
+      "sha256": "e9c8cf334d6bc2d38ebc31007ea0e31914db34867d7bfcd5645591ed2d496a9b"
+    }
+  ],
+  "source_sha256": "25d099bb16868eebb61eb9a9ab1985cdb7fff9475b89e5b40fdbb807ce5c2fce"
+}

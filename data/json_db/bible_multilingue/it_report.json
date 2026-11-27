@@ -1,0 +1,482 @@
+{
+  "lang": "it",
+  "translation": "Riveduta Bibbia 1927",
+  "abbreviation": "RIV",
+  "id_bible_version": 104,
+  "id_book_base": 464,
+  "license": "PD",
+  "attribution": "Public Domain — Riveduta 1927",
+  "source_url": "https://ebible.org/find/details.php?id=ita1927",
+  "note": "",
+  "books": 66,
+  "chapters": 1189,
+  "verses": 31102,
+  "files_written": 1189,
+  "problems": [],
+  "warnings": [],
+  "books_detail": [
+    {
+      "book": 1,
+      "name": "Genesi",
+      "chapters": 50,
+      "verses": 1533,
+      "sha256": "74a80c03d6d3671986163def021142b0edc86b221ba4e1860be7441d1770745f"
+    },
+    {
+      "book": 2,
+      "name": "Esodo",
+      "chapters": 40,
+      "verses": 1213,
+      "sha256": "5b4d0635fdbe55b2cb9e0cb74dd729440f6b7245c38350e160c2ef58e1d81f73"
+    },
+    {
+      "book": 3,
+      "name": "Levitico",
+      "chapters": 27,
+      "verses": 859,
+      "sha256": "bbc26c5361156ce3632525c6be334e5eb31c019ec2805fcceaee9dd2f63f8717"
+    },
+    {
+      "book": 4,
+      "name": "Numeri",
+      "chapters": 36,
+      "verses": 1288,
+      "sha256": "3b6b00206f5dec0895227f84b569973b386e3264df93484825b035afd33d3572"
+    },
+    {
+      "book": 5,
+      "name": "Deuteronomio",
+      "chapters": 34,
+      "verses": 959,
+      "sha256": "45dcaac5f1f03994cb4886884dde0259caa94aa186c4de0e0a51e2a6988d722f"
+    },
+    {
+      "book": 6,
+      "name": "Giosué",
+      "chapters": 24,
+      "verses": 658,
+      "sha256": "c27b85f20097fd87c0d5a5b20b59055a92fdf97e4f5935cf13f9275bb854c006"
+    },
+    {
+      "book": 7,
+      "name": "Giudici",
+      "chapters": 21,
+      "verses": 618,
+      "sha256": "41d3a7e050ccf10cd3829384e0934fca324ab0399d52e5af649618c9f948423a"
+    },
+    {
+      "book": 8,
+      "name": "Rut",
+      "chapters": 4,
+      "verses": 85,
+      "sha256": "85bab68814396931deb8ef26c0ed2f50cef677d1f4f5a4672b5f486b46e7ccee"
+    },
+    {
+      "book": 9,
+      "name": "1 Samuele",
+      "chapters": 31,
+      "verses": 810,
+      "sha256": "60c4d7419894fc5e2d2f76b75f20110bcf16e2eeaee551b36a6c8d06a38b59e0"
+    },
+    {
+      "book": 10,
+      "name": "2 Samuele",
+      "chapters": 24,
+      "verses": 695,
+      "sha256": "d22de780d04f2453484f0a0e527d813734e0fefbbf26e3be0aa90789db959d2f"
+    },
+    {
+      "book": 11,
+      "name": "1 Re",
+      "chapters": 22,
+      "verses": 816,
+      "sha256": "cf6e22727ccdd4f8a416459c81efb6e8bf4654efb125fb7be2275669dd324fce"
+    },
+    {
+      "book": 12,
+      "name": "2 Re",
+      "chapters": 25,
+      "verses": 719,
+      "sha256": "9cd2747afebdcc9d3127bda4b8762c867fcbc41a4e182e4ad10af931be6f5912"
+    },
+    {
+      "book": 13,
+      "name": "1 Cronache",
+      "chapters": 29,
+      "verses": 942,
+      "sha256": "68b680e92befa3ee0da935974a534956b303d2d9429e630e95184ccd9d0e1569"
+    },
+    {
+      "book": 14,
+      "name": "2 Cronache",
+      "chapters": 36,
+      "verses": 822,
+      "sha256": "54cae088e53614764d72d112d4b7bfb3431718f9074385fcee1428325ac1dd89"
+    },
+    {
+      "book": 15,
+      "name": "Esdra",
+      "chapters": 10,
+      "verses": 280,
+      "sha256": "b9cf583860924f202ffe355ada9cc978e157bf9fcfe23c87d58fdeaec7c2edea"
+    },
+    {
+      "book": 16,
+      "name": "Neemia",
+      "chapters": 13,
+      "verses": 406,
+      "sha256": "1f8cd77aff274d4003e1bfbd6b7ef58c3f8d069e2ab54f1095d6f7eb84453210"
+    },
+    {
+      "book": 17,
+      "name": "Ester",
+      "chapters": 10,
+      "verses": 167,
+      "sha256": "4d18c8e5107fe1b3c117979ec30cbaa5c69a53b52353f42f145d660904096d85"
+    },
+    {
+      "book": 18,
+      "name": "Giobbe",
+      "chapters": 42,
+      "verses": 1070,
+      "sha256": "34e417482f7aa8935284b78736da5abaadf0a1572fe798f64776925dbc768860"
+    },
+    {
+      "book": 19,
+      "name": "Salmi",
+      "chapters": 150,
+      "verses": 2461,
+      "sha256": "2b357a0765b3422f704b11c0a2478edb38dbd131df7816d404a0259e1b620bd9"
+    },
+    {
+      "book": 20,
+      "name": "Proverbi",
+      "chapters": 31,
+      "verses": 915,
+      "sha256": "e8e686910e5f9af00fa8b4b6eb3d5623b47184f6e99ed8ef31df7888380ab52f"
+    },
+    {
+      "book": 21,
+      "name": "Ecclesiaste",
+      "chapters": 12,
+      "verses": 222,
+      "sha256": "3ca63c85485c547c38dfbf8cfc73c7cd765219fd79c2efcd3f1192741361684c"
+    },
+    {
+      "book": 22,
+      "name": "Cantico dei Cantici",
+      "chapters": 8,
+      "verses": 117,
+      "sha256": "4e93ec6419c9340c700d8d633dacb7470031bb486325ebdab0026075ea29aebc"
+    },
+    {
+      "book": 23,
+      "name": "Isaia",
+      "chapters": 66,
+      "verses": 1292,
+      "sha256": "0dfa78e9ff61bd9a78b81715c404b2204bda2d6300d5f3d4e493d13893b29523"
+    },
+    {
+      "book": 24,
+      "name": "Geremia",
+      "chapters": 52,
+      "verses": 1364,
+      "sha256": "e1a1840dfad020da165ae09645181e02d1e313158513fd57bd4ff86d744b3475"
+    },
+    {
+      "book": 25,
+      "name": "Lamentazioni",
+      "chapters": 5,
+      "verses": 154,
+      "sha256": "46bbf6e6870a6102bda26e6616dc677a36069a8e732d68121f49b316d66e1778"
+    },
+    {
+      "book": 26,
+      "name": "Ezechiele",
+      "chapters": 48,
+      "verses": 1273,
+      "sha256": "1a8d8343f1ba10079395acbf96af383b31b1cf6f2313cb27422bfbd2a7594d1e"
+    },
+    {
+      "book": 27,
+      "name": "Daniele",
+      "chapters": 12,
+      "verses": 357,
+      "sha256": "68cc79c8a1d7b0ed2bba2498e09dbe88019f996dc1ff833a6eac3f5e8297e89a"
+    },
+    {
+      "book": 28,
+      "name": "Osea",
+      "chapters": 14,
+      "verses": 197,
+      "sha256": "473a95de4fb642c835aa5997c4d0c3248943ef3122756035f166e3dcc67c06c4"
+    },
+    {
+      "book": 29,
+      "name": "Gioele",
+      "chapters": 3,
+      "verses": 73,
+      "sha256": "12098266fcc8241b95fab06a99c279c85f4dd9b800dfd9010030df7a0370b6fa"
+    },
+    {
+      "book": 30,
+      "name": "Amos",
+      "chapters": 9,
+      "verses": 146,
+      "sha256": "5a73c67b566d05a759c6dbe1fdc4ef5dbbc3f3abaf432b20e21003a9f3651e21"
+    },
+    {
+      "book": 31,
+      "name": "Abdia",
+      "chapters": 1,
+      "verses": 21,
+      "sha256": "a6bf49c34ed1b255d6d306c895eda4d96343816b05fb4c9414f63f3d4de237fa"
+    },
+    {
+      "book": 32,
+      "name": "Giona",
+      "chapters": 4,
+      "verses": 48,
+      "sha256": "de91a120a8279b00ea8ae1a5c9dc61b69ad6eac9dad45d3832f402b432a61c2f"
+    },
+    {
+      "book": 33,
+      "name": "Michea",
+      "chapters": 7,
+      "verses": 105,
+      "sha256": "efc72da3160dd68412b9d80eb52cc432739dde3c4366bffd805b0837abc2502a"
+    },
+    {
+      "book": 34,
+      "name": "Nahum",
+      "chapters": 3,
+      "verses": 47,
+      "sha256": "79adc29f23961e831b2b4b832bff038534e8c174b288a3427b7a12129a4a2cf2"
+    },
+    {
+      "book": 35,
+      "name": "Abacuc",
+      "chapters": 3,
+      "verses": 56,
+      "sha256": "6f8c125fc1c39a4683a74092a252a76592f25b6b2d5e00c27647db6bcb494017"
+    },
+    {
+      "book": 36,
+      "name": "Sofonia",
+      "chapters": 3,
+      "verses": 53,
+      "sha256": "946259ab00b1b0bd6afb4a4a29db8e865479f073102386920e8886c97c22bc4a"
+    },
+    {
+      "book": 37,
+      "name": "Aggeo",
+      "chapters": 2,
+      "verses": 38,
+      "sha256": "988eedf5f775b2c3b13259c35c13869bf72d47236577c52bfd928f1882cf5a50"
+    },
+    {
+      "book": 38,
+      "name": "Zaccaria",
+      "chapters": 14,
+      "verses": 211,
+      "sha256": "f001b6a6f5583fa72c88a62b422f5d99b7d4fb088aba3d907ba105aad4541346"
+    },
+    {
+      "book": 39,
+      "name": "Malachia",
+      "chapters": 4,
+      "verses": 55,
+      "sha256": "3e196327cd39f98d194173478870e3c09444fcca5654c49b905b1fdde30bbd5e"
+    },
+    {
+      "book": 40,
+      "name": "Matteo",
+      "chapters": 28,
+      "verses": 1071,
+      "sha256": "59a334b23872d122d1a9ea1952acc3fc8b7cceb6f2ec743b4f52d52860f05c25"
+    },
+    {
+      "book": 41,
+      "name": "Marco",
+      "chapters": 16,
+      "verses": 678,
+      "sha256": "a37477fe9cafe4f4e4b0773011f2603a9f345b816f88a0eba0febfc493405cda"
+    },
+    {
+      "book": 42,
+      "name": "Luca",
+      "chapters": 24,
+      "verses": 1151,
+      "sha256": "4dff8feaa0cf86fcd00b5019142934b618bf3937642d878ef9ba6a443d954a0b"
+    },
+    {
+      "book": 43,
+      "name": "Giovanni",
+      "chapters": 21,
+      "verses": 879,
+      "sha256": "45e8e80cb2b99615eaccd881b19f21fbe9e26139563f179a44af808818445fb2"
+    },
+    {
+      "book": 44,
+      "name": "Atti",
+      "chapters": 28,
+      "verses": 1007,
+      "sha256": "496965a2de5d7189220e7bde190f7ea895a58360f4ca3062f96dae0bc8639d12"
+    },
+    {
+      "book": 45,
+      "name": "Romani",
+      "chapters": 16,
+      "verses": 433,
+      "sha256": "a81ad43d854215a2188e7b97ace8d57ff633701d04d1551520cab95b36ffa461"
+    },
+    {
+      "book": 46,
+      "name": "1 Corinzi",
+      "chapters": 16,
+      "verses": 437,
+      "sha256": "336508a15952a67c7c5fdcb93c30ec93d071e1eeff11b8d78a252b89b808b4bc"
+    },
+    {
+      "book": 47,
+      "name": "2 Corinzi",
+      "chapters": 13,
+      "verses": 257,
+      "sha256": "6cf6d9fb6d9d468d6314253e4990cfc259fdc9bd74ed14421db110fd8792dd49"
+    },
+    {
+      "book": 48,
+      "name": "Galati",
+      "chapters": 6,
+      "verses": 149,
+      "sha256": "57a505c2fa86f9fdf3df0132e7ddb6f6810864cfde9d6a7c9ed8f424806b7308"
+    },
+    {
+      "book": 49,
+      "name": "Efesini",
+      "chapters": 6,
+      "verses": 155,
+      "sha256": "198ce0a127c72cd53fb8e9bdd2b62b903528f4fd32b8f4ef4a3e70d97ca5e6d2"
+    },
+    {
+      "book": 50,
+      "name": "Filippesi",
+      "chapters": 4,
+      "verses": 104,
+      "sha256": "a37454a5bb214082de168193273757c36524470240e7a58c8fa85574aa7b9d04"
+    },
+    {
+      "book": 51,
+      "name": "Colossesi",
+      "chapters": 4,
+      "verses": 95,
+      "sha256": "794a923debbc87b755035a7d7a99f0e65cdb496cee426251a55275ec503992e9"
+    },
+    {
+      "book": 52,
+      "name": "1 Tessalonicesi",
+      "chapters": 5,
+      "verses": 89,
+      "sha256": "c4ef9b7c73106d1eb2d4a3877590a16642d6b40ae5caa4c89e17594a52abed51"
+    },
+    {
+      "book": 53,
+      "name": "2 Tessalonicesi",
+      "chapters": 3,
+      "verses": 47,
+      "sha256": "235d8131d3d7a2f7e6f336d6e214b35aca34260bb77e3320a5a6c1740270a290"
+    },
+    {
+      "book": 54,
+      "name": "1 Timoteo",
+      "chapters": 6,
+      "verses": 113,
+      "sha256": "a03c021ca1028da9f84f2a9ad99dbf1b229e7e4546e6e9b11e6822e8e8bdcee8"
+    },
+    {
+      "book": 55,
+      "name": "2 Timoteo",
+      "chapters": 4,
+      "verses": 83,
+      "sha256": "7f013bc9bb5a92e2cf08497e65855f07267525ab3253f284ee86558cb753eb68"
+    },
+    {
+      "book": 56,
+      "name": "Tito",
+      "chapters": 3,
+      "verses": 46,
+      "sha256": "68b263486976bfe76abf1f2cb010dc929f6fcb5ae96357f8f0ef1f21fdc34d15"
+    },
+    {
+      "book": 57,
+      "name": "Filemone",
+      "chapters": 1,
+      "verses": 25,
+      "sha256": "656917720e56f2423a73522cdbe68f3573f5c7faf20ac5fc79611dd074640897"
+    },
+    {
+      "book": 58,
+      "name": "Ebrei",
+      "chapters": 13,
+      "verses": 303,
+      "sha256": "99df2b4a2fc67de9471f98791d940fcc6b2d8df86ec7591ce08a6eb2827a3b64"
+    },
+    {
+      "book": 59,
+      "name": "Giacomo",
+      "chapters": 5,
+      "verses": 108,
+      "sha256": "8df0fc0f198d24045e013e90c7e9191a3b373ac3e30aff111d8fa7515fb93de9"
+    },
+    {
+      "book": 60,
+      "name": "1 Pietro",
+      "chapters": 5,
+      "verses": 105,
+      "sha256": "454e6319dc0c1e581d17109e95c5a17b7718c3c78fe3062c760d20e4e8bec227"
+    },
+    {
+      "book": 61,
+      "name": "2 Pietro",
+      "chapters": 3,
+      "verses": 61,
+      "sha256": "42fcd7714831e9b92144070a492952973ed1f2e05887b725c0e39fc40c96458d"
+    },
+    {
+      "book": 62,
+      "name": "1 Giovanni",
+      "chapters": 5,
+      "verses": 105,
+      "sha256": "c38a9dacf23245301901deef5e0cccd56d8d055820d150b4b4fcdf2017450936"
+    },
+    {
+      "book": 63,
+      "name": "2 Giovanni",
+      "chapters": 1,
+      "verses": 13,
+      "sha256": "0939c6ef7945ec8d5d1a4c79d2d572efb29769819dd7d5916db6d3bb5bbeaa3d"
+    },
+    {
+      "book": 64,
+      "name": "3 Giovanni",
+      "chapters": 1,
+      "verses": 14,
+      "sha256": "a19d3a16205c2531d3807b2d5259eba993ffab997abf32951dadfedc422683c0"
+    },
+    {
+      "book": 65,
+      "name": "Giuda",
+      "chapters": 1,
+      "verses": 25,
+      "sha256": "24efb3d40461256c1c5a50c5e4973ba953ad092057c141a2d359c5bd972c9ed0"
+    },
+    {
+      "book": 66,
+      "name": "Apocalisse",
+      "chapters": 22,
+      "verses": 404,
+      "sha256": "107a74154dc1d8f2d9caaf0d84502f86a0b8117024efedfba5dd30655b6fb092"
+    }
+  ],
+  "source_sha256": "437eebe0f1b7a1bca857a36df76b8f473f0093a45b6ec42af78a889b202768f5"
+}

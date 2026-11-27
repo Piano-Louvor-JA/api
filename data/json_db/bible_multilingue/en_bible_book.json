@@ -1,0 +1,464 @@
+[
+  {
+    "id_bible_book": 200,
+    "name": "The First Book of Moses, Commonly Called Genesis",
+    "abbreviation": "Commonly Called Genesis",
+    "chapters": 50,
+    "book_number": 1
+  },
+  {
+    "id_bible_book": 201,
+    "name": "The Second Book of Mosis, Commonly Called Exodus",
+    "abbreviation": "Commonly Called Exodus",
+    "chapters": 40,
+    "book_number": 2
+  },
+  {
+    "id_bible_book": 202,
+    "name": "The Third Book of Mosis, Commonly Called Leviticus",
+    "abbreviation": "Commonly Called Leviticus",
+    "chapters": 27,
+    "book_number": 3
+  },
+  {
+    "id_bible_book": 203,
+    "name": "The Fourth Book of Moses, Commonly Called Numbers",
+    "abbreviation": "Commonly Called Numbers",
+    "chapters": 36,
+    "book_number": 4
+  },
+  {
+    "id_bible_book": 204,
+    "name": "The Fifth Book of Moses, Commonly Called Deuteronomy",
+    "abbreviation": "Commonly Called Deuteronomy",
+    "chapters": 34,
+    "book_number": 5
+  },
+  {
+    "id_bible_book": 205,
+    "name": "The Book of Joshua",
+    "abbreviation": "Js",
+    "chapters": 24,
+    "book_number": 6
+  },
+  {
+    "id_bible_book": 206,
+    "name": "The Book of Judges",
+    "abbreviation": "Jz",
+    "chapters": 21,
+    "book_number": 7
+  },
+  {
+    "id_bible_book": 207,
+    "name": "The Book of Ruth",
+    "abbreviation": "Rt",
+    "chapters": 4,
+    "book_number": 8
+  },
+  {
+    "id_bible_book": 208,
+    "name": "The First Book of Samuel",
+    "abbreviation": "1Sm",
+    "chapters": 31,
+    "book_number": 9
+  },
+  {
+    "id_bible_book": 209,
+    "name": "The Second Book of Samuel",
+    "abbreviation": "2Sm",
+    "chapters": 24,
+    "book_number": 10
+  },
+  {
+    "id_bible_book": 210,
+    "name": "The First Book of Kings",
+    "abbreviation": "1Rs",
+    "chapters": 22,
+    "book_number": 11
+  },
+  {
+    "id_bible_book": 211,
+    "name": "The Second Book of Kings",
+    "abbreviation": "2Rs",
+    "chapters": 25,
+    "book_number": 12
+  },
+  {
+    "id_bible_book": 212,
+    "name": "The First Book of Chronicles",
+    "abbreviation": "1Cr",
+    "chapters": 29,
+    "book_number": 13
+  },
+  {
+    "id_bible_book": 213,
+    "name": "The Second Book of Chronicles",
+    "abbreviation": "2Cr",
+    "chapters": 36,
+    "book_number": 14
+  },
+  {
+    "id_bible_book": 214,
+    "name": "The Book of Ezra",
+    "abbreviation": "Ed",
+    "chapters": 10,
+    "book_number": 15
+  },
+  {
+    "id_bible_book": 215,
+    "name": "The Book of Nehemiah",
+    "abbreviation": "Ne",
+    "chapters": 13,
+    "book_number": 16
+  },
+  {
+    "id_bible_book": 216,
+    "name": "The Book of Esther",
+    "abbreviation": "Et",
+    "chapters": 10,
+    "book_number": 17
+  },
+  {
+    "id_bible_book": 217,
+    "name": "The Book of Job",
+    "abbreviation": "Jó",
+    "chapters": 42,
+    "book_number": 18
+  },
+  {
+    "id_bible_book": 218,
+    "name": "The Psalms",
+    "abbreviation": "Sl",
+    "chapters": 150,
+    "book_number": 19
+  },
+  {
+    "id_bible_book": 219,
+    "name": "The Proverbs",
+    "abbreviation": "Pv",
+    "chapters": 31,
+    "book_number": 20
+  },
+  {
+    "id_bible_book": 220,
+    "name": "Ecclesiates or, The Preacher",
+    "abbreviation": "The Preacher",
+    "chapters": 12,
+    "book_number": 21
+  },
+  {
+    "id_bible_book": 221,
+    "name": "The Song of Solomon",
+    "abbreviation": "Ct",
+    "chapters": 8,
+    "book_number": 22
+  },
+  {
+    "id_bible_book": 222,
+    "name": "The Book of Isaiah",
+    "abbreviation": "Is",
+    "chapters": 66,
+    "book_number": 23
+  },
+  {
+    "id_bible_book": 223,
+    "name": "The Book of Jeremiah",
+    "abbreviation": "Jr",
+    "chapters": 52,
+    "book_number": 24
+  },
+  {
+    "id_bible_book": 224,
+    "name": "The Lamentations of Jeremiah",
+    "abbreviation": "Lm",
+    "chapters": 5,
+    "book_number": 25
+  },
+  {
+    "id_bible_book": 225,
+    "name": "The Book of Ezekiel",
+    "abbreviation": "Ez",
+    "chapters": 48,
+    "book_number": 26
+  },
+  {
+    "id_bible_book": 226,
+    "name": "The Book of Daniel",
+    "abbreviation": "Dn",
+    "chapters": 12,
+    "book_number": 27
+  },
+  {
+    "id_bible_book": 227,
+    "name": "The Book of Hosea",
+    "abbreviation": "Os",
+    "chapters": 14,
+    "book_number": 28
+  },
+  {
+    "id_bible_book": 228,
+    "name": "The Book of Joel",
+    "abbreviation": "Jl",
+    "chapters": 3,
+    "book_number": 29
+  },
+  {
+    "id_bible_book": 229,
+    "name": "The Book of Amos",
+    "abbreviation": "Am",
+    "chapters": 9,
+    "book_number": 30
+  },
+  {
+    "id_bible_book": 230,
+    "name": "The Book of Obadiah",
+    "abbreviation": "Ob",
+    "chapters": 1,
+    "book_number": 31
+  },
+  {
+    "id_bible_book": 231,
+    "name": "The Book of Jonah",
+    "abbreviation": "Jn",
+    "chapters": 4,
+    "book_number": 32
+  },
+  {
+    "id_bible_book": 232,
+    "name": "The Book of Micah",
+    "abbreviation": "Mq",
+    "chapters": 7,
+    "book_number": 33
+  },
+  {
+    "id_bible_book": 233,
+    "name": "The Book of Nahum",
+    "abbreviation": "Na",
+    "chapters": 3,
+    "book_number": 34
+  },
+  {
+    "id_bible_book": 234,
+    "name": "The Book of Habakkuk",
+    "abbreviation": "Hc",
+    "chapters": 3,
+    "book_number": 35
+  },
+  {
+    "id_bible_book": 235,
+    "name": "The Book of Zephaniah",
+    "abbreviation": "Sf",
+    "chapters": 3,
+    "book_number": 36
+  },
+  {
+    "id_bible_book": 236,
+    "name": "The Book of Haggai",
+    "abbreviation": "Ag",
+    "chapters": 2,
+    "book_number": 37
+  },
+  {
+    "id_bible_book": 237,
+    "name": "The Book of Zechariah",
+    "abbreviation": "Zc",
+    "chapters": 14,
+    "book_number": 38
+  },
+  {
+    "id_bible_book": 238,
+    "name": "The Book of Malachi",
+    "abbreviation": "Ml",
+    "chapters": 4,
+    "book_number": 39
+  },
+  {
+    "id_bible_book": 239,
+    "name": "The Good News According to Matthew",
+    "abbreviation": "Mt",
+    "chapters": 28,
+    "book_number": 40
+  },
+  {
+    "id_bible_book": 240,
+    "name": "The Good News According to Mark",
+    "abbreviation": "Mc",
+    "chapters": 16,
+    "book_number": 41
+  },
+  {
+    "id_bible_book": 241,
+    "name": "The Good News According to Luke",
+    "abbreviation": "Lc",
+    "chapters": 24,
+    "book_number": 42
+  },
+  {
+    "id_bible_book": 242,
+    "name": "The Good News According to John",
+    "abbreviation": "Jo",
+    "chapters": 21,
+    "book_number": 43
+  },
+  {
+    "id_bible_book": 243,
+    "name": "The Acts of the Apostles",
+    "abbreviation": "At",
+    "chapters": 28,
+    "book_number": 44
+  },
+  {
+    "id_bible_book": 244,
+    "name": "Paul’s Letter to the Romans",
+    "abbreviation": "Rm",
+    "chapters": 16,
+    "book_number": 45
+  },
+  {
+    "id_bible_book": 245,
+    "name": "Paul’s First Letter to the Corinthians",
+    "abbreviation": "1Co",
+    "chapters": 16,
+    "book_number": 46
+  },
+  {
+    "id_bible_book": 246,
+    "name": "Paul’s Second Letter to the Corinthians",
+    "abbreviation": "2Co",
+    "chapters": 13,
+    "book_number": 47
+  },
+  {
+    "id_bible_book": 247,
+    "name": "Paul’s Letter to the Galatians",
+    "abbreviation": "Gl",
+    "chapters": 6,
+    "book_number": 48
+  },
+  {
+    "id_bible_book": 248,
+    "name": "Paul’s Letter to the Ephesians",
+    "abbreviation": "Ef",
+    "chapters": 6,
+    "book_number": 49
+  },
+  {
+    "id_bible_book": 249,
+    "name": "Paul’s Letter to the Philippians",
+    "abbreviation": "Fp",
+    "chapters": 4,
+    "book_number": 50
+  },
+  {
+    "id_bible_book": 250,
+    "name": "Paul’s Letter to the Colossians",
+    "abbreviation": "Cl",
+    "chapters": 4,
+    "book_number": 51
+  },
+  {
+    "id_bible_book": 251,
+    "name": "Paul’s First Letter to the Thessalonians",
+    "abbreviation": "1Ts",
+    "chapters": 5,
+    "book_number": 52
+  },
+  {
+    "id_bible_book": 252,
+    "name": "Paul’s Second Letter to the Thessalonians",
+    "abbreviation": "2Ts",
+    "chapters": 3,
+    "book_number": 53
+  },
+  {
+    "id_bible_book": 253,
+    "name": "Paul’s First Letter to Timothy",
+    "abbreviation": "1Tm",
+    "chapters": 6,
+    "book_number": 54
+  },
+  {
+    "id_bible_book": 254,
+    "name": "Paul’s Second Letter to Timothy",
+    "abbreviation": "2Tm",
+    "chapters": 4,
+    "book_number": 55
+  },
+  {
+    "id_bible_book": 255,
+    "name": "Paul’s Letter to Titus",
+    "abbreviation": "Tt",
+    "chapters": 3,
+    "book_number": 56
+  },
+  {
+    "id_bible_book": 256,
+    "name": "Paul’s Letter to Philemon",
+    "abbreviation": "Fm",
+    "chapters": 1,
+    "book_number": 57
+  },
+  {
+    "id_bible_book": 257,
+    "name": "The Letter to the Hebrews",
+    "abbreviation": "Hb",
+    "chapters": 13,
+    "book_number": 58
+  },
+  {
+    "id_bible_book": 258,
+    "name": "The Letter from James",
+    "abbreviation": "Tg",
+    "chapters": 5,
+    "book_number": 59
+  },
+  {
+    "id_bible_book": 259,
+    "name": "Peter’s First Letter",
+    "abbreviation": "1Pe",
+    "chapters": 5,
+    "book_number": 60
+  },
+  {
+    "id_bible_book": 260,
+    "name": "Peter’s Second Letter",
+    "abbreviation": "2Pe",
+    "chapters": 3,
+    "book_number": 61
+  },
+  {
+    "id_bible_book": 261,
+    "name": "John’s First Letter",
+    "abbreviation": "1Jo",
+    "chapters": 5,
+    "book_number": 62
+  },
+  {
+    "id_bible_book": 262,
+    "name": "John’s Second Letter",
+    "abbreviation": "2Jo",
+    "chapters": 1,
+    "book_number": 63
+  },
+  {
+    "id_bible_book": 263,
+    "name": "John’s Third Letter",
+    "abbreviation": "3Jo",
+    "chapters": 1,
+    "book_number": 64
+  },
+  {
+    "id_bible_book": 264,
+    "name": "The Letter from Jude",
+    "abbreviation": "Jd",
+    "chapters": 1,
+    "book_number": 65
+  },
+  {
+    "id_bible_book": 265,
+    "name": "The Revelation to John",
+    "abbreviation": "Ap",
+    "chapters": 22,
+    "book_number": 66
+  }
+]

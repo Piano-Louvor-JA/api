@@ -1,0 +1,482 @@
+{
+  "lang": "ru",
+  "translation": "Синодальный перевод (Synodal 1876)",
+  "abbreviation": "SYN",
+  "id_bible_version": 102,
+  "id_book_base": 332,
+  "license": "PD",
+  "attribution": "Public Domain — Synodal 1876",
+  "source_url": "https://ebible.org/find/details.php?id=russyn",
+  "note": "",
+  "books": 66,
+  "chapters": 1189,
+  "verses": 31169,
+  "files_written": 1189,
+  "problems": [],
+  "warnings": [],
+  "books_detail": [
+    {
+      "book": 1,
+      "name": "Бытие",
+      "chapters": 50,
+      "verses": 1533,
+      "sha256": "613396f494ed76900bac4a49b25eed3d345665fdd6b42b905cd4234f2b758530"
+    },
+    {
+      "book": 2,
+      "name": "Исход",
+      "chapters": 40,
+      "verses": 1213,
+      "sha256": "59fdf09cfeea6095a18ad83caea4c374250716252815f3d92233c87239a923f4"
+    },
+    {
+      "book": 3,
+      "name": "Левит",
+      "chapters": 27,
+      "verses": 858,
+      "sha256": "ad445bb4e782070d16c7d3d741915e7e62a25b5b1ff39ac7e51994e56a7a426b"
+    },
+    {
+      "book": 4,
+      "name": "Числа",
+      "chapters": 36,
+      "verses": 1288,
+      "sha256": "8c08ec831e2ba092dd1d86e343dd2caaf66767344685d69ef0f9f32fb827b729"
+    },
+    {
+      "book": 5,
+      "name": "Второзаконие",
+      "chapters": 34,
+      "verses": 959,
+      "sha256": "124124a05ff0a62b312c41d042c67720ac8da4554287bdac7082c055dc7d7886"
+    },
+    {
+      "book": 6,
+      "name": "Книга Иисуса Навина",
+      "chapters": 24,
+      "verses": 661,
+      "sha256": "768d79d6e6fa0b454de230f142333e8dd1227c7160acd308534adae08bcff012"
+    },
+    {
+      "book": 7,
+      "name": "Книга Судей Израилевых",
+      "chapters": 21,
+      "verses": 618,
+      "sha256": "a2a3fe5d63135af0d7d9495f81a76a24c6c0fd99056b13e58ff5305ebd2a8de6"
+    },
+    {
+      "book": 8,
+      "name": "Книга Руфь",
+      "chapters": 4,
+      "verses": 85,
+      "sha256": "461a06c5de820cd988bd698afd34a68e8babd6cb393765866c8deedcd4938bbf"
+    },
+    {
+      "book": 9,
+      "name": "Первая книга Царств",
+      "chapters": 31,
+      "verses": 811,
+      "sha256": "f94d98c75f59d772eb76108e609dca15c5b3c475ff19605dfef5714f68fd9308"
+    },
+    {
+      "book": 10,
+      "name": "Вторая книга Царств",
+      "chapters": 24,
+      "verses": 695,
+      "sha256": "0dfe014544b07cee5f20077dc3e1153cf2a1f1c28fd786cdacb0c7c509de9015"
+    },
+    {
+      "book": 11,
+      "name": "Третья книга Царств",
+      "chapters": 22,
+      "verses": 816,
+      "sha256": "50d2fa908bed22cd11f10aeb96b642cd45bfc50a6c27cf7edb711aa9fb944c36"
+    },
+    {
+      "book": 12,
+      "name": "Четвертая книга Царств",
+      "chapters": 25,
+      "verses": 719,
+      "sha256": "1543d80060a50d111f98626f4e40a9808553a5a2021d4f55dff73bffcdbdecb1"
+    },
+    {
+      "book": 13,
+      "name": "Первая книга Паралипоменон",
+      "chapters": 29,
+      "verses": 942,
+      "sha256": "2e021865d19a0a94e692dd5c1cd5e7017042b14ae3d50ad6782a18fe1d43bff3"
+    },
+    {
+      "book": 14,
+      "name": "Вторая книга Паралипоменон",
+      "chapters": 36,
+      "verses": 822,
+      "sha256": "81a92f14a9accf1a0305fb00eb34732c62ad1c09eff5a59a09a6a70f8a0e6615"
+    },
+    {
+      "book": 15,
+      "name": "Книга Ездры",
+      "chapters": 10,
+      "verses": 280,
+      "sha256": "d908f7eac2e1c3aefc49acd47265696f88691507d23241593d0e81d653c588ae"
+    },
+    {
+      "book": 16,
+      "name": "Неемия",
+      "chapters": 13,
+      "verses": 406,
+      "sha256": "9ac142573278b1fe161f4184e7faa2683377817ceb71eab33e01a8e7a37ef0d7"
+    },
+    {
+      "book": 17,
+      "name": "Книга Есфирь",
+      "chapters": 10,
+      "verses": 167,
+      "sha256": "50239dc0c1c81135688c030329f5a1606f8b9beed8c087b9b9aa415547c68362"
+    },
+    {
+      "book": 18,
+      "name": "Книга Иова",
+      "chapters": 42,
+      "verses": 1070,
+      "sha256": "df280424100d27d234b0c2f7711903b9b6bc918e5dd4c32d8c87878e85f97298"
+    },
+    {
+      "book": 19,
+      "name": "Псалтырь",
+      "chapters": 150,
+      "verses": 2526,
+      "sha256": "4db98c82960cca7144dbff1a76c32bfa86f6dfce35f6c76cc23c6d1c8382db68"
+    },
+    {
+      "book": 20,
+      "name": "Притчи Соломона",
+      "chapters": 31,
+      "verses": 918,
+      "sha256": "d9ecb863d7bfd94a5372c0134af3981d48028e1cb1784ff5a3064a61d4336cf2"
+    },
+    {
+      "book": 21,
+      "name": "Книга Екклесиаста",
+      "chapters": 12,
+      "verses": 222,
+      "sha256": "d565de6f49a120ab3a3bf8144058d3354dc493fc49e7ff280c7b1c6c24317c06"
+    },
+    {
+      "book": 22,
+      "name": "Песни Песней",
+      "chapters": 8,
+      "verses": 116,
+      "sha256": "8d80b229d071dfc34527ccda9fb3d29c867673e113036a576c2005549d72c402"
+    },
+    {
+      "book": 23,
+      "name": "Книга пророка Исаии",
+      "chapters": 66,
+      "verses": 1291,
+      "sha256": "90670a9c0032bc83049ee4f27f0632ed9d94d6e22ff74d434d0e6ce3f099591a"
+    },
+    {
+      "book": 24,
+      "name": "Книга пророка Иеремии",
+      "chapters": 52,
+      "verses": 1364,
+      "sha256": "87f910d8b00cb8df075e1c7cac10e3f7d2b233dd15a1acc9d88a8367daead84c"
+    },
+    {
+      "book": 25,
+      "name": "Плач Иеремии",
+      "chapters": 5,
+      "verses": 154,
+      "sha256": "419f49de1bf5f5802f928b92840f5fbff9eadbb4351584901a1b9aa3d0bd8647"
+    },
+    {
+      "book": 26,
+      "name": "Книга пророка Иезекииля",
+      "chapters": 48,
+      "verses": 1273,
+      "sha256": "147e6e4f5b032e4255553cbe55fddbdb9a687abbbaa8f9caf022de2123987328"
+    },
+    {
+      "book": 27,
+      "name": "Книга пророка Даниила",
+      "chapters": 12,
+      "verses": 357,
+      "sha256": "0d7183de38660658a88b959351f51612e363c7663e34ae9852a280341d489054"
+    },
+    {
+      "book": 28,
+      "name": "Книга пророка Осии",
+      "chapters": 14,
+      "verses": 197,
+      "sha256": "258fdfef0f8d9100e1317b21e861a48415f44fac0351e51b8472656816298a21"
+    },
+    {
+      "book": 29,
+      "name": "Книга пророка Иоиля",
+      "chapters": 3,
+      "verses": 73,
+      "sha256": "8cabfe12ff15b534f9fa75e4e5aa104f0069971e3fcf7b6bd8fc7fd8116059b1"
+    },
+    {
+      "book": 30,
+      "name": "Книга пророка Амоса",
+      "chapters": 9,
+      "verses": 146,
+      "sha256": "60b244538a354a45d64d98a1573ccca0c3af3ee17f1ac86d38fba8682c4d0e24"
+    },
+    {
+      "book": 31,
+      "name": "Книга пророка Авдия",
+      "chapters": 1,
+      "verses": 21,
+      "sha256": "a67df29909c5d7b0a28ac0dda1ef5f1c3d99a47caf9c96a71aa7e56fc27a5a53"
+    },
+    {
+      "book": 32,
+      "name": "Книга пророка Ионы",
+      "chapters": 4,
+      "verses": 48,
+      "sha256": "d8cd82c0a3acdb72858cb7ebfe0605547fe64c99ba83c7df75e90f7a2e729b13"
+    },
+    {
+      "book": 33,
+      "name": "Книга пророка Михея",
+      "chapters": 7,
+      "verses": 105,
+      "sha256": "321c029bed83ed08e92d4a099422c4364e6e21b11638f87c5a04a6e9bf616b67"
+    },
+    {
+      "book": 34,
+      "name": "Книга пророка Наума",
+      "chapters": 3,
+      "verses": 47,
+      "sha256": "8fecfce8fe35c0e2b7f4d9791d354104e9166b954f804d8d1dbc900d65cd2d98"
+    },
+    {
+      "book": 35,
+      "name": "Книга пророка Аввакума",
+      "chapters": 3,
+      "verses": 56,
+      "sha256": "38610300dfeae7534991777e4e713295883fc00076ff770cbbaf28ccb1c943a7"
+    },
+    {
+      "book": 36,
+      "name": "Книга пророка Софонии",
+      "chapters": 3,
+      "verses": 53,
+      "sha256": "3dff1b5881938f7b5393b86f2359a790482d1b83c62b6db8b74bfdfc9198c848"
+    },
+    {
+      "book": 37,
+      "name": "Книга пророка Аггея",
+      "chapters": 2,
+      "verses": 38,
+      "sha256": "e0af156d9c09870b2cb15d4744732540ce004facbc751ab195c524b2d83e2838"
+    },
+    {
+      "book": 38,
+      "name": "Книга пророка Захарии",
+      "chapters": 14,
+      "verses": 211,
+      "sha256": "403b4b746b3bfe380ca2411b03577bd02cd44e87c2841d9660af7a10281bf251"
+    },
+    {
+      "book": 39,
+      "name": "Книга пророка Малахии",
+      "chapters": 4,
+      "verses": 55,
+      "sha256": "3150ba8c7019ef28acf51183adb1facba556b3dce12562aa1f1cd3221bbc35f6"
+    },
+    {
+      "book": 40,
+      "name": "Евангелие от Матфея",
+      "chapters": 28,
+      "verses": 1071,
+      "sha256": "d56bd35e92e0d42d65a0dc7a98a04db1d1e9ebb1d2d369fcb1d143998e1c92f0"
+    },
+    {
+      "book": 41,
+      "name": "Евангелие от Марка",
+      "chapters": 16,
+      "verses": 678,
+      "sha256": "769376bbd9800d137e2167af9be5868be590f81c82ead52b26eaa006697dc226"
+    },
+    {
+      "book": 42,
+      "name": "Евангелие от Луки",
+      "chapters": 24,
+      "verses": 1151,
+      "sha256": "af6241d7eb4cfd5e97703695122b3cc659247ce8e20dc574fccf4c7d386d0e9b"
+    },
+    {
+      "book": 43,
+      "name": "Евангелие от Иоанна",
+      "chapters": 21,
+      "verses": 879,
+      "sha256": "214774e8945c40dc8681848980d1c27dc874349b9d6b77e69ba5e80d104eaa77"
+    },
+    {
+      "book": 44,
+      "name": "Деяния",
+      "chapters": 28,
+      "verses": 1006,
+      "sha256": "bbd224e51ddfea02a47c27db615fd644d598bfee60c9fd43519fd1efa7a37af2"
+    },
+    {
+      "book": 45,
+      "name": "Послание к Римлянам",
+      "chapters": 16,
+      "verses": 433,
+      "sha256": "4938d216bd2dde62d11a3f69e46e0a4663c42d83b35331d808afb60e7e5b732a"
+    },
+    {
+      "book": 46,
+      "name": "Первое послание к Коринфянам",
+      "chapters": 16,
+      "verses": 437,
+      "sha256": "90526a48406746bc575b81384de2de17c4512448a1fead18beee908a1a579b1e"
+    },
+    {
+      "book": 47,
+      "name": "Второе послание к Коринфянам",
+      "chapters": 13,
+      "verses": 255,
+      "sha256": "1cfc1665e1cca92b8bd7f62233cbaaf6c64e2d30c2a2779c769a9d4180353306"
+    },
+    {
+      "book": 48,
+      "name": "Послание к Галатам",
+      "chapters": 6,
+      "verses": 149,
+      "sha256": "cbac81553daf2ed9d461f40d67425d885f91a30e6349955ecfadc83cf2f99d83"
+    },
+    {
+      "book": 49,
+      "name": "Послание к Ефесянам",
+      "chapters": 6,
+      "verses": 155,
+      "sha256": "b3f23fbf48410f13a4b42f66c0e28d03537d969c6c6b363b0fda52bb7949f5a4"
+    },
+    {
+      "book": 50,
+      "name": "Послание к Филлиппийцам",
+      "chapters": 4,
+      "verses": 104,
+      "sha256": "609817bde627e4589f406059034be641749b31e80263ebee51b38cfaacafe74a"
+    },
+    {
+      "book": 51,
+      "name": "Послание к Колоссянам",
+      "chapters": 4,
+      "verses": 95,
+      "sha256": "2dc4a8ffa85eeae6642bde9316e00ae0a240313891149b30974927c6f0c378b3"
+    },
+    {
+      "book": 52,
+      "name": "Первое послание к Фессалоникийцам",
+      "chapters": 5,
+      "verses": 89,
+      "sha256": "6d87e8b40cfffde320b49d0787ccb0fdcc21f3daf1683a7dabdf5c47b1168a24"
+    },
+    {
+      "book": 53,
+      "name": "Второе послание к Фессалоникийцам",
+      "chapters": 3,
+      "verses": 47,
+      "sha256": "dd1fb24139f7ff84b5aab662d0233b0b77a23c66fb812c89f6e7a96b8ac3f8d6"
+    },
+    {
+      "book": 54,
+      "name": "Первое послание к Тимофею",
+      "chapters": 6,
+      "verses": 113,
+      "sha256": "bcda64ccd19bc0f094ce1143fbabe19a5fdfef09d71205f950c879648070517b"
+    },
+    {
+      "book": 55,
+      "name": "Второе послание к Тимофею",
+      "chapters": 4,
+      "verses": 83,
+      "sha256": "7336dc0724a20d086cef22fba0a361c3ae343dea955967a54230e894e85f3e08"
+    },
+    {
+      "book": 56,
+      "name": "Послание к Титу",
+      "chapters": 3,
+      "verses": 46,
+      "sha256": "fb10b58b8cabf3c22c39fc6e6db794bf5bbb660e5ab24f015735747e3ed6199b"
+    },
+    {
+      "book": 57,
+      "name": "Послание к Филимону",
+      "chapters": 1,
+      "verses": 25,
+      "sha256": "024c0556bbb45e18be295fc52657caf2f1330240cf17cde96e77678518843a5c"
+    },
+    {
+      "book": 58,
+      "name": "Послание к Евреям",
+      "chapters": 13,
+      "verses": 303,
+      "sha256": "cd0b6b4bf669235451d89154088e938485547cff13e36e8aa9df1493a86c81a1"
+    },
+    {
+      "book": 59,
+      "name": "Послание Иакова",
+      "chapters": 5,
+      "verses": 108,
+      "sha256": "5489539b110d3e7b2f9a87a8d075414a54db99ec3e807e20a490d59a481307e1"
+    },
+    {
+      "book": 60,
+      "name": "Первое послание Петра",
+      "chapters": 5,
+      "verses": 105,
+      "sha256": "60a1c2938193578a7af36b7cd5bbe7ba2ed97f67d0424789d74603b8fdcd04ac"
+    },
+    {
+      "book": 61,
+      "name": "Второе послание Петра",
+      "chapters": 3,
+      "verses": 61,
+      "sha256": "a4b1e1998be425b28eb786e1340480db67bb0f457465fabb6c027933927d2852"
+    },
+    {
+      "book": 62,
+      "name": "Первое послание Иоанна",
+      "chapters": 5,
+      "verses": 105,
+      "sha256": "47486a0b87777407e2f2e46ffeda907d095a7c2bc16568105b177b93a57e00c7"
+    },
+    {
+      "book": 63,
+      "name": "Второе послание Иоанна",
+      "chapters": 1,
+      "verses": 13,
+      "sha256": "049e7904a359a93f82030c12a19ef781b5f1df7e3026a57420db0bb1f1586b26"
+    },
+    {
+      "book": 64,
+      "name": "Третье послание Иоанна",
+      "chapters": 1,
+      "verses": 15,
+      "sha256": "e39b024341f5e9ac4dbc66e7b2dc50876825d24c32ee3cba1686b40803a68500"
+    },
+    {
+      "book": 65,
+      "name": "Послание Иуды",
+      "chapters": 1,
+      "verses": 25,
+      "sha256": "fd4f28218eed8fcc4ab14ccb8f3a0d2d28231ea77ebe835302346cc247022089"
+    },
+    {
+      "book": 66,
+      "name": "Откровение Иоанна Богослова",
+      "chapters": 22,
+      "verses": 404,
+      "sha256": "8643cc7fd7e04e426707462ecd5d0709d6bb1c5b39458bed8698e94ced8eb127"
+    }
+  ],
+  "source_sha256": "9af20fe73fff9370acc8fd03cc0ffa718e1cf107d83fc401d41dcadc6c4e4a88"
+}
