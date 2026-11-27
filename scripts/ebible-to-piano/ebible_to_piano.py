@@ -93,7 +93,7 @@ _VERSE_RE = re.compile(r"^\\v\s+(\d+)\S*\s*(.*)", re.M)
 _MARKER_RE = re.compile(r"\\[a-zA-Z0-9]+\s*|\s*\\p\b")
 
 
-def _clean(text: str) -> str:
+def _clean(text: str, lang: str | None = None) -> str:
     """Strip USFM markers, footnotes/refs content, normalize whitespace."""
     # F1 (QA t_dbd7397c/PR #308): atributos interlinear (|strong="..." etc.)
     # DEVEM sair ANTES dos markers — \w Word|strong="H8064"\w* vira 'Word'.
@@ -108,6 +108,19 @@ def _clean(text: str) -> str:
     text = re.sub(r"\\bdit\s+\([^)]*\)\s*(\\bdit\*)?", "", text)  # refs parênteses
     text = re.sub(r"\\[a-zA-Z0-9]+(\d*)\*", "", text)  # F1: fechadores \w* etc (sem comer espaço)
     text = re.sub(r"\\[a-zA-Z0-9]+(\d*)\s*", "", text)  # markers
+    # t_1fb85696: espaçamento sujo residual pós-remoção de \+w/notas (en ~1.992
+    # versos). Normaliza SEM tocar \xa0 (tipografia fr correta: « » e :).
+    APOS = "\u2019"
+    text = re.sub("(\\S)[ 	]+" + APOS + "(s|t)\\b", "\\1" + APOS + "\\2", text)  # God ’s → God’s
+    text = re.sub("(\\w) n " + APOS + "t\\b", "\\1 n" + APOS + "t", text)  # do n ’t → do n’t
+    # fr: pontuação alta (! ? ; : ») mantém espaço — tipografia francesa legítima.
+    if lang == "fr":
+        text = re.sub(r"[ 	]+([,.)])", r"\1", text)
+    else:
+        text = re.sub(r"[ 	]+([,.!?;:])", r"\1", text)  # espaço antes de pontuação
+        text = re.sub(r"[ 	]+\)", ")", text)  # antes de )
+    # »/« nunca: guillemets pertencem à tipografia fr (espaço é legítimo)
+    text = re.sub(r"[ 	]{2,}", " ", text)  # colapso espaços múltiplos
     text = re.sub(r"[ \t]+", " ", text)
     return text.strip()
 
@@ -126,7 +139,7 @@ def _line_verses(line: str) -> list[tuple[str, str]]:
     return out
 
 
-def parse_usfm(raw: str) -> dict:
+def parse_usfm(raw: str, lang: str | None = None) -> dict:
     """USFM/USFX-text → {id, toc1, toc2, chapters: {ch: {verse: text}}}."""
     if raw.startswith("\ufeff"):
         raw = raw.lstrip("\ufeff")
@@ -142,7 +155,7 @@ def parse_usfm(raw: str) -> dict:
     def flush() -> None:
         nonlocal verse_num, buf
         if verse_num is not None and cur_ch is not None:
-            text = _clean(" ".join(buf))
+            text = _clean(" ".join(buf), lang)
             if text:
                 chapters.setdefault(cur_ch, {})[verse_num] = text
         verse_num, buf = None, []
@@ -335,7 +348,7 @@ def process_language(lang: str, outdir: Path, cache: Path, dry_run: bool = False
         book = usfm_code_to_book(code)
         if book is None:
             continue
-        parsed = parse_usfm(text)
+        parsed = parse_usfm(text, lang)
         books[book] = parsed
     # completude G1: livro ausente = FAIL; divergência de capítulos = WARN (§7)
     missing = [b for b in range(1, 67) if b not in books]

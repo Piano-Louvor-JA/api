@@ -306,9 +306,51 @@ def test_parse_usfm_open_crossref_discarded():
 def test_clean_strips_plus_w_markers():
     """Marcadores \\\\+w word\\\\+w* (wordlist) não podem sobreviver ao _clean."""
     raw = "\\+w Prends\\+w* \\+w courage\\+w* !"
-    assert etp._clean(raw) == "Prends courage !"
+    assert etp._clean(raw, "fr") == "Prends courage !"
 
 def test_parse_usfm_luke12_no_plus_w():
     """Verso real en (Luke 12:2) não pode conter '\\\\+w' no texto servido."""
     parsed = etp.parse_usfm("\\id LUK\n\\c 12\n\\v 2 \\+w But\\+w* \\+w there\\+w* \\+w is\\+w* nothing covered up.")
     assert parsed["chapters"]["12"]["2"] == "But there is nothing covered up."
+
+
+# ---------- Espaçamento sujo pós-remoção de \+w (t_1fb85696, engwebp en) ----------
+
+def test_clean_collapses_leftover_double_spaces():
+    raw = "\\+w The\\+w* \\+w Book\\+w* of the Wars."
+    assert etp._clean(raw) == "The Book of the Wars."
+
+
+def test_clean_removes_space_before_punctuation():
+    raw = "\\+w The\\+w* Wars of the LORD , “Vaheb in Suphah"
+    assert etp._clean(raw) == "The Wars of the LORD, \u201cVaheb in Suphah"
+
+
+def test_clean_removes_space_before_period():
+    raw = "even Jacob . Selah ."
+    assert etp._clean(raw) == "even Jacob. Selah."
+
+
+def test_clean_closes_apostrophe_s():
+    raw = "\\+w God\\+w* \u2019s mouth"
+    assert etp._clean(raw) == "God\u2019s mouth"
+
+
+def test_clean_closes_apostrophe_nt():
+    raw = "do n \u2019t"
+    assert etp._clean(raw) == "do n\u2019t"
+
+
+def test_clean_preserves_quote_apostrophes():
+    raw = "he said \u2019 quote \u2019 ends"
+    assert etp._clean(raw) == "he said \u2019 quote \u2019 ends"
+
+
+def test_clean_removes_space_before_close_bracket_and_guillemet():
+    raw = "(word ) and \u00bb end"
+    assert etp._clean(raw) == "(word) and \u00bb end"
+
+
+def test_clean_preserves_fr_nbsp():
+    raw = "Il dit\u00a0: \u00ab Bonjour \u00bb"
+    assert etp._clean(raw) == "Il dit\u00a0: \u00ab Bonjour \u00bb"
