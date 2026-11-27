@@ -1,4 +1,4 @@
--- 038_bible_multilingue.sql
+-- 040_bible_multilingue.sql
 -- Gerado por scripts/ebible-to-piano — NÃO editar à mão.
 -- Idempotente (INSERT OR IGNORE). ADR-02/03: ids 100-112,
 -- book_number 1-66 por idioma, id_book = base + book-1 (200-1057).

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenera 038_bible_multilingue.sql com nomes reais (\toc1 do USFM, via report).
+"""Regenera 040_bible_multilingue.sql com nomes reais (\toc1 do USFM, via report).
 
 Base: migration gerada pelo ebible_to_piano.py (fallback pt) + reports/*.json
 (nomes reais por idioma). Mantém ids/estrutura — só substitui a coluna `name`
@@ -10,7 +10,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-MIG = ROOT / "src/db/migrations/038_bible_multilingue.sql"
+MIG = ROOT / "src/db/migrations/040_bible_multilingue.sql"
 REPORTS = ROOT / "scripts/ebible-to-piano/out/reports"
 
 ROW_RE = re.compile(

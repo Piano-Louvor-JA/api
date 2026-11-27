@@ -211,7 +211,7 @@ compatRoutes.get("/json_db", (c) => {
 // ==============================================
 // GET /json_db/:file — router generico que faz parse do filename
 // ==============================================
-// Idiomas da Bíblia multilíngue (migration 038, ebible-to-piano).
+// Idiomas da Bíblia multilíngue (migration 040, ebible-to-piano).
 // pt/es têm tratamento legacy (fallbacks do ecossistema); os demais são
 // servidos direto do banco após a migration.
 const BIBLE_LANGS = "pt|es|en|fr|ru|uk|it|nl|pl|tr|ja|ko|zh|ar|hi";
@@ -420,7 +420,7 @@ compatRoutes.get("/json_db/:file", async (c) => {
     return handleAlbumDetail(c, db, idAlbum);
   }
 
-  // {lang}_bible_book — catálogo por idioma (15 langs, migration 038)
+  // {lang}_bible_book — catálogo por idioma (15 langs, migration 040)
   const bookLangMatch = file.match(new RegExp(`^(${BIBLE_LANGS})_bible_book$`));
   if (bookLangMatch) {
     const lang = bookLangMatch[1];
@@ -438,7 +438,7 @@ compatRoutes.get("/json_db/:file", async (c) => {
     return c.json([]); // idioma novo sem migration aplicada
   }
 
-  // {lang}_bible_version — catálogo por idioma (15 langs, migration 038)
+  // {lang}_bible_version — catálogo por idioma (15 langs, migration 040)
   const versionLangMatch = file.match(
     new RegExp(`^(${BIBLE_LANGS})_bible_version$`),
   );

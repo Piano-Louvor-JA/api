@@ -10,14 +10,14 @@ catálogos + capítulos por idioma, servidos pelos endpoints compat.
 - `package_bible_multilingue.py` — empacota `out/bible_cache` em
   `data/json_db/bible_multilingue/`: tarball por idioma + `{lang}_bible_book.json`
   + `{lang}_bible_version.json` + `{lang}_bible_catalog.sha256` + report + manifest
-- `real_names_038.py` — regenera `src/db/migrations/038_bible_multilingue.sql`
+- `real_names_040.py` — regenera `src/db/migrations/040_bible_multilingue.sql`
   com nomes reais (`\toc1` do USFM) em vez do fallback pt
 - `ingest-bible-multilingue.sh` — deploy no servidor: valida checksums, extrai
   capítulos para `data/bible_cache/`, restart (migrations no boot), valida endpoints
 
 ## Endpoints (compat, já consumidos pelo app por locale)
 
-- `GET /json_db/{lang}_bible_book` — 66 livros (DB, migration 038)
+- `GET /json_db/{lang}_bible_book` — 66 livros (DB, migration 040)
 - `GET /json_db/{lang}_bible_version` — versão própria por idioma
 - `GET /json_db/bible_{version}_{book}_{chapter}` — capítulo (cache local primeiro,
   proxy upstream como fallback)
@@ -30,8 +30,8 @@ Idiomas: pt, es, en, fr, ru, uk, it, nl, pl, tr, ja, ko, zh, ar, hi.
 ```bash
 python3 scripts/ebible-to-piano/ebible_to_piano.py            # download + parse
 cp scripts/ebible-to-piano/out/migrations/028_bible_multilingue.sql \
-   src/db/migrations/038_bible_multilingue.sql
-python3 scripts/ebible-to-piano/real_names_038.py             # nomes reais na migration
+   src/db/migrations/040_bible_multilingue.sql
+python3 scripts/ebible-to-piano/real_names_040.py             # nomes reais na migration
 python3 scripts/ebible-to-piano/package_bible_multilingue.py  # tarballs + checksums + manifest
 ```
 

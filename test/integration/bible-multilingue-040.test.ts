@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { type SeededDb, setupSeededDb } from "../helpers/seeded-db.js";
 
 /**
- * Bíblia multilíngue (migration 038): /json_db/{lang}_bible_book e
+ * Bíblia multilíngue (migration 040): /json_db/{lang}_bible_book e
  * {lang}_bible_version para os 13 idiomas novos + capítulos do cache local.
  * - Catálogo de livros: 66 livros com nomes do idioma (não fallback pt)
  * - Versão: id 100..112 conforme migration
@@ -33,7 +33,7 @@ describe("Bíblia multilíngue 15 idiomas (json_db)", () => {
   beforeAll(async () => {
     app = await setupSeededDb();
     router = app.router;
-    // migration 038 (966 INSERTs) torna o initDb mais lento que o default
+    // migration 040 (966 INSERTs) torna o initDb mais lento que o default
   }, 60000);
 
   afterAll(() => app.cleanup());
@@ -65,7 +65,7 @@ describe("Bíblia multilíngue 15 idiomas (json_db)", () => {
     async (lang) => {
       const res = await router.request(`/json_db/${lang}_bible_book`);
       const books = await res.json();
-      // nomes vêm do \toc1 do USFM (migration 038 real_names) — só
+      // nomes vêm do \toc1 do USFM (migration 040 real_names) — só
       // en/nl/pl coincidem com "Genesis"
       if (lang !== "en" && lang !== "nl" && lang !== "pl") {
         expect(books[0].name).not.toBe("Gênesis");

@@ -6,7 +6,7 @@
 # Idempotente: pode rodar quantas vezes quiser.
 #   1. Verifica sha256 dos tarballs em data/json_db/bible_multilingue/
 #   2. Extrai bible_{v}_{b}_{c}.json para data/bible_cache/ (rota serve direto)
-#   3. Restart do container — migrations (038) rodam no boot
+#   3. Restart do container — migrations (040) rodam no boot
 #   4. Validação: 13 idiomas × 66 livros + 1 capítulo por idioma = 200
 #
 # Uso: bash scripts/ebible-to-piano/ingest-bible-multilingue.sh

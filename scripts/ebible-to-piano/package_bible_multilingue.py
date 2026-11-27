@@ -58,7 +58,7 @@ def extract_books(migration: str, lang: str) -> list[dict]:
 
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    migration = (ROOT / "src/db/migrations/038_bible_multilingue.sql").read_text()
+    migration = (ROOT / "src/db/migrations/040_bible_multilingue.sql").read_text()
     manifest = {}
     for lang in LANGS:
         rep_path = REPORTS / f"{lang}_report.json"
