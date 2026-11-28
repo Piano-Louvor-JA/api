@@ -150,14 +150,24 @@ describe("HOTFIX t_b3824cb7: capítulos multilíngues via tarball local", () => 
     try {
       const key = "bible_100_200_1";
       const clean = readFileSync(join(tarDir, "en_bible_chapters.tar.gz"));
-      const dirty = readFileSync(
-        join(
-          process.cwd(),
-          "data",
-          "json_db",
-          "bible_multilingue",
-          "en_bible_chapters.tar.gz",
-        ),
+      // tarball "novo" com conteúdo REALMENTE diferente: recompacta o mesmo
+      // JSON com um versículo alterado (t_5582d47e: ambos os tarballs estão
+      // limpos, então mtime/size iguais não bastam para provar invalidação)
+      const altered = execFileSync(
+        "sh",
+        [
+          "-c",
+          `tmp=$(mktemp -d) && tar xzf ${JSON.stringify(
+            join(tarDir, "en_bible_chapters.tar.gz"),
+          )} -C "$tmp" bible_100_200_1.json && python3 - "$tmp/bible_100_200_1.json" <<'PY'
+import json,sys
+p=sys.argv[1]; d=json.load(open(p))
+d["1"]="In the beginning God created the heavens and the earth. (alterado)"
+json.dump(d,open(p,"w"),ensure_ascii=False,separators=(",",":"))
+PY
+tar czf - -C "$tmp" bible_100_200_1.json && rm -rf "$tmp"`,
+        ],
+        { maxBuffer: 1024 * 1024, encoding: "buffer" } as object,
       );
       writeFileSync(join(dir, "en_bible_chapters.tar.gz"), clean);
       rmCache(key);
@@ -165,16 +175,18 @@ describe("HOTFIX t_b3824cb7: capítulos multilíngues via tarball local", () => 
       expect(first.status).toBe(200);
       const firstBody = await first.json();
       expect(firstBody[1]).not.toContain("strong=");
-      // troca o tarball (sujo de main) — mtime/size diferentes
-      writeFileSync(join(dir, "en_bible_chapters.tar.gz"), dirty);
+      // troca o tarball — conteúdo diferente
+      writeFileSync(join(dir, "en_bible_chapters.tar.gz"), altered);
       const second = await app.request(`/json_db/${key}`);
       expect(second.status).toBe(200);
+      const secondBody = await second.json();
+      expect(secondBody[1]).toContain("(alterado)");
       // cache de disco PRECISA ter sido invalidado: o arquivo em disco agora
-      // reflete o tarball novo (idempotência do sanitize não mascara: com o
-      // cache velho o conteúdo em disco seria o mesmo da 1ª resposta)
+      // reflete o tarball novo
       const disk = JSON.parse(
         readFileSync(join(resolveBibleCacheDir(), `${key}.json`), "utf-8"),
       );
+      expect(disk[1]).toContain("(alterado)");
       expect(JSON.stringify(disk)).not.toEqual(JSON.stringify(firstBody));
       rmCache(key);
     } finally {
