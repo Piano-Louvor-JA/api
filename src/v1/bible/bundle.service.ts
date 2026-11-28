@@ -102,9 +102,13 @@ function findVersionRow(db: Db, versionId: number): VersionRow | null {
 }
 
 function listBooks(db: Db, language: string): BookRow[] {
+  // SPEC-v2 ADR-v2-02: o bundle offline continua só com os livros v1 —
+  // migration 041 adiciona livros 2000-3399 desses idiomas ao SQLite, mas
+  // o bundle NÃO cresce com a v2 (opção A da §4.3.1). Range 2000-3399 é
+  // exclusivo dos ids v2; ids de teste (9000+) seguem válidos.
   return db
     .prepare(
-      "SELECT id_book, chapters FROM bible_books WHERE id_language = ? ORDER BY book_number, id_book",
+      "SELECT id_book, chapters FROM bible_books WHERE id_language = ? AND (id_book < 2000 OR id_book > 3399) ORDER BY book_number, id_book",
     )
     .all(language) as BookRow[];
 }
