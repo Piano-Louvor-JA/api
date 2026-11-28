@@ -16,7 +16,9 @@ const { cleanTarDir } = vi.hoisted(() => {
   process.env.MEDIA_MIRROR = "off";
   process.env.ON_MISS_FETCH = "off";
   return {
-    cleanTarDir: `${process.cwd()}/data/json_db/bible_multilingue-clean`,
+    // SPEC-v2: dir versionado (bible_multilingue) agora é limpo E
+    // multi-versão — o -clean gitignored nunca existiu no runner do CI.
+    cleanTarDir: `${process.cwd()}/data/json_db/bible_multilingue`,
   };
 });
 
