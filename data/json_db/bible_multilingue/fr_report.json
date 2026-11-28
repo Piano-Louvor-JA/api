@@ -293,35 +293,35 @@
       "name": "L'Évangile selon Matthieu",
       "chapters": 28,
       "verses": 1071,
-      "sha256": "94bd606ba63385c4a7ce3eb0c2de78705b6e654eff47e08ea0ec9f993dae2c21"
+      "sha256": "628bc89567d5055dc16eb28821c3b0c3a509b83169984b410cb99325c4b1b7a7"
     },
     {
       "book": 41,
       "name": "L'Évangile selon Marc",
       "chapters": 16,
       "verses": 678,
-      "sha256": "15c98a242dc4d494c4ef3d8199a003c2f42ef3ee3f2642219a2d36ad190b19c4"
+      "sha256": "ba1f52258da508c64487486f78feb8b4b74b1544d25009937bb8dbdfc598ce1e"
     },
     {
       "book": 42,
       "name": "L'Évangile selon Luc",
       "chapters": 24,
       "verses": 1150,
-      "sha256": "6a8548ca7f97c2803faeb165d05b23818411d4ac3d7e4ddd0378d91af3f54a0e"
+      "sha256": "c1b81c49e4f09e345e3c373901ecaeab967cf53cea87a620c9c074bae013876d"
     },
     {
       "book": 43,
       "name": "L'Évangile selon Jean",
       "chapters": 21,
       "verses": 879,
-      "sha256": "db8ee3058ccd2a1e6a365d46607a36ef9649926aeade0f454111c380382e4fb4"
+      "sha256": "74f2f698f6ec9738d460cb93f8ce53a568456e8b0427fd114ac7b14bfce1cb76"
     },
     {
       "book": 44,
       "name": "Les Actes des Apôtres",
       "chapters": 28,
       "verses": 1004,
-      "sha256": "69c8510aff20d05ceb14acc3781551b75c9dc3dc46f98ea58c9e4f41501c1da4"
+      "sha256": "58c092a7ee0d86a9e30993d73922932dde9242763df16b8877944200fb213175"
     },
     {
       "book": 45,
@@ -335,14 +335,14 @@
       "name": "Première Lettre de Paul aux Corinthiens",
       "chapters": 16,
       "verses": 437,
-      "sha256": "8ad5295e23c8f4cc85356392ec94ad8691907db5ae0fee709e207aaaf5fabe84"
+      "sha256": "c13409397b3f4be26dea3aac6c22528b70367ed68e17f95ecd0455bd6d588e08"
     },
     {
       "book": 47,
       "name": "Seconde Lettre de Paul aux Corinthiens",
       "chapters": 13,
       "verses": 257,
-      "sha256": "2a20e4cde59d6cf305f037848825a339ed8591b779eda6a425ca42a44f6953d9"
+      "sha256": "d4c3d6feabc74030f8f412b012e50c60f87ac259e53dc35e1f2222d1c527f8fc"
     },
     {
       "book": 48,
@@ -391,7 +391,7 @@
       "name": "Première lettre de Paul à Timothée",
       "chapters": 6,
       "verses": 113,
-      "sha256": "fcc3425ed5bea124c403bef6939c61d949a054eafb4aff365f54fe2f10c73e0f"
+      "sha256": "8d255be0b6213733a6e05d4175a74ef8ecf77b8f3776740e52cfe7aed70c6cdf"
     },
     {
       "book": 55,
@@ -475,7 +475,7 @@
       "name": "Apocalypse de Jean",
       "chapters": 22,
       "verses": 404,
-      "sha256": "03ec9a8e0479557dc5183329d2ef494f3d2fd560ef0e29fdee8c1edef72920b3"
+      "sha256": "7004a9056e34b555a2e7d9ec7dae6fbe3938a06fa28f1b124f131e0113650541"
     }
   ],
   "source_sha256": "1cae473f9d4ded70fc7651f129e03780634997b8265c15bc5c5a93af139bad03"

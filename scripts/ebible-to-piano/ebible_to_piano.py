@@ -98,9 +98,23 @@ def _clean(text: str, lang: str | None = None) -> str:
     # F1 (QA t_dbd7397c/PR #308): atributos interlinear (|strong="..." etc.)
     # DEVEM sair ANTES dos markers — \w Word|strong="H8064"\w* vira 'Word'.
     text = re.sub(r"\|strong=\"[^\"]*\"\*?", "", text)
+    # t_af6f8556 (round 2, takeover orquestrador): marcadores de PALAVRA
+    # (\w \w* \wj \wj* \+w \+w* \+add…) são transparentes — viram UM espaço, e o
+    # colapso de espaços no final resolve. Isso preserva o espaçamento de
+    # ja/zh/ko/pt (HEAD já estava certo para eles).
+    # Único caso especial: marcador colado em APÓSTROFO/ASPAS DE ABERTURA
+    # (`\+w*'\+w allume` = elisão fr; `\'\+w L|..`, `“\+w It`, `«\xa0\+w Il`):
+    # aí o espaço seguinte pertence ao marcador e sai — senão vira `n ' allume`
+    # e `“ It`.
+    text = re.sub(r"(['’«“‘]\\?)\\[+]?[a-zA-Z0-9]+\d* (?=\w)", r"\1", text)
+    text = re.sub(r"(«\xa0)\\[+]?[a-zA-Z0-9]+\d* (?=\w)", r"\1", text)
+    # fechador de palavra seguido de apóstrofo de elisão (`\+w*'`): o fechador
+    # não pode virar espaço — some.
+    text = re.sub(r"\\(?:\+w|wj?)\*(?=['’])", "", text)
+    text = re.sub(r"\\'", "'", text)  # apóstrofo escapado → literal
     # rework: \+w word\+w* / \+add ... \+add* (wordlist, USFM extended) não podem
     # sobreviver — removem-se os MARKERS mantendo o TEXTO (bible_100_241_12 tinha
-    # '\\+w But\\+w* \\+w there\\+w*' servido literal).
+    # '\\\\+w But\\\\+w* \\\\+w there\\\\+w*' servido literal).
     text = re.sub(r"\\\+[a-zA-Z0-9]+(\d*)\*?\s*", " ", text)
     text = re.sub(r"\\f\s+\+.*?\\f\*", "", text, flags=re.S)  # footnotes completos
     text = re.sub(r"\\f\s+[^\\]*(\\f\*)?", "", text)  # \f aberto sem fechar

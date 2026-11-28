@@ -293,35 +293,35 @@
       "name": "The Good News According to Matthew",
       "chapters": 28,
       "verses": 1071,
-      "sha256": "c483fe76574e3aa5d20db31dcda83069651011f3771c32da8e0fc018b67a60f0"
+      "sha256": "befd314bc20669ca80745d7dc835406e80b005910968b3eeec212e7098cdbd1e"
     },
     {
       "book": 41,
       "name": "The Good News According to Mark",
       "chapters": 16,
       "verses": 678,
-      "sha256": "829d37a3fbf1a3938f234e0d888005c07d6365dc39d45a10e650aa997ec5f40a"
+      "sha256": "92b4fa80d75f130a840e68cc00c1f514338f1188cbac1fb0053dc15b33d3d5fb"
     },
     {
       "book": 42,
       "name": "The Good News According to Luke",
       "chapters": 24,
       "verses": 1150,
-      "sha256": "91e2fcbfc497bdc2e3800773843ea9fc914df764821ac31c5f934a9efba96fab"
+      "sha256": "40d9da254c4f76653c819e8420788460a9d072f93a97e97161c5d35e35cc0f13"
     },
     {
       "book": 43,
       "name": "The Good News According to John",
       "chapters": 21,
       "verses": 879,
-      "sha256": "bedee439de5592922c07067821cbaa45a2e45a20eb5b24abe0601af0f66867c9"
+      "sha256": "604868105807a87a3e59715b7640b9e5cb319a59335e9dde1d098ceb0cb62c17"
     },
     {
       "book": 44,
       "name": "The Acts of the Apostles",
       "chapters": 28,
       "verses": 1004,
-      "sha256": "f3568dd1ba31b4776c88b7e0267edcaaef2739e65fdcc466468be87f7cbaf9c4"
+      "sha256": "a0ad6da50acca4579c725597421ed279e020b9ca9ff633b46d87faf4ac51588a"
     },
     {
       "book": 45,
@@ -335,14 +335,14 @@
       "name": "Paul’s First Letter to the Corinthians",
       "chapters": 16,
       "verses": 437,
-      "sha256": "bdb18e88107ff980420c2bd224ef58955a1ad52fd9dc546b5c6bfa82a36c411d"
+      "sha256": "b34ccd3467b5a5cdb2846be218092c9acd9e1f7e8d387ee5472a442ba648c227"
     },
     {
       "book": 47,
       "name": "Paul’s Second Letter to the Corinthians",
       "chapters": 13,
       "verses": 257,
-      "sha256": "af93f29d895d26a01ce7cc9849bc4e8265b87d2ed439e8d91400ecd32dc06e00"
+      "sha256": "f76381614b0366125fc22236abef6e64642f95008e46fdeef01761b060c81a39"
     },
     {
       "book": 48,
@@ -391,7 +391,7 @@
       "name": "Paul’s First Letter to Timothy",
       "chapters": 6,
       "verses": 113,
-      "sha256": "3714e1fd524a4825c359363cd280f1e7013b1d297b17f4dad25b5be197b34c88"
+      "sha256": "84f9ff127f01f3316caf82c67561511eee658ecb730c8cf4bd0a68ec2b1847ec"
     },
     {
       "book": 55,
@@ -475,7 +475,7 @@
       "name": "The Revelation to John",
       "chapters": 22,
       "verses": 404,
-      "sha256": "aeeb44cb90abac10d4a7c9f0ffd4d05e1a94489a49ed251cf3bf06faf304c336"
+      "sha256": "192b0e01a6ef33f4dc0df95e51d5eda8b4ff15d222195580c13a7d22b0ff0d33"
     }
   ],
   "source_sha256": "a78b49d0faf717d128ff95ed89c237722197eaf70ba4f0c169d708795a43964d"

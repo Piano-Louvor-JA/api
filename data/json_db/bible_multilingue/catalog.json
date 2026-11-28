@@ -21,7 +21,7 @@
     "chapters": 1189,
     "verses": 31098,
     "tar": "en_bible_chapters.tar.gz",
-    "sha256": "64697c19a069c6ddcfa4aab3ed6503bfc6c45457744655834e937601e67d4507"
+    "sha256": "865c213ff3e2b4aad18bfd0ce7b5790e90b5c032cacc67aebd2d9940474a3cbe"
   },
   "fr": {
     "id_bible_version": 101,
@@ -29,7 +29,7 @@
     "chapters": 1189,
     "verses": 31098,
     "tar": "fr_bible_chapters.tar.gz",
-    "sha256": "76f65ca457354f5874970ae1ba7a24251556bc5234ffecd2c42db4b57833b34a"
+    "sha256": "5d9b4e16595197eb6ff13a6c0e254f9ff2e069de41e7e6d07bec0bb9f9c9e807"
   },
   "ru": {
     "id_bible_version": 102,
