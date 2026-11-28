@@ -72,6 +72,8 @@ type CollectionRow = {
   created_at: string;
   updated_at: string;
   cover_url: string | null;
+  // t_c68a47ac: 1 = cover_url só para o dono (default, LGPD conservador)
+  cover_private: number;
   owner_id: number | null;
   author_name: string | null;
   visibility: "public" | "private";
@@ -130,6 +132,26 @@ const tenantHeader = z.string().default("piano").openapi("X-Tenant", {
 });
 
 const tenantRequest = { headers: z.object({ "X-Tenant": tenantHeader }) };
+
+/**
+ * t_c68a47ac (cover privacy): redige cover_url quando a capa é privada e o
+ * viewer não é o dono. Aplica-se a TODA resposta de coletânea (list/detail).
+ */
+function redactCoverForViewer<
+  T extends {
+    cover_url?: string | null;
+    cover_private?: number;
+    owner_id?: number | null;
+  },
+>(row: T, viewerId?: number): T {
+  if (
+    row.cover_private === 1 &&
+    (viewerId === undefined || row.owner_id !== viewerId)
+  ) {
+    return { ...row, cover_url: null };
+  }
+  return row;
+}
 
 function withTenantHeader<T extends { request?: Record<string, unknown> }>(
   route: T,
@@ -230,7 +252,7 @@ customRoutes.openapi(listCollectionsRoute, (c) => {
 
     return c.json(
       {
-        data: pageItems,
+        data: pageItems.map((r) => redactCoverForViewer(r, user?.id_user)),
         meta: {
           total: collections.length,
           page,
@@ -302,7 +324,7 @@ customRoutes.openapi(createCollectionRoute, async (c) => {
 
     const result = db
       .prepare(
-        `INSERT INTO custom_collections (name, description, owner_id, author_name, visibility, tenant_id) VALUES (?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO custom_collections (name, description, owner_id, author_name, visibility, tenant_id, cover_url, cover_private) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         body.name,
@@ -311,6 +333,8 @@ customRoutes.openapi(createCollectionRoute, async (c) => {
         body.author_name ?? null,
         body.visibility ?? "public",
         c.get("tenantId"),
+        body.cover_url ?? null,
+        body.cover_private === false ? 0 : 1,
       );
 
     const collection = db
@@ -393,7 +417,7 @@ customRoutes.openapi(getCollectionRoute, (c) => {
       return c.json({ error: "Coletânea não encontrada" }, 404);
     }
 
-    return c.json(collection, 200);
+    return c.json(redactCoverForViewer(collection, user?.id_user), 200);
   } catch (error) {
     console.error(error);
     return c.json({ error: "Erro ao buscar coletânea" }, 500);
@@ -476,13 +500,18 @@ customRoutes.openapi(updateCollectionRoute, (c) => {
 
     db.prepare(
       `UPDATE custom_collections
-       SET name = ?, description = ?, cover_url = ?, visibility = ?, updated_at = CURRENT_TIMESTAMP
+       SET name = ?, description = ?, cover_url = ?, visibility = ?, cover_private = ?, updated_at = CURRENT_TIMESTAMP
        WHERE id_collection = ?`,
     ).run(
       body.name ?? collection.name,
       body.description ?? collection.description,
       body.cover_url !== undefined ? body.cover_url : collection.cover_url,
       body.visibility ?? collection.visibility,
+      body.cover_private !== undefined
+        ? body.cover_private
+          ? 1
+          : 0
+        : collection.cover_private,
       parseInt(id, 10),
     );
 
