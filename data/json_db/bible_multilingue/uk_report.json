@@ -293,35 +293,35 @@
       "name": "Євангелия від сьв. Маттея",
       "chapters": 28,
       "verses": 1071,
-      "sha256": "61ab06a6fd8c2bbfe5f8e78a19fac4db967630a69f50bb7ba6748d9d6f635dc5"
+      "sha256": "029ae9458c3ff16d77a2eb66c9af689fd95bbaaa1b36649803ee7f0222249ddf"
     },
     {
       "book": 41,
       "name": "Євангелия від сьв. Марка",
       "chapters": 16,
       "verses": 678,
-      "sha256": "39c1095b86cd9359f71c79d83db6202690401704b9aa1e09aece884c4ef4661f"
+      "sha256": "976dff701b6e3d74043ed64a8aebf75dca373220a8b1e5a90f2ceaa0f751b021"
     },
     {
       "book": 42,
       "name": "Євангелия від сьв. Луки",
       "chapters": 24,
       "verses": 1151,
-      "sha256": "2d75fa2d444c47fe0c36be8173ca57becd7e7c6701618d87bdb5e3be3ae2f95f"
+      "sha256": "29108b4bd4fd493b272260dd63059826dd82f7aa10f65726e58f51df6e4e86f7"
     },
     {
       "book": 43,
       "name": "Євангелия від сьв. Йоана",
       "chapters": 21,
       "verses": 879,
-      "sha256": "4a2d489bf5f6807ebb3cd6d946022438da39f752089ed0defb6408be53eff035"
+      "sha256": "3d7a29835bf51e6b86911cc674d25c9fffdf1985cdaa7f4a7bb4f56f837982b0"
     },
     {
       "book": 44,
       "name": "Дїяння сьвятих Апостолів",
       "chapters": 28,
       "verses": 1007,
-      "sha256": "214ee85c6969e710a78cb0ca527d15ebe6b90098297c17278120f02c10ea130f"
+      "sha256": "fe5703750108ae7ea1cdaaec5d1574b98ef477e868b9459d4445e8d7a97338bc"
     },
     {
       "book": 45,
@@ -335,14 +335,14 @@
       "name": "Перве Посланнє сьв. Ап. Павла до Коринтян",
       "chapters": 16,
       "verses": 437,
-      "sha256": "5d6a5ae707fac162efa4af48c0bc2e499bc8727b3e8e7249f36606f83b3f2351"
+      "sha256": "408a44bfd112684254f8eb4c0906c689ea9231b5492591c6acadd5af5bd472fe"
     },
     {
       "book": 47,
       "name": "Друге Посланнє сьв. Ап. Павла до Коринтян",
       "chapters": 13,
       "verses": 256,
-      "sha256": "8a100c04a9cebe5cb3ee30d63ae8a30cfcfac47eb32798d7ca5c62b3e9a12526"
+      "sha256": "600bed9a6563d20259d325d362823099b9af4f9db72d04feeef2f9f9fe500b71"
     },
     {
       "book": 48,
@@ -475,7 +475,7 @@
       "name": "Одкриттє сьв. Йоана Богослова",
       "chapters": 22,
       "verses": 404,
-      "sha256": "a9e34fe408bf862a265261aaa758146fa5d0c99102b7e626ab5053def8f0ba05"
+      "sha256": "88ca2e8d14b1de22f3a50d62f0be57156f938d3210bb35f74950b1cd73586aa6"
     }
   ],
   "source_sha256": "df5f0a70ed9720352b9a36c3c8bb981ebf3298a9e660cb552de4a71800344356"

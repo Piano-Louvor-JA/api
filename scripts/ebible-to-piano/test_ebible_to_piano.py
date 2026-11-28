@@ -166,3 +166,197 @@ def test_migration_idempotent(tmp_path):  # G6 — requires sqlite3 CLI
 def test_migration_book_rows_use_adr03():
     sql = etp.build_migration([BY_LANG["ru"]])
     assert "(332, " in sql  # Gênesis ru = 332 + book_number(1) - 1
+
+
+# ---------- F1: strong= interlinear (QA t_dbd7397c, PR #308) ----------
+
+def test_clean_strips_strong_attributes():
+    """F1: \\w Word|strong="H8064"\\w* vira 'Word' — sem resíduo strong=."""
+    raw = r'\w In|strong="H8064"\w* \w the|strong="H1254"\w* beginning'
+    assert etp._clean(raw) == "In the beginning"
+
+
+def test_parse_usfm_real_engwebp_fixture_no_strong():
+    """F1: fixture USFM real do engwebp (Gn1) não serve strong= em nenhum verso."""
+    raw = (HERE / "fixtures" / "engwebp_gen1_strong.usfm").read_text("utf-8")
+    parsed = etp.parse_usfm(raw)
+    text = " ".join(parsed["chapters"]["1"].values())
+    assert "strong=" not in text
+    assert "|" not in text
+    assert "In the beginning God created" in text
+
+
+# ---------- F2: catálogo chapters = conteúdo real (ko 1Pe, QA t_dbd7397c) ----------
+
+def test_package_book_json_uses_real_chapters(monkeypatch, tmp_path):
+    """F2: {lang}_bible_book.json deve declarar chapters do CONTEÚDO real (report),
+    não do cânon — ko 1Pe upstream truncado: 4, não 5."""
+    import package_bible_multilingue as pkg
+    from pathlib import Path as P
+
+    # ko 1Pe: id_bible_book 853, book_number 60; report diz 4 capítulos
+    # books_detail de ko_report.json (T0, real): 60 -> chapters 4
+    rep = {"books": 66, "chapters": 1188, "verses": 30000,
+           "translation": "Korean Bible", "abbreviation": "ko",
+           "books_detail": [
+        {"book": 1, "name": "창세기", "chapters": 50, "verses": 1533, "sha256": "x"},
+        {"book": 60, "name": "베드로전서", "chapters": 4, "verses": 80, "sha256": "y"},
+    ]}
+
+    class FakeP:
+        def __init__(self, base): self.base = base
+        def __truediv__(self, other): return FakeP(str(self) + "/" + str(other))
+        def __str__(self): return self.base
+        def read_text(self, *a, **k): return ""
+        def write_text(self, *a, **k): pass
+        def mkdir(self, *a, **k): pass
+        def exists(self): return True
+        def read_bytes(self): return b""  # t_1fb85696: tar determinístico lê bytes
+        def __fspath__(self): return str(self)  # open(FakeP) funciona
+        def __getattr__(self, name): return FakeP(str(self))
+
+    src = {}
+    def fake_write(path, content):
+        src[str(path)] = content
+
+    import json as _json
+    # isola: só o book.json de ko interessa
+    captured = {}
+    orig = pkg.json.dumps
+
+    # roda a lógica de livro real com o mínimo: monkeypatch langs/reports/caches
+    monkeypatch.setattr(pkg, "LANGS", ["ko"])
+    monkeypatch.setattr(pkg, "REPORTS", FakeP("reports"))
+    monkeypatch.setattr(pkg, "OUT", FakeP("out"))
+    monkeypatch.setattr(pkg, "CACHE", FakeP("cache"))
+    monkeypatch.setattr(pkg, "ROOT", FakeP("root"))
+
+    def fake_loads(s):
+        return rep
+    monkeypatch.setattr(pkg.json, "loads", fake_loads)
+
+    def fake_extract(migration, lang):
+        return [{"id_bible_book": 794, "name": "창세기", "abbreviation": "Gn",
+                 "chapters": 50, "book_number": 1},
+                {"id_bible_book": 853, "name": "베드로전서", "abbreviation": "1Pe",
+                 "chapters": 5, "book_number": 60}]
+    monkeypatch.setattr(pkg, "extract_books", fake_extract)
+
+    # stub sha256/tarfile p/ não tocar disco
+    monkeypatch.setattr(pkg, "sha256", lambda p: "0" * 64)
+    import tarfile as _tar
+    class _TI:  # t_1fb85696: tar determinístico usa gettarinfo+addfile
+        mtime = 0; uid = 0; gid = 0; uname = ""; gname = ""
+    class _TF:
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def add(self, *a, **k): pass
+        def gettarinfo(self, *a, **k): return _TI()
+        def addfile(self, *a, **k): pass
+    monkeypatch.setattr(_tar, "open", lambda *a, **k: _TF())
+
+    def fake_dump(obj, *a, **k):
+        # captura somente o book.json (lista de dicts com id_bible_book)
+        if isinstance(obj, list) and obj and isinstance(obj[0], dict) and "id_bible_book" in obj[0]:
+            captured["books"] = obj
+        return "[]"
+    monkeypatch.setattr(pkg.json, "dumps", fake_dump)
+
+    # report tem só 2 livros, mas o código exige 66 — stub dos checks de contagem
+    checks = []
+    def fake_fail(msg): checks.append(msg)
+    monkeypatch.setattr(pkg, "fail", fake_fail)
+    # cache existe=True para todo arquivo esperado
+    pkg.main()
+    # contagem de livros divergente é esperado no stub (66 != 2), mas não interessa aqui
+
+    books = captured["books"]
+    p1 = [b for b in books if b["book_number"] == 60][0]
+    assert p1["chapters"] == 4, f"ko 1Pe deve declarar 4 (real), veio {p1['chapters']}"
+    gn = [b for b in books if b["book_number"] == 1][0]
+    assert gn["chapters"] == 50
+
+
+# ---------- Footnote/cross-ref ABERTA (reviewer t_8dbd1429, rework) ----------
+
+def test_parse_usfm_open_footnote_discarded():
+    """Footnote \\f + ... aberta (sem \\f*) deve sair INTEIRA, sem vazar texto."""
+    raw = "\\id GEN\n\\c 1\n\\v 1 Alpha \\f + \\ft note"
+    parsed = etp.parse_usfm(raw)
+    assert parsed["chapters"] == {"1": {"1": "Alpha"}}, parsed["chapters"]
+
+
+def test_parse_usfm_open_footnote_stops_at_next_verse():
+    """Footnote aberta descarta até o próximo \\v — não engole o verso seguinte."""
+    raw = "\\id GEN\n\\c 1\n\\v 1 Alpha \\f + \\ft nota aberta\n\\v 2 Beta"
+    parsed = etp.parse_usfm(raw)
+    assert parsed["chapters"] == {"1": {"1": "Alpha", "2": "Beta"}}, parsed["chapters"]
+
+
+def test_parse_usfm_open_footnote_stops_at_next_chapter():
+    """Footnote aberta descarta até o próximo \\c — capítulo seguinte intacto."""
+    raw = "\\id GEN\n\\c 1\n\\v 1 Alpha \\f + \\ft nota\n\\c 2\n\\v 1 Beta"
+    parsed = etp.parse_usfm(raw)
+    assert parsed["chapters"] == {"1": {"1": "Alpha"}, "2": {"1": "Beta"}}, parsed["chapters"]
+
+
+def test_parse_usfm_open_crossref_discarded():
+    """Cross-ref \\x ... aberta (sem \\x*) também não vaza conteúdo."""
+    raw = "\\id GEN\n\\c 1\n\\v 1 Alpha \\xo 1.1 \\xt ref aberta"
+    parsed = etp.parse_usfm(raw)
+    assert parsed["chapters"] == {"1": {"1": "Alpha"}}, parsed["chapters"]
+
+
+# ---------- Marcadores +w/+add escapando do _clean (rework: bible_100_241_12) ----------
+
+def test_clean_strips_plus_w_markers():
+    """Marcadores \\\\+w word\\\\+w* (wordlist) não podem sobreviver ao _clean."""
+    raw = "\\+w Prends\\+w* \\+w courage\\+w* !"
+    assert etp._clean(raw, "fr") == "Prends courage !"
+
+def test_parse_usfm_luke12_no_plus_w():
+    """Verso real en (Luke 12:2) não pode conter '\\\\+w' no texto servido."""
+    parsed = etp.parse_usfm("\\id LUK\n\\c 12\n\\v 2 \\+w But\\+w* \\+w there\\+w* \\+w is\\+w* nothing covered up.")
+    assert parsed["chapters"]["12"]["2"] == "But there is nothing covered up."
+
+
+# ---------- Espaçamento sujo pós-remoção de \+w (t_1fb85696, engwebp en) ----------
+
+def test_clean_collapses_leftover_double_spaces():
+    raw = "\\+w The\\+w* \\+w Book\\+w* of the Wars."
+    assert etp._clean(raw) == "The Book of the Wars."
+
+
+def test_clean_removes_space_before_punctuation():
+    raw = "\\+w The\\+w* Wars of the LORD , “Vaheb in Suphah"
+    assert etp._clean(raw) == "The Wars of the LORD, \u201cVaheb in Suphah"
+
+
+def test_clean_removes_space_before_period():
+    raw = "even Jacob . Selah ."
+    assert etp._clean(raw) == "even Jacob. Selah."
+
+
+def test_clean_closes_apostrophe_s():
+    raw = "\\+w God\\+w* \u2019s mouth"
+    assert etp._clean(raw) == "God\u2019s mouth"
+
+
+def test_clean_closes_apostrophe_nt():
+    raw = "do n \u2019t"
+    assert etp._clean(raw) == "do n\u2019t"
+
+
+def test_clean_preserves_quote_apostrophes():
+    raw = "he said \u2019 quote \u2019 ends"
+    assert etp._clean(raw) == "he said \u2019 quote \u2019 ends"
+
+
+def test_clean_removes_space_before_close_bracket_and_guillemet():
+    raw = "(word ) and \u00bb end"
+    assert etp._clean(raw) == "(word) and \u00bb end"
+
+
+def test_clean_preserves_fr_nbsp():
+    raw = "Il dit\u00a0: \u00ab Bonjour \u00bb"
+    assert etp._clean(raw) == "Il dit\u00a0: \u00ab Bonjour \u00bb"

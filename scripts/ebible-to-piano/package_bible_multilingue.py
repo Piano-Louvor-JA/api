@@ -5,7 +5,9 @@ Por idioma: {lang}_bible_chapters.tar.gz (JSONs bible_{v}_{b}_{c}.json),
 {lang}_bible_book.json, {lang}_bible_version.json, {lang}_bible_catalog.sha256,
 {lang}_report.json. Falha alto se contagem de arquivos divergir do report.
 """
+import gzip
 import hashlib
+import io
 import json
 import re
 import sys
@@ -58,7 +60,11 @@ def extract_books(migration: str, lang: str) -> list[dict]:
 
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    migration = (ROOT / "src/db/migrations/040_bible_multilingue.sql").read_text()
+    # A migration do repo (040) NÃO contém pt/es (legados via 009/027); o
+    # gerador emite out/migrations/028 com TODOS os 15 idiomas — é a fonte
+    # de ids/nomes do packaging. (rework t_838c6ee4: packaging falhava com
+    # "pt: 0 livros no migration" porque lia o 040 do repo.)
+    migration = (Path(__file__).parent / "out" / "migrations" / "028_bible_multilingue.sql").read_text()
     manifest = {}
     for lang in LANGS:
         rep_path = REPORTS / f"{lang}_report.json"
@@ -84,6 +90,9 @@ def main() -> None:
         rep_ch = {b["book"]: b["chapters"] for b in rep["books_detail"]}
         for b in books:
             real = rep_ch.get(b["book_number"], b["chapters"])
+            # F2 (QA t_dbd7397c/PR #308): o catálogo declara o CONTEÚDO REAL
+            # (maior capítulo presente no tar), não o cânon — ko 1Pe: 4, não 5.
+            b["chapters"] = real
             for ch in range(1, real + 1):
                 n = f"bible_{v}_{b['id_bible_book']}_{ch}.json"
                 p = CACHE / n
@@ -98,9 +107,18 @@ def main() -> None:
             fail(f"{lang}: {total} != report chapters {rep['chapters']}")
 
         tar_path = OUT / f"{lang}_bible_chapters.tar.gz"
-        with tarfile.open(tar_path, "w:gz") as tf:
+        # t_1fb85696: tar determinístico (mtime=0) — regen não deve alterar o sha256
+        # de idiomas cujo conteúdo não mudou (zh/ru/ar/... byte-idênticos).
+        tar_bytes = io.BytesIO()
+        with tarfile.open(fileobj=tar_bytes, mode="w") as tf:
             for n in names:
-                tf.add(CACHE / n, arcname=n)
+                ti = tf.gettarinfo(CACHE / n, arcname=n)
+                ti.mtime = 0
+                ti.uid = ti.gid = 0
+                ti.uname = ti.gname = ""
+                tf.addfile(ti, io.BytesIO((CACHE / n).read_bytes()))
+        with gzip.GzipFile(filename="", mode="wb", fileobj=open(tar_path, "wb"), mtime=0) as gz:
+            gz.write(tar_bytes.getvalue())
 
         # catálogos no shape json_db (compatível com /json_db/{lang}_bible_book)
         (OUT / f"{lang}_bible_book.json").write_text(

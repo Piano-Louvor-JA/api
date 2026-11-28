@@ -20,462 +20,462 @@
       "name": "Księga Rodzaju",
       "chapters": 50,
       "verses": 1533,
-      "sha256": "a1452f066dd91d89a6d561bc72f5be312fe0951a955aca473d8a79c19c986bdf"
+      "sha256": "ca95a35d4fccb7f7147ba1e0b4ba07a9d3aa458e55729ea0f1a554da7f76bc62"
     },
     {
       "book": 2,
       "name": "Wyjścia",
       "chapters": 40,
       "verses": 1213,
-      "sha256": "d350091b57b4758444d103c90a0c1b5542f565938bb18e359d475891569b622c"
+      "sha256": "303e8de3b37d1da4a1eeb0be6c5e4419639a16176189b2473e2d5ceb997bba72"
     },
     {
       "book": 3,
       "name": "Księga Kapłańska",
       "chapters": 27,
       "verses": 859,
-      "sha256": "d8a3347ed3115ac40bb7a8b9f386ba47d3aec05c7c8724a0662fb11a2d6baa86"
+      "sha256": "94eeb1441455a1f573eb0662753a12f589148182a0178f6954ff14a235b6f48a"
     },
     {
       "book": 4,
       "name": "Księga Liczb",
       "chapters": 36,
       "verses": 1288,
-      "sha256": "f886aff836be8d9dcf7f95884d8a9b79053c656d159801539223ec52dddef6b2"
+      "sha256": "c37eca2754cdd39e1f142188f5986225e1714416bc3570c184fa125cfc7484a9"
     },
     {
       "book": 5,
       "name": "Księga Powtórzonego Prawa",
       "chapters": 34,
       "verses": 959,
-      "sha256": "2980916becd1af0c68e4baa9a83f64dc8698c01201b49f704c1d4de536b86c7a"
+      "sha256": "f56d92a56ba53f2fecf7bdc47aab086ef0e2290bf8e497ebb4fe6962722a991c"
     },
     {
       "book": 6,
       "name": "Księga Jozuego",
       "chapters": 24,
       "verses": 658,
-      "sha256": "716bda7e23c0679117f92b31ec7e68725263d62bf492d5e0b1ee449a92f8b997"
+      "sha256": "6910fa26aee69dfd25f046561dbf519eeb2b58e0cc51d697b40ee3663289aabf"
     },
     {
       "book": 7,
       "name": "Księga Sędziów",
       "chapters": 21,
       "verses": 618,
-      "sha256": "0e4c3aa179d38e390bce62c2a3942e05f85ac378013e99cb3306a33f42b99236"
+      "sha256": "f80f45440210dd15a93703bc75eef2f304d7bccacdf475e70f0138bb69e81bac"
     },
     {
       "book": 8,
       "name": "Księga Rut",
       "chapters": 4,
       "verses": 85,
-      "sha256": "c41b947210c7142e230aeaf6f88980ccf2e3cb9d3205232c5e5761f18b32c8c6"
+      "sha256": "2df52fe969d8a72c7c7c4e75036dde82a5a1ff028fcc8fb932d77b1723a753f6"
     },
     {
       "book": 9,
       "name": "I Księga Samuela",
       "chapters": 31,
       "verses": 810,
-      "sha256": "7c0d1543eb3ee326146b5ba9b56a40b3809a82db083dd604f3cd541a9aa30188"
+      "sha256": "8be298e4030a06332c1894d08bffa203c4fec99c5dd027c37146d3cacbc667a6"
     },
     {
       "book": 10,
       "name": "II Księga Samuela",
       "chapters": 24,
       "verses": 695,
-      "sha256": "33efbe9b119d6132651e967bd87ade7bcd20ac4a563ca6cebf23f1dfdce7a712"
+      "sha256": "6ca92f6c143cf48a717e7f905c7568877e1ef7add98a279c4613e94d2692e682"
     },
     {
       "book": 11,
       "name": "I Księga Królewska",
       "chapters": 22,
       "verses": 816,
-      "sha256": "ab8e0f4026f06e19af39f6b5636e63f45c041364391e414a1f506cdb23ce6c47"
+      "sha256": "c962793ac64a79b251f0f246b4552a88d729cf328802bebeb7cce77215c98144"
     },
     {
       "book": 12,
       "name": "II Księga Królewska",
       "chapters": 25,
       "verses": 719,
-      "sha256": "1f8f05d422d536efd06724cc39df66f2f826031353ba509dda0b67558e2be3b8"
+      "sha256": "a742608dd42da4f43a2f26648c699483f72162b09d00e806448b74205bf4cadd"
     },
     {
       "book": 13,
       "name": "I Księga Kronik",
       "chapters": 29,
       "verses": 942,
-      "sha256": "d311e05295d619937f3699a800831c22879c82a332986f8722c76875371827bc"
+      "sha256": "21aba90dc208decf602d74b131245455222845a3a1acab3428ce375c4d5a51c0"
     },
     {
       "book": 14,
       "name": "II Księga Kronik",
       "chapters": 36,
       "verses": 822,
-      "sha256": "d08a3c6678123c83caaa34b97c28c7213fb0c8903d8c528fe862c01281bdf5f9"
+      "sha256": "40473f0d891c7f20fa94f793e52b6a637c739ec36754345c86ec2c5cff7d1682"
     },
     {
       "book": 15,
       "name": "Księga Ezdrasza",
       "chapters": 10,
       "verses": 280,
-      "sha256": "fa22e69adf51f871eebe305f1942b216400f962aaed6b05cecbb65a8eed4be97"
+      "sha256": "eacedc8a2c7c4989478f085aaa42c9f5749e8289d33d7bebc4163cb4b12d1b45"
     },
     {
       "book": 16,
       "name": "Księga Nehemiasza",
       "chapters": 13,
       "verses": 406,
-      "sha256": "60d64633913aa4442b5c9350380ec123c8a8e20deb8e49d99b541c6ff14cfc42"
+      "sha256": "f6c7012f15b8df1b902f91a23816ee439e83b5780af0204ffcb1b382d385483e"
     },
     {
       "book": 17,
       "name": "Księga Estery",
       "chapters": 10,
       "verses": 167,
-      "sha256": "2be0a7b3496b2bf30ff93830687c19a8dddb7ecacdd2c0c4457f34aa07803f4f"
+      "sha256": "4696dfbb01958947965b8d4c291145ef4cbf7249956144b11a5e679d2405d27a"
     },
     {
       "book": 18,
       "name": "Księga Hioba",
       "chapters": 42,
       "verses": 1070,
-      "sha256": "e90629e73c77acf769be502f8486cf7314c6240d74af24d8b34ea1d5fe4eb6d8"
+      "sha256": "8e3aa03a646f0f6987f746d1a122402b5bd46cf1deceb6b4a2713ad213f214cc"
     },
     {
       "book": 19,
       "name": "Księga Psalmów",
       "chapters": 150,
       "verses": 2461,
-      "sha256": "1e33b9348f5c4cf0321583cd171ccf4bc4a991a82137b5e3816241e405601293"
+      "sha256": "458ba8a6862d2ab6e3c08981bf5c4828a4692c53edc58eb54f9d6bbd2287527c"
     },
     {
       "book": 20,
       "name": "Księga Przysłów",
       "chapters": 31,
       "verses": 915,
-      "sha256": "ee9b2193337506b109dca90cc5fd29f33bf55307573a15ec260e1921d330b5c7"
+      "sha256": "39b712b28144a7afa6533d6967f5e77754f8f4f6478aef741559028a8a894875"
     },
     {
       "book": 21,
       "name": "Księga Kaznodziei",
       "chapters": 12,
       "verses": 222,
-      "sha256": "60fbab5afef6dd4954cb0e443af6c35f86359d54f206e870d79558a1a32e285e"
+      "sha256": "480aabe3a16f6ddde32ae7b0dae43a495c432eb52f96857900c61db07a7c1c8f"
     },
     {
       "book": 22,
       "name": "Pieśń nad Pieśniami",
       "chapters": 8,
       "verses": 117,
-      "sha256": "6f3250efbf497a1e552497dc8208c2fdf362d8f19f4d19a5bbef58dc452b8cca"
+      "sha256": "7ef5d8b628a6c80d2f878476340a71abc9f9b5d9400da0cb7f0260c70f2709c9"
     },
     {
       "book": 23,
       "name": "Księga Izajasza",
       "chapters": 66,
       "verses": 1292,
-      "sha256": "ed5209885edcbd150ada6c585def4a63616a6500d88c189643ddeb043b773482"
+      "sha256": "5b1ac4f190724fcf7d41ef116fb225332527fe206363fc32de70ca1a8b1acaa2"
     },
     {
       "book": 24,
       "name": "Księga Jeremiasza",
       "chapters": 52,
       "verses": 1364,
-      "sha256": "24b738f9558d2569ad34e7a1b83a00a0c7dec47db9f5250ba91479970ab60228"
+      "sha256": "cbd48059e98e94bfdf7b918e55fb5b6db38b1142690619298ce46e3761924d2b"
     },
     {
       "book": 25,
       "name": "Lamentacje",
       "chapters": 5,
       "verses": 154,
-      "sha256": "3a9d6f1fdb0487caff0573f23098adac3b1a6955ba7b3ca17ae7f7c3f3a287aa"
+      "sha256": "9e5101ee3f991fc1c54c8c5756251e660f624f64c491e6afc70872ff4d8b4b17"
     },
     {
       "book": 26,
       "name": "Księga Ezechiela",
       "chapters": 48,
       "verses": 1273,
-      "sha256": "989f6c63b6e1f8a6e1fc1b122f06e8fadff07fe46623ceee4aa1c6d51f97b92e"
+      "sha256": "16e3a051296c205ad1f25c3e74444bd30354fd9198e77f6ff8a9b2fbf567b3a7"
     },
     {
       "book": 27,
       "name": "Księga Daniela",
       "chapters": 12,
       "verses": 357,
-      "sha256": "d6c1d6f6f9b2a7fea77eb8ef2402ef63b77356dd6e6e9d4b4078619148ef07ff"
+      "sha256": "c3263704d184e7e3a22c228d20369f94bd9c7434db310b5d7a216b1d0f58a9d7"
     },
     {
       "book": 28,
       "name": "Księga Ozeasza",
       "chapters": 14,
       "verses": 197,
-      "sha256": "11e8285a846656f826867a97863c4b3b88bf1a43776c2c608a03476b6f8265f9"
+      "sha256": "36493c36c4a756bab5f2e2b04d42dd0183c08edf957d3834ed42d6afb5929a8c"
     },
     {
       "book": 29,
       "name": "Księga Joela",
       "chapters": 3,
       "verses": 73,
-      "sha256": "5b06f91178a0dd324d00adf4649889318c6e40de9b1fd8a3a30dbab06a4bd1d9"
+      "sha256": "de03e937745ddd8057b8ca0bace0f874277eb7a7ed5cc6ff3c918a0fd29588d7"
     },
     {
       "book": 30,
       "name": "Księga Amosa",
       "chapters": 9,
       "verses": 146,
-      "sha256": "71338a21ca6857af844bcbf0f430a6e79d13ad88f28a1843b5287455330d47d8"
+      "sha256": "abe696d04f483640f3567f2e2e6f69087e2db0bafc993ffb5d7f36349cf4fa29"
     },
     {
       "book": 31,
       "name": "Księga Abdiasza",
       "chapters": 1,
       "verses": 21,
-      "sha256": "d4365c863ed613f70dc1e0040e146e0fb0f503bb537ba600f82204fa5f9902f2"
+      "sha256": "4088895de2543f7608ff251888d66fe94fd78fd4dd5fa6c15a8ad22431a464fd"
     },
     {
       "book": 32,
       "name": "Księga Jonasza",
       "chapters": 4,
       "verses": 48,
-      "sha256": "4286fa8d5891e6940bedba7cec599d481a17874f8943b68fb50c1a31d14dfc6c"
+      "sha256": "11a7b3d2a9409a1670e461e8ff27c454693a969fcf80479fcc439e053c494039"
     },
     {
       "book": 33,
       "name": "Księga Micheasza",
       "chapters": 7,
       "verses": 105,
-      "sha256": "e3318635f08b83f6aaaf741dac54100d446107a68e8fad5a0eda1a373caa174a"
+      "sha256": "ba70a705ef2558256031a599552e0e2710763103c86983e1e729077299ca522f"
     },
     {
       "book": 34,
       "name": "Księga Nahuma",
       "chapters": 3,
       "verses": 47,
-      "sha256": "09e6b196df7d2723f136082a40f63d6661a65628a2ae506bf4dfb1e3aec54f57"
+      "sha256": "3e01fb0da4f570b738a036736b371e720469b61897de8b86b04ea33777dac007"
     },
     {
       "book": 35,
       "name": "Księga Habakuka",
       "chapters": 3,
       "verses": 56,
-      "sha256": "c6c74d0b82d013fd45778aae3f5ca521fcad5badb3babf132b1d2b403ef77521"
+      "sha256": "8dabc1d205d661f10549e7ed6c3d59287cc562b38b92c591e8e6d5f2066bbd5e"
     },
     {
       "book": 36,
       "name": "Księga Sofoniasza",
       "chapters": 3,
       "verses": 53,
-      "sha256": "8af53d00feb0059f45de611fc5351a1a0bc73664634b2679524ffd22231acf29"
+      "sha256": "8d6b21319a4c0d4ac22f021fbdf4f7c03423a857ecc7a447093f0abdf9078a5f"
     },
     {
       "book": 37,
       "name": "Księga Aggeusza",
       "chapters": 2,
       "verses": 38,
-      "sha256": "78a33e4aa6455cdaf252a3349bb940ea134381191d4496d98dacb63817c5db72"
+      "sha256": "5438e6fe26b2e7bad87142dfa37f33b6cb58409b211252af4dd8b3c26130b476"
     },
     {
       "book": 38,
       "name": "Księga Zachariasza",
       "chapters": 14,
       "verses": 211,
-      "sha256": "8d8e8dc83bdb6670294b2bacc05f7e3b03fbbdbac7a8a94ac98bfa2ba7a4a809"
+      "sha256": "0b11295970e91a2167dd647eab2d02f07167e66c97eac4875117026991255727"
     },
     {
       "book": 39,
       "name": "Księga Malachiasza",
       "chapters": 4,
       "verses": 55,
-      "sha256": "d478533a728d804b4687d2a97f26814ccf79938c10e014945d3158b7b8064220"
+      "sha256": "0b98d9c4e28cd427bd6c38494bdcca5991d0e24c395eb5acfd908764a117d51f"
     },
     {
       "book": 40,
       "name": "Ewangelia Mateusza",
       "chapters": 28,
       "verses": 1071,
-      "sha256": "82b00bd01e187031f18b507c44ff78155fc011a9efd9d27a2fbaa28f614bbce7"
+      "sha256": "c380ed367bd7386744db8da49c69a7f496883b9185acfabc2bb24b582d62b822"
     },
     {
       "book": 41,
       "name": "Ewangelia Marka",
       "chapters": 16,
       "verses": 678,
-      "sha256": "87e62a6ef57fb8592d287e292564b49a1c1ceef9f419644e7864d7ee5c9e1f7a"
+      "sha256": "4bf71d9956c6693884a60c399bc3182f5ccde19f2305f93e0b382ae9ee7b36b6"
     },
     {
       "book": 42,
       "name": "Ewangelia Łukasza",
       "chapters": 24,
       "verses": 1151,
-      "sha256": "266c6bc3567bdb6eb08986ad7c9fdbfcf426aeb330db9795897cb84e4b59f5a1"
+      "sha256": "f0804f15907b77b8b0f6704426189bed777c40d4f972716b7e58883c781a826b"
     },
     {
       "book": 43,
       "name": "Ewangelia Jana",
       "chapters": 21,
       "verses": 879,
-      "sha256": "8a657bdd3e7b162dda57f29a2ed7ec49e8bcb5758d6a3389ab39a1560ec43a3d"
+      "sha256": "a2a676ba8bd815eadbade56e59873afc0ffaa79836a7beda97560db7038d2e74"
     },
     {
       "book": 44,
       "name": "Dzieje Apostolskie",
       "chapters": 28,
       "verses": 1007,
-      "sha256": "313b69ac1d3d020914e08269cd1cd2046478273a26e5d4cfd4d46ecd1a84065f"
+      "sha256": "fee9737b5480449b5ad2531a19c7370ba901ebd904d8596f06444546c17beb68"
     },
     {
       "book": 45,
       "name": "List do Rzymian",
       "chapters": 16,
       "verses": 433,
-      "sha256": "b14ec324a784bac78631ec73297bafa043930b560a301f0a3ff4a0862f619c4a"
+      "sha256": "79fea47634c8842401642bab19d3df7f5f87ba31900e42acecad95e1e1bc6693"
     },
     {
       "book": 46,
       "name": "I List do Koryntian",
       "chapters": 16,
       "verses": 437,
-      "sha256": "80852e71e916f007ca2bf3f2b5816f3ce3d085a591177da7c4e316750e203ea3"
+      "sha256": "0d8fe21fd22021c12d58559d631d9fe49df073545f7d144b7a245d748dd1f6da"
     },
     {
       "book": 47,
       "name": "II List do Koryntian",
       "chapters": 13,
       "verses": 257,
-      "sha256": "5dd063273a96bbe74204587520293264a0a159fdfd46760c7c920e571169e0f2"
+      "sha256": "275f7292f3a5aa73f03993fda9a25d3795242cfaa729074238a707e37bf74f0e"
     },
     {
       "book": 48,
       "name": "List do Galacjan",
       "chapters": 6,
       "verses": 149,
-      "sha256": "3aeac5b35f5d3da173a0f4707aad14f90d74ba47d6868abf41cccf12bc1763e3"
+      "sha256": "db9a2fdf825fdad2e2a3a3558542e4c78a20aa74859f85f7127a53eed2ca9337"
     },
     {
       "book": 49,
       "name": "List do Efezjan",
       "chapters": 6,
       "verses": 155,
-      "sha256": "ea9a5cdcb8b9b0482d1d9fc01743d44f11cd22ce0e5f2ab00a7f19cc010cd2e7"
+      "sha256": "f79b2b2723f39e505d42fdcac9c51d382a9605be3b61c95837f63d6a0f927e34"
     },
     {
       "book": 50,
       "name": "List do Filipian",
       "chapters": 4,
       "verses": 104,
-      "sha256": "e5392e5b8cb6609faddf5f1f51c2beacfa1fac385eb38e927d3e46f24a621839"
+      "sha256": "cac66d00b63f93e0cc6292e3cd6294cc276a0fab2ca50860983ccf9144e991a4"
     },
     {
       "book": 51,
       "name": "List do Kolosan",
       "chapters": 4,
       "verses": 95,
-      "sha256": "204267fb957343c17e7b9a78633a55b88d16bbe2b2689948115edd023493c638"
+      "sha256": "9f0522f48591c13747aa2b84ae143a430b5be99100393ae4dac875613cae7115"
     },
     {
       "book": 52,
       "name": "I List do Tesaloniczan",
       "chapters": 5,
       "verses": 89,
-      "sha256": "51d1dcc7d284042db04f36c5c6b4107b06484ba5fbf9274c047447df2e595dfa"
+      "sha256": "f047e0a0fffce259ac28e7f0198112cd8cdec15d12017c6769f906668dd3ac2b"
     },
     {
       "book": 53,
       "name": "II List do Tesaloniczan",
       "chapters": 3,
       "verses": 47,
-      "sha256": "0ca0febfdae0fee0bdce34c75034cd71fb432d166061f1e7a239c299cf5f32aa"
+      "sha256": "3112d0e152866471147406f2711dc1ad12d3be14248a2612202a4aa7f9729df3"
     },
     {
       "book": 54,
       "name": "I List do Tymoteusza",
       "chapters": 6,
       "verses": 113,
-      "sha256": "11d922a3fd786f5a446d3b61e9aa121a1c65a783ddd25514735ceee3b3c5dd19"
+      "sha256": "9b7bf8930729d7478e7cb7a89778da2352f54dc509910666686207a485128cef"
     },
     {
       "book": 55,
       "name": "II List do Tymoteusza",
       "chapters": 4,
       "verses": 83,
-      "sha256": "7942d31e51cc40010983d17c011d1f69f6d9f1f15ca13c149918954a6f0d10b2"
+      "sha256": "6d1bfc79be5e1f471a76a7f8da9cc5dfd529c103c4f60f5081ce23a76d957854"
     },
     {
       "book": 56,
       "name": "List do Tytusa",
       "chapters": 3,
       "verses": 46,
-      "sha256": "57811d0a194edbf122b0b8cf489c98f6e8285a6990d72187488dae9baf0e8be3"
+      "sha256": "dcb4ceb63314b526d9450f49edb5664f20258ced6f3b9b339ea6c153781fd3e5"
     },
     {
       "book": 57,
       "name": "List do Filemona",
       "chapters": 1,
       "verses": 25,
-      "sha256": "accfe3913ade020250dd9bbf60d1271db102ed058a97fcfba3a363e075427999"
+      "sha256": "1792cf2fdacd56a9260287f0783cd7d854ce538e741f07174423b43751e37890"
     },
     {
       "book": 58,
       "name": "List do Hebrajczyków",
       "chapters": 13,
       "verses": 303,
-      "sha256": "322dd72ef580ded345a9f7e171aa28473d67d7056844ff4b845e030b1d62ffdc"
+      "sha256": "bd120081a5c46b8f072c150170fde464530e6da133ab5255096e890014803ee8"
     },
     {
       "book": 59,
       "name": "List Jakuba",
       "chapters": 5,
       "verses": 108,
-      "sha256": "376044e7350f7520cc4d35e0b325cbd2ff2e9a10d40b1862c3ccc066d5be6df7"
+      "sha256": "07a4884a0c716d35501f69f731832bb4ea67554436ff4257faa250a2d19767d7"
     },
     {
       "book": 60,
       "name": "I List Piotra",
       "chapters": 5,
       "verses": 105,
-      "sha256": "5cf42b73d79c24f2815c04e5f0a8e1c742125799b1816345fe49d39eeb12ebc5"
+      "sha256": "33d5e87fef9b78718277e642ff3dafeceb9b40dc0c0833fc1be50de4d0fbc534"
     },
     {
       "book": 61,
       "name": "II List Piotra",
       "chapters": 3,
       "verses": 61,
-      "sha256": "bd2d961661806a18621c322ba1d9a976816cd5f1a3db84272368a6744e66d29d"
+      "sha256": "517b2174aca959e6d20ada4891252cc81f6fe570d57d68adfd621ca23e16637c"
     },
     {
       "book": 62,
       "name": "I List Jana",
       "chapters": 5,
       "verses": 105,
-      "sha256": "6cc14b6db2ae7ee6adf1469b59dcd21d5c47a13676a3e2c6951cf0e7d976e75b"
+      "sha256": "97f21fe636a2ceaf21fbfcb9ed0177f1d6df24f052cfe212f128e67eb56f136f"
     },
     {
       "book": 63,
       "name": "II List Jana",
       "chapters": 1,
       "verses": 13,
-      "sha256": "2fb3d447943abe26ba45d0a9bc3e7c9ad2e983856fc5e84ac10af033f45f67ab"
+      "sha256": "08690a1c44487a5e4026ef3ef6acd1a43af241da9d9bbe0fe511ceb8541b8cd2"
     },
     {
       "book": 64,
       "name": "III List Jana",
       "chapters": 1,
       "verses": 14,
-      "sha256": "949b2550cf46a491efc222b3381c3bb93bffce2d2bb6d273f04ff79d91f82c2a"
+      "sha256": "b4fa49355c829a81a8ea1842eed16afaac2c8e78e05fc0049f2102b14c9d8a31"
     },
     {
       "book": 65,
       "name": "List Judy",
       "chapters": 1,
       "verses": 25,
-      "sha256": "dbf73efb97762737f9b32719e5e3a0376c28cc47a907515baf940d7b1fcc0cb4"
+      "sha256": "bff4c651b21414d2b4fc507976a82df620d68a6d3ff442af82e8526370529d9a"
     },
     {
       "book": 66,
       "name": "Objawienie Jana",
       "chapters": 22,
       "verses": 404,
-      "sha256": "4359366c836ea0415d25352186ab3227cda051adad13e1a97b8c5e0995b3eb87"
+      "sha256": "515b7679a0fc584f873c8145dd4dad5859e7267d0479cba2cac6f6bc4f61c7de"
     }
   ],
   "source_sha256": "e86daaba9b4201238b6735c8bfc1d21b69429c9151685133dc22d9f5f81e9aaa"

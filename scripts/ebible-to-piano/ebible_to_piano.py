@@ -93,13 +93,48 @@ _VERSE_RE = re.compile(r"^\\v\s+(\d+)\S*\s*(.*)", re.M)
 _MARKER_RE = re.compile(r"\\[a-zA-Z0-9]+\s*|\s*\\p\b")
 
 
-def _clean(text: str) -> str:
+def _clean(text: str, lang: str | None = None) -> str:
     """Strip USFM markers, footnotes/refs content, normalize whitespace."""
+    # F1 (QA t_dbd7397c/PR #308): atributos interlinear (|strong="..." etc.)
+    # DEVEM sair ANTES dos markers — \w Word|strong="H8064"\w* vira 'Word'.
+    text = re.sub(r"\|strong=\"[^\"]*\"\*?", "", text)
+    # t_af6f8556 (round 2, takeover orquestrador): marcadores de PALAVRA
+    # (\w \w* \wj \wj* \+w \+w* \+add…) são transparentes — viram UM espaço, e o
+    # colapso de espaços no final resolve. Isso preserva o espaçamento de
+    # ja/zh/ko/pt (HEAD já estava certo para eles).
+    # Único caso especial: marcador colado em APÓSTROFO/ASPAS DE ABERTURA
+    # (`\+w*'\+w allume` = elisão fr; `\'\+w L|..`, `“\+w It`, `«\xa0\+w Il`):
+    # aí o espaço seguinte pertence ao marcador e sai — senão vira `n ' allume`
+    # e `“ It`.
+    text = re.sub(r"(['’«“‘]\\?)\\[+]?[a-zA-Z0-9]+\d* (?=\w)", r"\1", text)
+    text = re.sub(r"(«\xa0)\\[+]?[a-zA-Z0-9]+\d* (?=\w)", r"\1", text)
+    # fechador de palavra seguido de apóstrofo de elisão (`\+w*'`): o fechador
+    # não pode virar espaço — some.
+    text = re.sub(r"\\(?:\+w|wj?)\*(?=['’])", "", text)
+    text = re.sub(r"\\'", "'", text)  # apóstrofo escapado → literal
+    # rework: \+w word\+w* / \+add ... \+add* (wordlist, USFM extended) não podem
+    # sobreviver — removem-se os MARKERS mantendo o TEXTO (bible_100_241_12 tinha
+    # '\\\\+w But\\\\+w* \\\\+w there\\\\+w*' servido literal).
+    text = re.sub(r"\\\+[a-zA-Z0-9]+(\d*)\*?\s*", " ", text)
     text = re.sub(r"\\f\s+\+.*?\\f\*", "", text, flags=re.S)  # footnotes completos
     text = re.sub(r"\\f\s+[^\\]*(\\f\*)?", "", text)  # \f aberto sem fechar
     text = re.sub(r"\\x\s+[^\\]*(\\x\*)?", "", text)  # cross-refs
     text = re.sub(r"\\bdit\s+\([^)]*\)\s*(\\bdit\*)?", "", text)  # refs parênteses
+    text = re.sub(r"\\[a-zA-Z0-9]+(\d*)\*", "", text)  # F1: fechadores \w* etc (sem comer espaço)
     text = re.sub(r"\\[a-zA-Z0-9]+(\d*)\s*", "", text)  # markers
+    # t_1fb85696: espaçamento sujo residual pós-remoção de \+w/notas (en ~1.992
+    # versos). Normaliza SEM tocar \xa0 (tipografia fr correta: « » e :).
+    APOS = "\u2019"
+    text = re.sub("(\\S)[ 	]+" + APOS + "(s|t)\\b", "\\1" + APOS + "\\2", text)  # God ’s → God’s
+    text = re.sub("(\\w) n " + APOS + "t\\b", "\\1 n" + APOS + "t", text)  # do n ’t → do n’t
+    # fr: pontuação alta (! ? ; : ») mantém espaço — tipografia francesa legítima.
+    if lang == "fr":
+        text = re.sub(r"[ 	]+([,.)])", r"\1", text)
+    else:
+        text = re.sub(r"[ 	]+([,.!?;:])", r"\1", text)  # espaço antes de pontuação
+        text = re.sub(r"[ 	]+\)", ")", text)  # antes de )
+    # »/« nunca: guillemets pertencem à tipografia fr (espaço é legítimo)
+    text = re.sub(r"[ 	]{2,}", " ", text)  # colapso espaços múltiplos
     text = re.sub(r"[ \t]+", " ", text)
     return text.strip()
 
@@ -118,7 +153,7 @@ def _line_verses(line: str) -> list[tuple[str, str]]:
     return out
 
 
-def parse_usfm(raw: str) -> dict:
+def parse_usfm(raw: str, lang: str | None = None) -> dict:
     """USFM/USFX-text → {id, toc1, toc2, chapters: {ch: {verse: text}}}."""
     if raw.startswith("\ufeff"):
         raw = raw.lstrip("\ufeff")
@@ -129,11 +164,12 @@ def parse_usfm(raw: str) -> dict:
     cur_ch: str | None = None
     buf: list[str] = []
     verse_num: str | None = None
+    in_open_note = False  # footnote/cross-ref aberta (sem \f*/\x*): descartar até \v/\c/EOF
 
     def flush() -> None:
         nonlocal verse_num, buf
         if verse_num is not None and cur_ch is not None:
-            text = _clean(" ".join(buf))
+            text = _clean(" ".join(buf), lang)
             if text:
                 chapters.setdefault(cur_ch, {})[verse_num] = text
         verse_num, buf = None, []
@@ -142,6 +178,20 @@ def parse_usfm(raw: str) -> dict:
         line = line.strip()
         if not line:
             continue
+        # reviewer t_8dbd1429: \f/\x aberta — descarta a nota INTEIRA (até \v/\c/EOF)
+        if in_open_note:
+            if line.startswith(("\\v ", "\\c ")):
+                in_open_note = False  # cai no handler normal abaixo
+            else:
+                continue  # conteúdo da nota: descartado
+        _note_open_re = r"\\[fx](?:\s|o\s|t\s|q\s|k\s|r\s|ot\s|nt\s|dc\s)"
+        _note_closed_re = r"\\[fx]\*"
+        if re.search(_note_open_re, line) and not re.search(_note_closed_re, line):
+            # nota aberta: guarda só o texto antes dela e entra em modo discard
+            in_open_note = True
+            line = re.split(_note_open_re, line, maxsplit=1)[0].strip()
+            if not line:
+                continue
         if line.startswith("\\id "):
             book_id = line.split(None, 1)[1].strip()
         elif line.startswith("\\toc1 "):
@@ -312,7 +362,7 @@ def process_language(lang: str, outdir: Path, cache: Path, dry_run: bool = False
         book = usfm_code_to_book(code)
         if book is None:
             continue
-        parsed = parse_usfm(text)
+        parsed = parse_usfm(text, lang)
         books[book] = parsed
     # completude G1: livro ausente = FAIL; divergência de capítulos = WARN (§7)
     missing = [b for b in range(1, 67) if b not in books]
