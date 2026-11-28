@@ -140,6 +140,35 @@ describe("B1.2 delta: PATCH status + reopen_count", () => {
     // ticket existe em tenant 'a' mas global_operator tem tenantId null (?? "")
     expect(res.status).toBe(404);
   });
+
+  it("POST /escalation/run admin → 200 {escalated} + audit", async () => {
+    const res = await app.request("/v1/tickets/escalation/run", {
+      method: "POST",
+      headers: authHeader("uid-admin"),
+    });
+    expect(res.status).toBe(200);
+    const j = (await res.json()) as { escalated: number };
+    expect(j.escalated).toBeGreaterThanOrEqual(0);
+    const audit = getDb()
+      .prepare(
+        "SELECT action FROM audit_events WHERE action = 'ticket.escalation_run'",
+      )
+      .get();
+    expect(audit).toBeTruthy();
+  });
+
+  it("POST /escalation/run não-admin → 403", async () => {
+    getDb()
+      .prepare(
+        "INSERT INTO tenant_memberships (tenant_id, principal_id, role) VALUES ('a', 'uid-member', 'member')",
+      )
+      .run();
+    const res = await app.request("/v1/tickets/escalation/run", {
+      method: "POST",
+      headers: authHeader("uid-member"),
+    });
+    expect(res.status).toBe(403);
+  });
 });
 
 describe("B1.2 delta: escalada P1 SLA", () => {
