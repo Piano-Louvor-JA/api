@@ -5,6 +5,7 @@
 import { randomUUID } from "node:crypto";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getDb } from "../../db/connection.js";
+import { escalateBreached } from "./escalation.js";
 import { suggestAiResponse } from "./tickets.ai.js";
 import {
   assertAdmin,
@@ -670,6 +671,37 @@ export function buildTicketsRoutes(): OpenAPIHono<TicketsEnv> {
       after: { status },
     });
     return c.json({ ok: true }, 200);
+  });
+
+  // ===== escalada P1 SLA — job manual/cron (SPEC-B1.1 §6.1) =====
+  app.use("/escalation/*", ticketsAuthMiddleware);
+
+  const escalationRunRoute = createRoute({
+    method: "post",
+    path: "/escalation/run",
+    summary: "Dispara job de escalada P1 SLA (admin; cron externo)",
+    tags: ["tickets"],
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: z.object({ escalated: z.number().int() }),
+          },
+        },
+        description: "Quantidade escalada",
+      },
+      ...errorResponses(401, 403),
+    },
+  });
+  app.openapi(escalationRunRoute, (c) => {
+    const auth = c.get("ticketsAuth");
+    assertAdmin(auth);
+    const escalated = escalateBreached();
+    audit("ticket.escalation_run", {
+      actor: auth.uid,
+      after: { escalated },
+    });
+    return c.json({ escalated }, 200);
   });
 
   return app;
