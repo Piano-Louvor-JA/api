@@ -1,7 +1,1 @@
-[
-  {
-    "id_bible_version": 101,
-    "name": "Sainte Bible libre pour le monde",
-    "abbreviation": "SBL"
-  }
-]
+[{"id_bible_version":101,"name":"Sainte Bible libre pour le monde","abbreviation":"SBL"},{"id_bible_version":207,"name":"Louis Segond 1910","abbreviation":"LSG"},{"id_bible_version":208,"name":"Ostervald","abbreviation":"FOB"},{"id_bible_version":209,"name":"Bible J.N. Darby","abbreviation":"JND"}]

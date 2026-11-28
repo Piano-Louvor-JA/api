@@ -94,13 +94,24 @@ _MARKER_RE = re.compile(r"\\[a-zA-Z0-9]+\s*|\s*\\p\b")
 
 
 def _clean(text: str) -> str:
-    """Strip USFM markers, footnotes/refs content, normalize whitespace."""
+    """Strip USFM markers, footnotes/refs content, strong numbers, normalize whitespace."""
     text = re.sub(r"\\f\s+\+.*?\\f\*", "", text, flags=re.S)  # footnotes completos
     text = re.sub(r"\\f\s+[^\\]*(\\f\*)?", "", text)  # \f aberto sem fechar
     text = re.sub(r"\\x\s+[^\\]*(\\x\*)?", "", text)  # cross-refs
     text = re.sub(r"\\bdit\s+\([^)]*\)\s*(\\bdit\*)?", "", text)  # refs parênteses
+    # anotações eBible inline (repro t_5582d47e: en/es/fr com strong numbers)
+    text = re.sub(r'\|strong="[^"]*"\*?', " ", text)  # |strong="H1234"*
+    text = re.sub(r"\\\+w\*?\s?", " ", text)  # \+w
+    text = re.sub(r"\\k\s\+?", " ", text)  # \k
+    text = re.sub(r"\*?,?\s*\d+:\d+[^*]{0,120}\*", " ", text)  # *refs* de nota
     text = re.sub(r"\\[a-zA-Z0-9]+(\d*)\s*", "", text)  # markers
+    text = re.sub(r"\s*\*", "", text)  # asteriscos órfãos de anotação
     text = re.sub(r"[ \t]+", " ", text)
+    # nbsp: borda antes de pontuação/aspas de fechamento (tipografia fr interna
+    # é preservada pelo fix-format-leaks; aqui o pipeline em pt/limpo)
+    text = re.sub(r"[\u00a0 ]+([”’.,;:!?])", r"\1", text)
+    text = re.sub(r"([“‘])[\u00a0 ]+", r"\1", text)
+    text = re.sub(r" +\)", ")", text)
     return text.strip()
 
 
@@ -281,9 +292,9 @@ def sha256_file(p: Path) -> str:
 
 # ---------------------------------------------------------------- pipeline
 
-def load_usfm_texts(lang: str, cache: Path) -> dict[str, str]:
+def load_usfm_texts_t(t, cache: Path) -> dict[str, str]:
     """Retorna {BOOKCODE: usfm_text}. eBible zip ou fetch.bible por livro."""
-    t = BY_LANG[lang]
+    lang = t.lang
     texts: dict[str, str] = {}
     if t.ebible_code is None:
         for code in USFM_BOOK_CODES:
@@ -305,7 +316,12 @@ def load_usfm_texts(lang: str, cache: Path) -> dict[str, str]:
 
 def process_language(lang: str, outdir: Path, cache: Path, dry_run: bool = False) -> dict:
     t = BY_LANG[lang]
-    texts = load_usfm_texts(lang, cache)
+    return process_translation(t, outdir, cache, dry_run)
+
+
+def process_translation(t, outdir: Path, cache: Path, dry_run: bool = False) -> dict:
+    lang = t.lang
+    texts = load_usfm_texts_t(t, cache)
     books = {}
     problems = []
     for code, text in texts.items():

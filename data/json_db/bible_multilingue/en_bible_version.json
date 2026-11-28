@@ -1,7 +1,1 @@
-[
-  {
-    "id_bible_version": 100,
-    "name": "World English Bible (2020 stable)",
-    "abbreviation": "WEBP"
-  }
-]
+[{"id_bible_version":100,"name":"World English Bible (2020 stable)","abbreviation":"WEBP"},{"id_bible_version":201,"name":"King James Version","abbreviation":"KJV"},{"id_bible_version":202,"name":"American Standard Version (1901)","abbreviation":"ASV"},{"id_bible_version":203,"name":"Darby Translation","abbreviation":"DBY"},{"id_bible_version":204,"name":"Bible in Basic English","abbreviation":"BBE"}]
