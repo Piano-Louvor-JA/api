@@ -29,6 +29,21 @@ const MULTI_VERSION_TO_LANG: ReadonlyMap<string, string> = new Map([
   ["110", "zh"],
   ["111", "ar"],
   ["112", "hi"],
+  // SPEC-v2 §4.1 — 2ª+ versões por idioma (migration 041)
+  ["200", "pt"],
+  ["201", "en"],
+  ["202", "en"],
+  ["203", "en"],
+  ["204", "en"],
+  ["205", "es"],
+  ["206", "es"],
+  ["207", "fr"],
+  ["208", "fr"],
+  ["209", "fr"],
+  ["210", "ru"],
+  ["211", "uk"],
+  ["212", "it"],
+  ["213", "nl"],
 ]);
 
 /** Idiomas que têm tarball multilíngue (falso → upstream). */
@@ -139,4 +154,23 @@ export function tarballStamp(lang: string): string | null {
 /** Reset do índice (testes). */
 export function _resetTarballIndexForTest(): void {
   indexCache.clear();
+}
+
+/**
+ * SPEC-v2 §4.2: catálogo multi-versão (bible_book/bible_version) do idioma,
+ * lido do JSON empacotado ao lado do tarball — v1 em [0], novas versões
+ * depois. Retorna null se o arquivo não existir (rota cai no fluxo DB).
+ */
+export function readBibleCatalogFile(
+  lang: string,
+  kind: "bible_book" | "bible_version",
+): string | null {
+  try {
+    return readFileSync(
+      `${resolveBibleTarballDir()}/${lang}_${kind}.json`,
+      "utf-8",
+    );
+  } catch {
+    return null;
+  }
 }

@@ -126,8 +126,28 @@ describe("es_bible_* — paridade com o mirror oficial (api#76)", () => {
     const versions = db
       .prepare("SELECT COUNT(*) c FROM bible_versions WHERE language='es'")
       .get() as any;
-    expect(books.c).toBe(66);
-    expect(versions.c).toBe(3);
+    // SPEC-v2: migration 041 adiciona livros 2500+/2600+ e versões 205/206
+    // ao ES — o bloco legacy do mirror (027) segue com 66/3 exatos.
+    expect(
+      (
+        db
+          .prepare(
+            "SELECT COUNT(*) c FROM bible_books WHERE id_language='es' AND id_book BETWEEN 67 AND 132",
+          )
+          .get() as any
+      ).c,
+    ).toBe(66);
+    expect(books.c).toBe(198);
+    expect(
+      (
+        db
+          .prepare(
+            "SELECT COUNT(*) c FROM bible_versions WHERE language='es' AND CAST(id_version AS INTEGER) IN (10,11,12)",
+          )
+          .get() as any
+      ).c,
+    ).toBe(3);
+    expect(versions.c).toBe(5);
   });
 
   it("manifest /json_db lista os catálogos ES", async () => {

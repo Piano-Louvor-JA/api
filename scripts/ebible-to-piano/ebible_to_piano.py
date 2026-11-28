@@ -292,9 +292,9 @@ def sha256_file(p: Path) -> str:
 
 # ---------------------------------------------------------------- pipeline
 
-def load_usfm_texts(lang: str, cache: Path) -> dict[str, str]:
+def load_usfm_texts_t(t, cache: Path) -> dict[str, str]:
     """Retorna {BOOKCODE: usfm_text}. eBible zip ou fetch.bible por livro."""
-    t = BY_LANG[lang]
+    lang = t.lang
     texts: dict[str, str] = {}
     if t.ebible_code is None:
         for code in USFM_BOOK_CODES:
@@ -316,7 +316,12 @@ def load_usfm_texts(lang: str, cache: Path) -> dict[str, str]:
 
 def process_language(lang: str, outdir: Path, cache: Path, dry_run: bool = False) -> dict:
     t = BY_LANG[lang]
-    texts = load_usfm_texts(lang, cache)
+    return process_translation(t, outdir, cache, dry_run)
+
+
+def process_translation(t, outdir: Path, cache: Path, dry_run: bool = False) -> dict:
+    lang = t.lang
+    texts = load_usfm_texts_t(t, cache)
     books = {}
     problems = []
     for code, text in texts.items():

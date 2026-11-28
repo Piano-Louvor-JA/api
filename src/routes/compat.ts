@@ -14,6 +14,7 @@ import { resolveBibleCacheDir } from "../lib/bibleCacheDir.js";
 import {
   MULTILINGUE_LANGS,
   multilingueLangForVersion,
+  readBibleCatalogFile,
   readBibleChapterEntry,
   tarballStamp,
 } from "../lib/bibleTarball.js";
@@ -431,10 +432,25 @@ compatRoutes.get("/json_db/:file", async (c) => {
   const bookLangMatch = file.match(new RegExp(`^(${BIBLE_LANGS})_bible_book$`));
   if (bookLangMatch) {
     const lang = bookLangMatch[1];
+    // SPEC-v2 §4.2: catálogo multi-versão do arquivo empacotado (v1 em
+    // [0], livros concatenados) para os idiomas com 2ª+ versão servidos
+    // por tarball. pt/es legados seguem o fluxo DB/fallback (capítulos das
+    // novas versões 200/205/206 resolvem pelo MULTI_VERSION_TO_LANG).
+    if (lang !== "pt" && lang !== "es") {
+      const multi = readBibleCatalogFile(lang, "bible_book");
+      if (multi) return c.json(JSON.parse(multi));
+    }
+    // pt/es legados: só os ranges v1 (id_book < 2000) — SPEC-v2 adiciona
+    // livros 2000+ desses idiomas no DB (migration 041), mas a rota legada
+    // não muda contrato; capítulos das versões novas resolvem pelo tarball.
+    const legacyBookFilter =
+      lang === "pt" || lang === "es"
+        ? " AND (id_book < 2000 OR id_book > 3399)"
+        : "";
     const books = db
       .prepare(
         `SELECT id_book AS id_bible_book, book_number, name, chapters, abbreviation, testament, keywords, color
-         FROM bible_books WHERE id_language = ? ORDER BY book_number`,
+         FROM bible_books WHERE id_language = ?${legacyBookFilter} ORDER BY book_number`,
       )
       .all(lang);
     // PT: resposta direta do DB (mesmo vazia — contrato do espelho).
@@ -451,9 +467,21 @@ compatRoutes.get("/json_db/:file", async (c) => {
   );
   if (versionLangMatch) {
     const lang = versionLangMatch[1];
+    // SPEC-v2 §4.2: catálogo multi-versão (v1 em [0]). pt/es legados
+    // seguem o fluxo DB/fallback.
+    if (lang !== "pt" && lang !== "es") {
+      const multi = readBibleCatalogFile(lang, "bible_version");
+      if (multi) return c.json(JSON.parse(multi));
+    }
+    // SPEC-v2: exclui apenas os ids novos (200-213) das rotas legadas;
+    // ids arbitrários de terceiros (ex. '1234567' em testes) continuam.
+    const legacyVerFilter =
+      lang === "pt" || lang === "es"
+        ? " AND (CAST(id_version AS INTEGER) < 200 OR CAST(id_version AS INTEGER) > 299)"
+        : "";
     const versions = db
       .prepare(
-        `SELECT id_version AS id_bible_version, name, abbreviation FROM bible_versions WHERE language = ? ORDER BY name`,
+        `SELECT id_version AS id_bible_version, name, abbreviation FROM bible_versions WHERE language = ?${legacyVerFilter} ORDER BY name`,
       )
       .all(lang)
       .map((row) => withVersionAbbreviation(row as Record<string, unknown>));

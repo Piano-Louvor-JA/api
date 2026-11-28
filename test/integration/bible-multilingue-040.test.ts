@@ -38,15 +38,28 @@ describe("Bíblia multilíngue 15 idiomas (json_db)", () => {
 
   afterAll(() => app.cleanup());
 
-  it.each(LANGS)("GET /json_db/$lang_bible_book → 66 livros", async (lang) => {
-    const res = await router.request(`/json_db/${lang}_bible_book`);
-    expect(res.status).toBe(200);
-    const books = await res.json();
-    expect(books).toHaveLength(66);
-    expect(books[0].book_number).toBe(1);
-    expect(books[0].chapters).toBe(50);
-    expect(books[65].book_number).toBe(66);
-  });
+  it.each(LANGS)(
+    "GET /json_db/$lang_bible_book → catálogo multi-versão (SPEC-v2: v1 em [0])",
+    async (lang) => {
+      const res = await router.request(`/json_db/${lang}_bible_book`);
+      expect(res.status).toBe(200);
+      const books = await res.json();
+      // SPEC-v2 §4.2: livros de TODAS as versões concatenadas (v1 primeiro,
+      // 66 por versão). pt/es legados continuam 66 (fluxo DB/fallback).
+      const V2: Record<string, number> = {
+        en: 4,
+        fr: 3,
+        ru: 1,
+        uk: 1,
+        it: 1,
+        nl: 1,
+      };
+      expect(books).toHaveLength(66 * (1 + (V2[lang] ?? 0)));
+      expect(books[0].book_number).toBe(1);
+      expect(books[0].chapters).toBe(50);
+      expect(books[65].book_number).toBe(66);
+    },
+  );
 
   it.each(LANGS)(
     "GET /json_db/%s_bible_version → versão própria",
@@ -54,7 +67,16 @@ describe("Bíblia multilíngue 15 idiomas (json_db)", () => {
       const res = await router.request(`/json_db/${lang}_bible_version`);
       expect(res.status).toBe(200);
       const versions = await res.json();
-      expect(versions).toHaveLength(1);
+      // SPEC-v2 §4.2: N itens, v1 em [0] (compat retroativa).
+      const V2: Record<string, number> = {
+        en: 4,
+        fr: 3,
+        ru: 1,
+        uk: 1,
+        it: 1,
+        nl: 1,
+      };
+      expect(versions).toHaveLength(1 + (V2[lang] ?? 0));
       expect(String(versions[0].id_bible_version)).toBe(String(id));
       expect(versions[0].name).toBeTruthy();
     },
@@ -118,18 +140,19 @@ describe("Bíblia multilíngue 15 idiomas (json_db)", () => {
     expect(body["1"]).toContain("In the beginning");
   });
 
-  it("idioma sem catálogo populado devolve [] (book e version)", async () => {
+  it("SPEC-v2: catálogo servido do arquivo multi-versão mesmo com DB vazio", async () => {
     const { getDb } = await import("../../src/db/connection.js");
     const db = getDb();
     db.prepare("DELETE FROM bible_books WHERE id_language = 'hi'").run();
     db.prepare("DELETE FROM bible_versions WHERE language = 'hi'").run();
 
+    // v2 (§4.2): o catálogo empacotado é a fonte — DB vazio não zera mais
     const books = await router.request("/json_db/hi_bible_book");
     expect(books.status).toBe(200);
-    expect(await books.json()).toEqual([]);
+    expect(((await books.json()) as unknown[]).length).toBe(66);
 
     const versions = await router.request("/json_db/hi_bible_version");
     expect(versions.status).toBe(200);
-    expect(await versions.json()).toEqual([]);
+    expect(((await versions.json()) as unknown[]).length).toBe(1);
   });
 });

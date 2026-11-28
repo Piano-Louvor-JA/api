@@ -83,6 +83,59 @@ TRANSLATIONS: tuple[Translation, ...] = (
                 "fetch.bible USFM por livro; KJV-versification"),
 )
 
+# SPEC-v2 §3.1 (frozen 28/11/2026) — 2ª+ versões por idioma.
+# id_bible_version = 200 + índice; id_book_base = 2000 + (idx)*100.
+# hincv FORA (licença pendente — decisão humana D1).
+V2_TRANSLATIONS: tuple[Translation, ...] = (
+    Translation("pt", "porbrbsl", "Bíblia Portuguesa Mundial", "BPM", 200, 2000, "PD",
+                "Public Domain — World Portuguese Bible",
+                "https://ebible.org/find/details.php?id=porbrbsl"),
+    Translation("en", "eng-kjv2006", "King James Version", "KJV", 201, 2100, "PD",
+                "Public Domain — King James (Authorized) Version",
+                "https://ebible.org/find/details.php?id=eng-kjv2006",
+                "KJV puro sem Apócrifos (não eng-kjv)"),
+    Translation("en", "eng-asv", "American Standard Version (1901)", "ASV", 202, 2200, "PD",
+                "Public Domain — American Standard Version 1901",
+                "https://ebible.org/find/details.php?id=eng-asv"),
+    Translation("en", "engDBY", "Darby Translation", "DBY", 203, 2300, "PD",
+                "Public Domain — Darby Translation",
+                "https://ebible.org/find/details.php?id=engDBY"),
+    Translation("en", "engBBE", "Bible in Basic English", "BBE", 204, 2400, "PD",
+                "Public Domain — Bible in Basic English",
+                "https://ebible.org/find/details.php?id=engBBE"),
+    Translation("es", "spabes", "La Biblia en Español Sencillo", "BES", 205, 2500, "PD",
+                "Public Domain — La Biblia en Español Sencillo",
+                "https://ebible.org/find/details.php?id=spabes"),
+    Translation("es", "spabll", "Santa Biblia libre Latinoamericano", "BLL", 206, 2600, "PD",
+                "Public Domain — Spanish BLL",
+                "https://ebible.org/find/details.php?id=spabll"),
+    Translation("fr", "fraLSG", "Louis Segond 1910", "LSG", 207, 2700, "PD",
+                "Public Domain — Louis Segond 1910",
+                "https://ebible.org/find/details.php?id=fraLSG"),
+    Translation("fr", "fra_fob", "Ostervald", "FOB", 208, 2800, "PD",
+                "Public Domain — La Sainte Bible (Ostervald)",
+                "https://ebible.org/find/details.php?id=fra_fob"),
+    Translation("fr", "frajnd", "Bible J.N. Darby", "JND", 209, 2900, "PD",
+                "Public Domain — Bible J.N. Darby",
+                "https://ebible.org/find/details.php?id=frajnd"),
+    Translation("ru", "rusfb", "Библия свободы (Freedom Bible)", "RFB", 210, 3000, "PD",
+                "Public Domain — Russian Freedom Bible",
+                "https://ebible.org/find/details.php?id=rusfb"),
+    Translation("uk", "ukrfb", "Біблія свободи (Freedom Bible)", "UFB", 211, 3100, "PD",
+                "Public Domain — Ukrainian Freedom Bible",
+                "https://ebible.org/find/details.php?id=ukrfb"),
+    Translation("it", "ita1885", "Diodati Bibbia 1885", "DIO", 212, 3200, "PD",
+                "Public Domain — Diodati 1885",
+                "https://ebible.org/find/details.php?id=ita1885"),
+    Translation("nl", "nld", "Dutch Bible 1917", "NL1917", 213, 3300, "PD",
+                "Public Domain — De Heilige Schrift 1917",
+                "https://ebible.org/find/details.php?id=nld"),
+)
+
+V2_BY_LANG: dict[str, list[Translation]] = {}
+for _t in V2_TRANSLATIONS:
+    V2_BY_LANG.setdefault(_t.lang, []).append(_t)
+
 BY_LANG: dict[str, Translation] = {t.lang: t for t in TRANSLATIONS}
 
 LANGUAGEM_NAMES = {  # INSERT languages p/ 13 novos idiomas
