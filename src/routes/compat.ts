@@ -3,6 +3,7 @@ import {
   mkdirSync,
   readFileSync,
   renameSync,
+  rmSync,
   writeFileSync,
 } from "node:fs";
 import { readFile as fsReadFile, stat as fsStat } from "node:fs/promises";
@@ -10,6 +11,12 @@ import { dirname, join } from "node:path";
 import { Hono } from "hono";
 import { getDb } from "../db/connection.js";
 import { resolveBibleCacheDir } from "../lib/bibleCacheDir.js";
+import {
+  MULTILINGUE_LANGS,
+  multilingueLangForVersion,
+  readBibleChapterEntry,
+  tarballStamp,
+} from "../lib/bibleTarball.js";
 import {
   contentEtag,
   isNotModified,
@@ -637,16 +644,76 @@ function chapterForCache(data: string): unknown {
 
 // ==============================================
 // Handler: bible chapter (lazy proxy com cache)
+// HOTFIX t_b3824cb7: versões multilíngues (100-112) são servidas do tarball
+// local — SEM upstream (o worker só tem pt). Chave com versão desconhecida
+// devolve 404 sem tocar o upstream (padrão SEC-143 do mirror).
 // ==============================================
+const bibleNegativeCache = new NegativeCache(5 * 60_000, 10_000);
+
+function multilingueLang(_c: any, version: string): string | null {
+  // Mapa estático (migration 040) primeiro; DB como autoridade se povoado.
+  const lang = multilingueLangForVersion(version);
+  if (lang) return lang;
+  try {
+    const row = getDb()
+      .prepare("SELECT language FROM bible_versions WHERE id_version = ?")
+      .get(version) as { language: string } | undefined;
+    // Só vale se for idioma com tarball (ex.: 'tt' de teste cai fora)
+    if (row && MULTILINGUE_LANGS.has(row.language)) return row.language;
+  } catch {
+    // DB indisponível: segue com o mapa estático (lang já é null aqui)
+  }
+  return null;
+}
+
 async function handleBibleChapter(c: any, cacheKey: string) {
   const cacheDir = resolveBibleCacheDir();
   mkdirSync(cacheDir, { recursive: true });
   const cacheFile = join(cacheDir, `${cacheKey}.json`);
+  const version = cacheKey.match(/^bible_(\d+)_/)?.[1];
+  const tarLang = version ? multilingueLang(c, version) : null;
 
-  // Serve from local cache if available
-  if (existsSync(cacheFile)) {
+  // Cache de disco multilíngue: carimbo do tarball valida o arquivo velho.
+  // Trocar o tarball (deploy de blobs novos) invalida o cache de disco.
+  const stampFile = tarLang ? join(cacheDir, `${cacheKey}.tarstamp`) : null;
+  if (tarLang && stampFile && existsSync(cacheFile)) {
+    const stamp = tarballStamp(tarLang);
+    // stamp ausente no disco = cache de versão antiga → invalida
+    if (
+      !stamp ||
+      !existsSync(stampFile) ||
+      readFileSync(stampFile, "utf-8") !== stamp
+    ) {
+      rmSync(cacheFile, { force: true });
+      rmSync(stampFile, { force: true });
+    } else {
+      const cached = readFileSync(cacheFile, "utf-8");
+      return c.json(JSON.parse(cached));
+    }
+  } else if (existsSync(cacheFile)) {
+    // Serve from local cache if available (fluxo pt/upstream)
     const cached = readFileSync(cacheFile, "utf-8");
     return c.json(JSON.parse(cached));
+  }
+
+  // Cache negativo: 404 conhecido não re-martela a fonte (upstream ou tarball)
+  if (bibleNegativeCache.has(cacheKey)) {
+    return c.json({ error: "Arquivo nao encontrado!" }, 404);
+  }
+
+  // Versões multilíngues: tarball local, sem upstream
+  if (tarLang) {
+    const raw = readBibleChapterEntry(tarLang, `${cacheKey}.json`);
+    if (raw !== null) {
+      const body = chapterForCache(raw);
+      writeFileSync(cacheFile, JSON.stringify(body), "utf-8");
+      const stamp = tarballStamp(tarLang);
+      if (stamp && stampFile) writeFileSync(stampFile, stamp, "utf-8");
+      return c.json(body);
+    }
+    // tarball existe mas o capítulo não — 404 definitivo (sem upstream)
+    bibleNegativeCache.set(cacheKey);
+    return c.json({ error: "Arquivo nao encontrado!" }, 404);
   }
 
   // Fetch from upstream (rate-limited, com retry em 429/5xx) e cacheia
@@ -655,6 +722,7 @@ async function handleBibleChapter(c: any, cacheKey: string) {
     const res = await fetchUpstream(upstreamUrl);
     if (res.status === 404) {
       // Versão/capítulo não existe no upstream — espelha o 404 em vez de 502
+      bibleNegativeCache.set(cacheKey);
       return c.json({ error: "Arquivo nao encontrado!" }, 404);
     }
     const data = await res.text();
@@ -664,6 +732,7 @@ async function handleBibleChapter(c: any, cacheKey: string) {
   } catch (e: unknown) {
     if (e instanceof UpstreamError && e.status === 404) {
       // Versão/capítulo não existe no upstream — espelha o 404 em vez de 502
+      bibleNegativeCache.set(cacheKey);
       return c.json({ error: "Arquivo nao encontrado!" }, 404);
     }
     return c.json({ error: "Failed to fetch chapter from upstream" }, 502);

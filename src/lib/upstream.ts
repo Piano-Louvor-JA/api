@@ -6,6 +6,13 @@ const MIN_INTERVAL_MS = 800;
 const MAX_RETRIES = 3;
 
 /**
+ * Timeout por tentativa (HOTFIX t_b3824cb7): fetch sem AbortSignal pendurava
+ * a request para sempre quando o upstream não respondia. Espelha o padrão do
+ * mirror de mídia (compat.ts, MIRROR_FETCH_TIMEOUT_MS).
+ */
+const FETCH_TIMEOUT_MS = Number(process.env.FETCH_TIMEOUT_MS ?? "10000");
+
+/**
  * Fallback em cascata: hosts na ordem de tentativa.
  * A URL chamada é o primário (Workers). Se falhar (rede/5xx), tenta o
  * mesmo path em api.louvorja.com.br.
@@ -73,12 +80,18 @@ export async function fetchUpstream(url: string): Promise<Response> {
       await throttle();
       let res: Response;
       try {
-        res = await fetch(candidateUrl);
-      } catch {
-        // Erro de rede (DNS down, timeout, conn refused): tenta fallback
+        res = await fetch(candidateUrl, {
+          signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+        });
+      } catch (e) {
+        // Erro de rede (DNS down, conn refused): tenta fallback. Timeout
+        // (AbortSignal) é 504 — também tenta o outro host antes de lançar.
+        const isTimeout =
+          e instanceof Error &&
+          (e as { name?: string }).name === "TimeoutError";
         lastError = new UpstreamError(
-          `Upstream network error: ${candidateUrl}`,
-          503,
+          `Upstream ${isTimeout ? "timeout" : "network error"}: ${candidateUrl}`,
+          isTimeout ? 504 : 503,
         );
         break;
       }

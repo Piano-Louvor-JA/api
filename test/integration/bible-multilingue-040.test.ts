@@ -92,10 +92,14 @@ describe("Bíblia multilíngue 15 idiomas (json_db)", () => {
   });
 
   it("capítulo serve do cache local sem rede (bible_100_200_1)", async () => {
-    // escreve no cache isolado (BIBLE_CACHE_DIR) — rota deve servir direto
+    // escreve no cache isolado (BIBLE_CACHE_DIR) — rota deve servir direto.
+    // HOTFIX t_b3824cb7: cache multilíngue só vale carimbado com o
+    // mtime+size do tarball (troca de tarball invalida). Sem o stamp a rota
+    // re-extrai do tarball — comportamento esperado.
     const { resolveBibleCacheDir } = await import(
       "../../src/lib/bibleCacheDir.js"
     );
+    const { tarballStamp } = await import("../../src/lib/bibleTarball.js");
     const { writeFileSync, mkdirSync } = await import("node:fs");
     const dir = resolveBibleCacheDir();
     mkdirSync(dir, { recursive: true });
@@ -106,6 +110,8 @@ describe("Bíblia multilíngue 15 idiomas (json_db)", () => {
       }),
       "utf-8",
     );
+    const stamp = tarballStamp("en");
+    if (stamp) writeFileSync(`${dir}/bible_100_200_1.tarstamp`, stamp, "utf-8");
     const res = await router.request("/json_db/bible_100_200_1");
     expect(res.status).toBe(200);
     const body = await res.json();
