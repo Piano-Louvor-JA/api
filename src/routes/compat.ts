@@ -739,6 +739,39 @@ compatRoutes.get("/file/:path{.*}", async (c) => {
   if (!mirrorablePath(path)) {
     return c.json({ error: "Invalid path" }, 400);
   }
+
+  // t_c68a47ac (cover privacy): mídia custom (media/custom/<uid>/...) é
+  // privada por padrão. Pública SOMENTE se for cover de coletânea com
+  // cover_private=0; senão exige dono (token de sessão). 404, não 403 —
+  // não revela existência de mídia alheia.
+  if (path.startsWith("custom/")) {
+    const db = getDb();
+    const isPublicCover = db
+      .prepare(
+        `SELECT 1 FROM custom_collections
+         WHERE cover_url IN (?, ?) AND cover_private = 0 AND deleted_at IS NULL`,
+      )
+      .get(path, `/${path}`);
+    if (!isPublicCover) {
+      const raw = c.req.header("authorization") ?? "";
+      const token = raw.startsWith("Bearer ") ? raw.slice(7) : "";
+      const uidMatch = path.match(/^custom\/(\d+)\//);
+      let viewer: { id_user: number } | undefined;
+      if (token) {
+        const { hashToken } = await import("../v1/custom/auth.service.js");
+        viewer = db
+          .prepare(
+            `SELECT cu.id_user FROM custom_sessions cs
+             INNER JOIN custom_users cu ON cu.id_user = cs.id_user
+             WHERE cs.token_hash = ?`,
+          )
+          .get(hashToken(token)) as { id_user: number } | undefined;
+      }
+      if (!viewer || !uidMatch || Number(uidMatch[1]) !== viewer.id_user) {
+        return c.json({ error: "Not found" }, 404);
+      }
+    }
+  }
   const localPath = join(MEDIA_DIR, path);
   // SEC-143 defesa em profundidade: caminho resolvido tem que continuar
   // dentro de MEDIA_DIR (cobre encode duplo / normalização estranha)

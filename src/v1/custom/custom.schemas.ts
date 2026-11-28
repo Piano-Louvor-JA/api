@@ -20,6 +20,8 @@ export const CustomCollectionSchema = z.object({
   // SPEC admin-conteudo-global v1.1.0 RF-03 (D6): aditivo, retro-compat.
   owner_name: z.string().nullable().optional(),
   tenant_id: z.string().openapi({ readOnly: true }).optional(),
+  // t_c68a47ac: privacidade da capa (1 = só dono; resposta sempre 0/1)
+  cover_private: z.number().optional(),
 });
 
 // SPEC admin-conteudo-global v1.1.0 (D2/D3): payloads admin congelados
@@ -93,6 +95,9 @@ export const CreateCustomCollectionSchema = z.object({
   description: z.string().max(500).optional(),
   author_name: z.string().max(80).nullable().optional(),
   visibility: z.enum(["public", "private"]).optional(),
+  cover_url: z.string().nullable().optional(),
+  // t_c68a47ac: privacidade da capa (default 1 = só o dono vê cover_url)
+  cover_private: z.boolean().optional(),
 });
 
 export const UpdateCustomCollectionSchema = z.object({
@@ -100,6 +105,7 @@ export const UpdateCustomCollectionSchema = z.object({
   description: z.string().max(500).optional(),
   cover_url: z.string().nullable().optional(),
   visibility: z.enum(["public", "private"]).optional(),
+  cover_private: z.boolean().optional(),
 });
 
 // Custom Musics
